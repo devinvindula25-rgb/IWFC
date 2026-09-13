@@ -1,0 +1,508 @@
+/* ============================================================
+   IWFC — Common Styles (shared between dark and light themes)
+   ============================================================ */
+
+/* --- Typography --- */
+.root {
+    -fx-font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* --- View Titles --- */
+.view-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.view-subtitle {
+    -fx-font-size: 14px;
+    -fx-opacity: 0.7;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    -fx-min-width: 220px;
+    -fx-max-width: 220px;
+}
+
+.sidebar-logo {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-padding: 10 15;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(128, 128, 128, 0.15);
+}
+
+.nav-button-active {
+    -fx-background-color: rgba(99, 102, 241, 0.2);
+    -fx-font-weight: bold;
+}
+
+.sidebar-user-info {
+    -fx-padding: 12;
+    -fx-background-radius: 10;
+}
+
+.sidebar-user-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.sidebar-user-role {
+    -fx-font-size: 12px;
+    -fx-opacity: 0.6;
+}
+
+.logout-button {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+    -fx-text-fill: #ef4444;
+    -fx-background-radius: 6;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+}
+
+.logout-button:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.3);
+}
+
+/* --- Theme Toggle --- */
+.theme-toggle-btn {
+    -fx-background-color: transparent;
+    -fx-font-size: 18px;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+    -fx-background-radius: 20;
+}
+
+.theme-toggle-btn:hover {
+    -fx-background-color: rgba(128, 128, 128, 0.2);
+}
+
+/* --- Stat Cards --- */
+.stat-card {
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0, 0, 3);
+    -fx-cursor: hand;
+}
+
+.stat-card-title {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+}
+
+.stat-card-value {
+    -fx-text-fill: white;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+}
+
+/* --- Status Badges --- */
+.status-badge {
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 10;
+}
+
+.badge-success {
+    -fx-background-color: rgba(34, 197, 94, 0.2);
+    -fx-text-fill: #22c55e;
+}
+
+.badge-danger {
+    -fx-background-color: rgba(239, 68, 68, 0.2);
+    -fx-text-fill: #ef4444;
+}
+
+.badge-warning {
+    -fx-background-color: rgba(245, 158, 11, 0.2);
+    -fx-text-fill: #f59e0b;
+}
+
+.badge-info {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-text-fill: #3b82f6;
+}
+
+/* --- Dashboard Sections --- */
+.dashboard-section {
+    -fx-background-radius: 12;
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* --- Equipment Cards --- */
+.equipment-card {
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+}
+
+.equipment-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.equipment-id {
+    -fx-font-size: 11px;
+    -fx-opacity: 0.6;
+}
+
+.equipment-location {
+    -fx-font-size: 12px;
+    -fx-opacity: 0.75;
+}
+
+.equipment-usage {
+    -fx-font-size: 11px;
+    -fx-opacity: 0.6;
+}
+
+.usage-ring-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* --- Session Timetable --- */
+.timetable-grid {
+    -fx-padding: 5;
+}
+
+.timetable-day-header {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-alignment: center;
+}
+
+.timetable-time-label {
+    -fx-font-size: 11px;
+    -fx-opacity: 0.6;
+}
+
+.timetable-cell {
+    -fx-background-radius: 3;
+}
+
+.session-block {
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 1);
+}
+
+.session-block:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 2);
+}
+
+.session-block-name {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.session-block-instructor {
+    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-font-size: 11px;
+}
+
+.session-block-location {
+    -fx-text-fill: rgba(255,255,255,0.7);
+    -fx-font-size: 10px;
+}
+
+/* --- Detail Panel --- */
+.detail-panel {
+    -fx-background-radius: 0;
+}
+
+.detail-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.detail-type {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.detail-info {
+    -fx-font-size: 13px;
+}
+
+.detail-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.7;
+}
+
+.detail-close-btn {
+    -fx-background-color: transparent;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-padding: 2 8;
+}
+
+.detail-close-btn:hover {
+    -fx-background-color: rgba(128,128,128,0.2);
+    -fx-background-radius: 12;
+}
+
+.book-button {
+    -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.book-button:hover {
+    -fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
+}
+
+.capacity-bar {
+    -fx-accent: #6366f1;
+}
+
+/* --- Maintenance Cards --- */
+.maintenance-card {
+    -fx-background-radius: 10;
+    -fx-padding: 16;
+}
+
+.maintenance-equipment-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.maintenance-id {
+    -fx-font-size: 12px;
+    -fx-opacity: 0.5;
+}
+
+.maintenance-description {
+    -fx-font-size: 13px;
+    -fx-opacity: 0.8;
+}
+
+.maintenance-meta {
+    -fx-font-size: 11px;
+    -fx-opacity: 0.5;
+}
+
+.dot-active {
+    -fx-text-fill: #6366f1;
+    -fx-font-size: 14px;
+}
+
+.dot-inactive {
+    -fx-text-fill: rgba(128,128,128,0.3);
+    -fx-font-size: 14px;
+}
+
+.dot-arrow {
+    -fx-font-size: 10px;
+    -fx-opacity: 0.4;
+}
+
+/* --- Filter Toggles --- */
+.filter-toggle {
+    -fx-background-radius: 16;
+    -fx-padding: 6 16;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+/* --- Buttons --- */
+.add-button {
+    -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+}
+
+.add-button:hover {
+    -fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
+}
+
+.action-button {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-text-fill: #3b82f6;
+    -fx-background-radius: 6;
+    -fx-padding: 5 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.action-button:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.35);
+}
+
+.action-button-success {
+    -fx-background-color: rgba(34, 197, 94, 0.2);
+    -fx-text-fill: #22c55e;
+    -fx-background-radius: 6;
+    -fx-padding: 5 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.action-button-success:hover {
+    -fx-background-color: rgba(34, 197, 94, 0.35);
+}
+
+/* --- Login --- */
+.login-card {
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 5);
+}
+
+.login-logo {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
+
+.login-subtitle {
+    -fx-font-size: 14px;
+    -fx-opacity: 0.6;
+}
+
+.form-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.7;
+}
+
+.login-input {
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-font-size: 14px;
+}
+
+.login-button {
+    -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-background-radius: 8;
+    -fx-padding: 10 30;
+    -fx-cursor: hand;
+}
+
+.login-button:hover {
+    -fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
+}
+
+.login-error {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 12px;
+}
+
+.quick-login-btn {
+    -fx-background-radius: 16;
+    -fx-padding: 5 14;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.quick-admin {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+    -fx-text-fill: #ef4444;
+}
+
+.quick-instructor {
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+    -fx-text-fill: #3b82f6;
+}
+
+.quick-member {
+    -fx-background-color: rgba(34, 197, 94, 0.15);
+    -fx-text-fill: #22c55e;
+}
+
+.quick-login-btn:hover {
+    -fx-opacity: 0.8;
+}
+
+/* --- Toast Notifications --- */
+.toast-notification {
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 12, 0, 0, 3);
+}
+
+.toast-text {
+    -fx-font-size: 12px;
+}
+
+.toast-success {
+    -fx-background-color: rgba(34, 197, 94, 0.95);
+}
+
+.toast-info {
+    -fx-background-color: rgba(59, 130, 246, 0.95);
+}
+
+.toast-warning {
+    -fx-background-color: rgba(245, 158, 11, 0.95);
+}
+
+.toast-success .toast-text,
+.toast-info .toast-text,
+.toast-warning .toast-text {
+    -fx-text-fill: white;
+}
+
+/* --- Search Field --- */
+.search-field {
+    -fx-background-radius: 20;
+    -fx-padding: 8 15;
+}
+
+/* --- Scrollbars --- */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* --- Empty Placeholder --- */
+.empty-placeholder {
+    -fx-font-size: 14px;
+    -fx-opacity: 0.5;
+    -fx-padding: 30;
+    -fx-alignment: center;
+}
+
+/* --- Alert Card --- */
+.alert-card {
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+}
+
+.alert-equipment-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.alert-description {
+    -fx-font-size: 11px;
+    -fx-opacity: 0.7;
+}

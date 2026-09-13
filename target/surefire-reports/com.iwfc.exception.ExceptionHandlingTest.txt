@@ -1,0 +1,22 @@
+-------------------------------------------------------------------------------
+Test set: com.iwfc.exception.ExceptionHandlingTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.136 s <<< FAILURE! -- in com.iwfc.exception.ExceptionHandlingTest
+com.iwfc.exception.ExceptionHandlingTest.testIntentionalFail_ConflictingBookingShouldNotThrow -- Time elapsed: 0.073 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: This test intentionally fails to prove that InvalidBookingException is correctly thrown for scheduling conflicts. ==> Unexpected exception thrown: com.iwfc.exception.InvalidBookingException: Schedule conflict: 'Intentional Conflict' conflicts with existing session 'Morning HIIT Blast' at Studio A on MONDAY 07:00-08:00
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertDoesNotThrow.createAssertionFailedError(AssertDoesNotThrow.java:84)
+	at org.junit.jupiter.api.AssertDoesNotThrow.assertDoesNotThrow(AssertDoesNotThrow.java:53)
+	at org.junit.jupiter.api.AssertDoesNotThrow.assertDoesNotThrow(AssertDoesNotThrow.java:40)
+	at org.junit.jupiter.api.Assertions.assertDoesNotThrow(Assertions.java:3187)
+	at com.iwfc@1.0.0/com.iwfc.exception.ExceptionHandlingTest.testIntentionalFail_ConflictingBookingShouldNotThrow(ExceptionHandlingTest.java:90)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: com.iwfc.exception.InvalidBookingException: Schedule conflict: 'Intentional Conflict' conflicts with existing session 'Morning HIIT Blast' at Studio A on MONDAY 07:00-08:00
+	at com.iwfc@1.0.0/com.iwfc.service.SessionService.validateNoConflict(SessionService.java:115)
+	at com.iwfc@1.0.0/com.iwfc.service.SessionService.createSession(SessionService.java:51)
+	at com.iwfc@1.0.0/com.iwfc.exception.ExceptionHandlingTest.lambda$testIntentionalFail_ConflictingBookingShouldNotThrow$3(ExceptionHandlingTest.java:90)
+	at org.junit.jupiter.api.AssertDoesNotThrow.assertDoesNotThrow(AssertDoesNotThrow.java:49)
+	... 6 more
+

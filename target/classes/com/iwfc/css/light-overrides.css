@@ -1,0 +1,278 @@
+/* ============================================================
+   IWFC — Light Theme Overrides
+   Clean white with soft shadows and vibrant accents
+   ============================================================ */
+
+.root {
+    -fx-base: #f8f9fa;
+    -fx-background: #f8f9fa;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 2, 0);
+}
+
+.sidebar-logo {
+    -fx-text-fill: #1f2937;
+}
+
+.nav-button {
+    -fx-text-fill: #6b7280;
+}
+
+.nav-button:hover {
+    -fx-text-fill: #374151;
+    -fx-background-color: rgba(99, 102, 241, 0.08);
+}
+
+.nav-button-active {
+    -fx-text-fill: #4f46e5;
+    -fx-background-color: rgba(99, 102, 241, 0.12);
+}
+
+.sidebar-user-info {
+    -fx-background-color: #f9fafb;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+}
+
+.sidebar-user-name {
+    -fx-text-fill: #1f2937;
+}
+
+.sidebar-user-role {
+    -fx-text-fill: #9ca3af;
+}
+
+/* --- Main Content Area --- */
+.main-layout {
+    -fx-background-color: #f8f9fa;
+}
+
+.view-title {
+    -fx-text-fill: #1f2937;
+}
+
+.view-subtitle {
+    -fx-text-fill: #6b7280;
+}
+
+/* --- Dashboard Sections --- */
+.dashboard-section {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);
+}
+
+.section-title {
+    -fx-text-fill: #1f2937;
+}
+
+/* --- Tables --- */
+.dashboard-table {
+    -fx-background-color: transparent;
+}
+
+.dashboard-table .column-header {
+    -fx-background-color: #f9fafb;
+}
+
+.dashboard-table .column-header .label {
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: bold;
+}
+
+.dashboard-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: #f3f4f6;
+    -fx-border-width: 0 0 1 0;
+}
+
+.dashboard-table .table-row-cell:hover {
+    -fx-background-color: rgba(99, 102, 241, 0.05);
+}
+
+.dashboard-table .table-cell {
+    -fx-text-fill: #374151;
+}
+
+/* --- Equipment Cards --- */
+.equipment-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);
+}
+
+.equipment-card:hover {
+    -fx-border-color: #a5b4fc;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 10, 0, 0, 3);
+}
+
+.equipment-name {
+    -fx-text-fill: #1f2937;
+}
+
+.equipment-id {
+    -fx-text-fill: #9ca3af;
+}
+
+.equipment-location {
+    -fx-text-fill: #6b7280;
+}
+
+.equipment-usage {
+    -fx-text-fill: #9ca3af;
+}
+
+.usage-ring-label {
+    -fx-text-fill: #374151;
+}
+
+/* --- Session Timetable --- */
+.timetable-day-header {
+    -fx-text-fill: #6b7280;
+    -fx-background-color: #f9fafb;
+    -fx-background-radius: 4;
+}
+
+.timetable-time-label {
+    -fx-text-fill: #9ca3af;
+}
+
+.timetable-cell {
+    -fx-background-color: #fafbfc;
+    -fx-border-color: #f3f4f6;
+    -fx-border-width: 1;
+}
+
+/* --- Detail Panel --- */
+.detail-panel {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 0 0 0 1;
+}
+
+.detail-title {
+    -fx-text-fill: #1f2937;
+}
+
+.detail-info {
+    -fx-text-fill: #374151;
+}
+
+/* --- Maintenance Cards --- */
+.maintenance-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 4, 0, 0, 1);
+}
+
+.maintenance-card:hover {
+    -fx-background-color: #fafbfc;
+}
+
+.maintenance-equipment-name {
+    -fx-text-fill: #1f2937;
+}
+
+.maintenance-description {
+    -fx-text-fill: #4b5563;
+}
+
+/* --- Alert Cards --- */
+.alert-card {
+    -fx-background-color: #f9fafb;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+
+.alert-equipment-name {
+    -fx-text-fill: #1f2937;
+}
+
+/* --- Login --- */
+.login-background {
+    -fx-background-color: linear-gradient(to bottom right, #ede9fe, #e0e7ff, #dbeafe);
+}
+
+.login-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 4);
+}
+
+.login-logo {
+    -fx-text-fill: #4f46e5;
+}
+
+.login-subtitle {
+    -fx-text-fill: #6b7280;
+}
+
+.login-input {
+    -fx-background-color: #f9fafb;
+    -fx-text-fill: #1f2937;
+    -fx-prompt-text-fill: #9ca3af;
+    -fx-border-color: #d1d5db;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+
+.login-input:focused {
+    -fx-border-color: #6366f1;
+    -fx-background-color: #ffffff;
+}
+
+.form-label {
+    -fx-text-fill: #6b7280;
+}
+
+/* --- Filter Toggles --- */
+.filter-toggle {
+    -fx-background-color: #f3f4f6;
+    -fx-text-fill: #6b7280;
+}
+
+.filter-toggle:selected {
+    -fx-background-color: rgba(99, 102, 241, 0.15);
+    -fx-text-fill: #4f46e5;
+}
+
+/* --- Search Field --- */
+.search-field {
+    -fx-background-color: #f3f4f6;
+    -fx-text-fill: #1f2937;
+    -fx-prompt-text-fill: #9ca3af;
+}
+
+/* --- Scrollbars Light --- */
+.scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(0,0,0,0.15);
+    -fx-background-radius: 4;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.alerts-scroll {
+    -fx-background-color: transparent;
+}
+
+.alerts-scroll > .viewport {
+    -fx-background-color: transparent;
+}
