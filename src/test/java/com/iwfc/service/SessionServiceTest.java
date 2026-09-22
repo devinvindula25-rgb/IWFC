@@ -21,7 +21,7 @@ class SessionServiceTest {
     private NotificationService notificationService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         DataStore.resetInstance();
         notificationService = new NotificationService();
         sessionService = new SessionService(notificationService);

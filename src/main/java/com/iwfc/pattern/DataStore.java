@@ -45,13 +45,9 @@ public class DataStore {
      *
      * @return the singleton DataStore instance
      */
-    public static DataStore getInstance() {
+    public static synchronized DataStore getInstance() {
         if (instance == null) {
-            synchronized (DataStore.class) {
-                if (instance == null) {
-                    instance = new DataStore();
-                }
-            }
+            instance = new DataStore();
         }
         return instance;
     }

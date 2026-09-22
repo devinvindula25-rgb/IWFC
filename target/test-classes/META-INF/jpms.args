@@ -1,4 +1,0 @@
---patch-module
-com.iwfc=_
---add-reads
-com.iwfc=ALL-UNNAMED

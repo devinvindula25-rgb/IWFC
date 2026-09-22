@@ -37,7 +37,7 @@ public class UsageRing extends StackPane {
         this.animatedProgress = new SimpleDoubleProperty(0);
 
         canvas = new Canvas(SIZE, SIZE);
-        centerLabel = new Label(String.format("%.0f", currentValue));
+        centerLabel = new Label(String.format("%.0f", this.currentValue));
         centerLabel.setFont(Font.font("System", FontWeight.BOLD, 13));
         centerLabel.getStyleClass().add("usage-ring-label");
 
@@ -49,7 +49,7 @@ public class UsageRing extends StackPane {
         animatedProgress.addListener((obs, oldVal, newVal) -> draw(newVal.doubleValue()));
 
         // Animate fill
-        double targetProgress = maxValue > 0 ? Math.min(currentValue / maxValue, 1.0) : 0;
+        double targetProgress = this.maxValue > 0 ? Math.min(this.currentValue / this.maxValue, 1.0) : 0;
         Timeline timeline = new Timeline(
             new KeyFrame(Duration.ZERO, new KeyValue(animatedProgress, 0)),
             new KeyFrame(Duration.millis(800), new KeyValue(animatedProgress, targetProgress))

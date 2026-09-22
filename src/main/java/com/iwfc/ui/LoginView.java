@@ -1,7 +1,6 @@
 package com.iwfc.ui;
 
 import com.iwfc.facade.IWFCSystemFacade;
-import com.iwfc.model.User;
 import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -63,15 +62,14 @@ public class LoginView extends StackPane {
 
         Button adminBtn = new Button("Admin");
         adminBtn.getStyleClass().addAll("quick-login-btn", "quick-admin");
-        adminBtn.setOnAction(e -> userIdField.setText("ADM001"));
+        
 
         Button instrBtn = new Button("Instructor");
         instrBtn.getStyleClass().addAll("quick-login-btn", "quick-instructor");
-        instrBtn.setOnAction(e -> userIdField.setText("INS001"));
+        
 
         Button memberBtn = new Button("Member");
         memberBtn.getStyleClass().addAll("quick-login-btn", "quick-member");
-        memberBtn.setOnAction(e -> userIdField.setText("MEM001"));
 
         quickButtons.getChildren().addAll(adminBtn, instrBtn, memberBtn);
 
@@ -82,6 +80,20 @@ public class LoginView extends StackPane {
 
         // Sign in button
         Button signInBtn = new Button("Sign In");
+        
+        // Setup quick login actions now that signInBtn exists
+        adminBtn.setOnAction(e -> {
+            userIdField.setText("ADM001");
+            signInBtn.fire();
+        });
+        instrBtn.setOnAction(e -> {
+            userIdField.setText("INS001");
+            signInBtn.fire();
+        });
+        memberBtn.setOnAction(e -> {
+            userIdField.setText("MEM001");
+            signInBtn.fire();
+        });
         signInBtn.getStyleClass().add("login-button");
         signInBtn.setPrefWidth(200);
         signInBtn.setPrefHeight(42);
@@ -92,7 +104,7 @@ public class LoginView extends StackPane {
                 return;
             }
             try {
-                User user = facade.login(userId);
+                facade.login(userId);
                 onLoginSuccess.run();
             } catch (Exception ex) {
                 showError(errorLabel, "Invalid User ID. Try ADM001, INS001, or MEM001.");
@@ -121,6 +133,7 @@ public class LoginView extends StackPane {
 
         StackPane.setAlignment(topBar, Pos.TOP_RIGHT);
         StackPane.setMargin(topBar, new Insets(15));
+        topBar.setPickOnBounds(false);
 
         getChildren().addAll(card, topBar);
     }

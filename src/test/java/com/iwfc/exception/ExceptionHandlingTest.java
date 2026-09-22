@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ExceptionHandlingTest {
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         DataStore.resetInstance();
     }
 

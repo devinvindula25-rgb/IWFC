@@ -1,7 +1,6 @@
 package com.iwfc.ui;
 
 import com.iwfc.facade.IWFCSystemFacade;
-import com.iwfc.model.Role;
 import com.iwfc.model.User;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -150,6 +149,6 @@ public class MainLayout extends BorderPane {
         };
 
         // Insert content behind any existing toasts
-        contentArea.getChildren().addFirst(content);
+        contentArea.getChildren().add(0, content);
     }
 }

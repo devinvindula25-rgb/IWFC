@@ -23,7 +23,7 @@ class MaintenanceServiceTest {
     private List<String> receivedNotifications;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         DataStore.resetInstance();
         notificationService = new NotificationService();
         maintenanceService = new MaintenanceService(notificationService);
@@ -90,7 +90,8 @@ class MaintenanceServiceTest {
     @DisplayName("Should throw IllegalStateException for invalid transition (PENDING → COMPLETED)")
     void testInvalidTransitionThrowsException() {
         // MR001 is PENDING — cannot be completed directly
-        assertThrows(IllegalStateException.class,
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
                 () -> maintenanceService.completeRequest("MR001"));
+        assertNotNull(exception);
     }
 }

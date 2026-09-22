@@ -7,7 +7,6 @@ import com.iwfc.ui.components.StatusBadge;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 
 import java.time.format.DateTimeFormatter;
