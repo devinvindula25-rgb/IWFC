@@ -1,5 +1,6 @@
 package com.iwfc.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,10 +10,17 @@ import java.util.List;
 public class Instructor extends User {
 
     private String specialization;
+    private List<String> traineeIds;
+    private List<String> feedbacks;
+    private double performanceScore;
+    private double attendanceRate;
+    private String bio;
 
-    public Instructor(String userId, String name, String email, String specialization) {
-        super(userId, name, email, Role.INSTRUCTOR);
+    public Instructor(String userId, String name, String email, String phone, String address, String profileImageUrl, String specialization) {
+        super(userId, name, email, phone, address, profileImageUrl, Role.INSTRUCTOR);
         this.specialization = specialization;
+        this.traineeIds = new ArrayList<>();
+        this.feedbacks = new ArrayList<>();
     }
 
     @Override
@@ -39,5 +47,45 @@ public class Instructor extends User {
 
     public void setSpecialization(String specialization) {
         this.specialization = specialization;
+    }
+
+    public List<String> getTraineeIds() {
+        return traineeIds;
+    }
+
+    public void setTraineeIds(List<String> traineeIds) {
+        this.traineeIds = traineeIds;
+    }
+
+    public List<String> getFeedbacks() {
+        return feedbacks;
+    }
+
+    public void setFeedbacks(List<String> feedbacks) {
+        this.feedbacks = feedbacks;
+    }
+
+    public double getPerformanceScore() {
+        return performanceScore;
+    }
+
+    public void setPerformanceScore(double performanceScore) {
+        this.performanceScore = performanceScore;
+    }
+
+    public double getAttendanceRate() {
+        return attendanceRate;
+    }
+
+    public void setAttendanceRate(double attendanceRate) {
+        this.attendanceRate = attendanceRate;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 }

@@ -5,6 +5,7 @@ D:\Projects\IWFC\src\main\java\com\iwfc\facade\IWFCSystemFacade.java
 D:\Projects\IWFC\src\main\java\com\iwfc\IWFCApp.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\Admin.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\Booking.java
+D:\Projects\IWFC\src\main\java\com\iwfc\model\BookingStatus.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\Equipment.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\EquipmentStatus.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\FitnessSession.java
@@ -12,9 +13,12 @@ D:\Projects\IWFC\src\main\java\com\iwfc\model\Instructor.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\Location.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\MaintenanceRequest.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\Member.java
+D:\Projects\IWFC\src\main\java\com\iwfc\model\Notification.java
+D:\Projects\IWFC\src\main\java\com\iwfc\model\NotificationCategory.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\RequestStatus.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\Role.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\Urgency.java
+D:\Projects\IWFC\src\main\java\com\iwfc\model\UsageLogEntry.java
 D:\Projects\IWFC\src\main\java\com\iwfc\model\User.java
 D:\Projects\IWFC\src\main\java\com\iwfc\pattern\DataStore.java
 D:\Projects\IWFC\src\main\java\com\iwfc\pattern\EventListener.java
@@ -32,6 +36,8 @@ D:\Projects\IWFC\src\main\java\com\iwfc\ui\EquipmentView.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\LoginView.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\MainLayout.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\MaintenanceView.java
+D:\Projects\IWFC\src\main\java\com\iwfc\ui\NotificationView.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\SessionView.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\ThemeManager.java
+D:\Projects\IWFC\src\main\java\com\iwfc\ui\UserManagementView.java
 D:\Projects\IWFC\src\main\java\module-info.java

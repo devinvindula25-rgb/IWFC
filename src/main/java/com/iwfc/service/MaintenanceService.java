@@ -27,6 +27,7 @@ public class MaintenanceService {
      * @param request the maintenance request to report
      */
     public void reportIssue(MaintenanceRequest request) {
+        request.getEquipment().setStatus(EquipmentStatus.FAULTY);
         dataStore.getMaintenanceRequests().add(request);
 
         notificationService.notifyListeners("MAINTENANCE_ALERT",
@@ -54,21 +55,39 @@ public class MaintenanceService {
     }
 
     /**
-     * Completes a maintenance request.
-     * Transitions status from ASSIGNED to COMPLETED.
+     * Completes a maintenance request and records resolution notes.
+     * Transitions status from ASSIGNED to COMPLETED and resets equipment usage.
      *
-     * @param requestId the request ID
+     * @param requestId       the request ID
+     * @param resolutionNotes optional notes describing the repair
      * @throws IllegalStateException if request is not in ASSIGNED status
      */
-    public void completeRequest(String requestId) {
+    public void completeRequest(String requestId, String resolutionNotes) {
         MaintenanceRequest request = getRequestById(requestId);
+        if (resolutionNotes != null) {
+            request.setResolutionNotes(resolutionNotes);
+        }
         request.complete();
 
-        // Also restore the equipment status to OPERATIONAL
+        // Restore the equipment status to OPERATIONAL and reset usage
         request.getEquipment().setStatus(EquipmentStatus.OPERATIONAL);
+        request.getEquipment().resetUsageHours();
 
         notificationService.notifyListeners("MAINTENANCE_STATUS_CHANGED",
             String.format("✅ Maintenance completed: %s [%s] is now operational",
+                request.getEquipment().getName(), requestId));
+    }
+
+    /**
+     * Re-opens a completed maintenance request.
+     */
+    public void reopenRequest(String requestId) {
+        MaintenanceRequest request = getRequestById(requestId);
+        request.reopen();
+        request.getEquipment().setStatus(EquipmentStatus.UNDER_MAINTENANCE);
+        
+        notificationService.notifyListeners("MAINTENANCE_STATUS_CHANGED",
+            String.format("🔄 Maintenance re-opened: %s [%s]",
                 request.getEquipment().getName(), requestId));
     }
 
@@ -109,10 +128,41 @@ public class MaintenanceService {
     }
 
     /**
+     * Returns pending requests with HIGH urgency.
+     */
+    public List<MaintenanceRequest> getHighUrgencyPendingRequests() {
+        return getAllRequests().stream()
+                .filter(r -> r.getUrgency() == Urgency.HIGH && r.getStatus() == RequestStatus.PENDING)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Generates a new unique request ID.
      */
     public String generateRequestId() {
         int nextId = dataStore.getMaintenanceRequests().size() + 1;
         return "MR" + String.format("%03d", nextId);
+    }
+
+    /**
+     * Returns maintenance history for a specific piece of equipment.
+     */
+    public List<MaintenanceRequest> getRequestsForEquipment(String equipmentId) {
+        return getAllRequests().stream()
+                .filter(r -> r.getEquipment().getEquipmentId().equals(equipmentId))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns maintenance statistics.
+     */
+    public java.util.Map<String, Long> getMaintenanceStats() {
+        java.util.Map<String, Long> stats = new java.util.HashMap<>();
+        List<MaintenanceRequest> all = getAllRequests();
+        stats.put("total", (long) all.size());
+        stats.put("pending", all.stream().filter(r -> r.getStatus() == RequestStatus.PENDING).count());
+        stats.put("assigned", all.stream().filter(r -> r.getStatus() == RequestStatus.ASSIGNED).count());
+        stats.put("completed", all.stream().filter(r -> r.getStatus() == RequestStatus.COMPLETED).count());
+        return stats;
     }
 }

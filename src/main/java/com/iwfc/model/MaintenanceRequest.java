@@ -16,6 +16,7 @@ public class MaintenanceRequest {
     private String assignedTo;
     private LocalDateTime createdDate;
     private LocalDateTime completedDate;
+    private String resolutionNotes;
 
     public MaintenanceRequest(String requestId, Equipment equipment, Instructor reportedBy,
                               String description, Urgency urgency) {
@@ -28,6 +29,7 @@ public class MaintenanceRequest {
         this.assignedTo = null;
         this.createdDate = LocalDateTime.now();
         this.completedDate = null;
+        this.resolutionNotes = "";
     }
 
     /**
@@ -59,6 +61,19 @@ public class MaintenanceRequest {
         }
         this.status = RequestStatus.COMPLETED;
         this.completedDate = LocalDateTime.now();
+    }
+
+    /**
+     * Re-opens a completed request.
+     */
+    public void reopen() {
+        if (this.status != RequestStatus.COMPLETED) {
+            throw new IllegalStateException("Only COMPLETED requests can be re-opened.");
+        }
+        this.status = RequestStatus.PENDING;
+        this.assignedTo = null;
+        this.completedDate = null;
+        this.resolutionNotes = "";
     }
 
     // --- Encapsulated accessors ---
@@ -109,6 +124,23 @@ public class MaintenanceRequest {
 
     public void setStatus(RequestStatus status) {
         this.status = status;
+    }
+
+    public String getResolutionNotes() {
+        return resolutionNotes;
+    }
+
+    public void setResolutionNotes(String resolutionNotes) {
+        this.resolutionNotes = resolutionNotes;
+    }
+
+    /**
+     * Checks if this request is high urgency.
+     *
+     * @return true if urgency is HIGH, false otherwise
+     */
+    public boolean isHighUrgency() {
+        return this.urgency == Urgency.HIGH;
     }
 
     public String getAssignedTo() {

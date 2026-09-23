@@ -11,15 +11,21 @@ public abstract class User {
     private String userId;
     private String name;
     private String email;
+    private String phone;
+    private String address;
+    private String profileImageUrl;
     private Role role;
 
     /**
      * Protected constructor — only subclasses can instantiate.
      */
-    protected User(String userId, String name, String email, Role role) {
+    protected User(String userId, String name, String email, String phone, String address, String profileImageUrl, Role role) {
         this.userId = userId;
         this.name = name;
         this.email = email;
+        this.phone = phone;
+        this.address = address;
+        this.profileImageUrl = profileImageUrl;
         this.role = role;
     }
 
@@ -67,6 +73,30 @@ public abstract class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     @Override

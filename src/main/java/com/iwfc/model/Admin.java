@@ -8,8 +8,8 @@ import java.util.List;
  */
 public class Admin extends User {
 
-    public Admin(String userId, String name, String email) {
-        super(userId, name, email, Role.ADMIN);
+    public Admin(String userId, String name, String email, String phone, String address, String profileImageUrl) {
+        super(userId, name, email, phone, address, profileImageUrl, Role.ADMIN);
     }
 
     @Override

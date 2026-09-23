@@ -1,7 +1,9 @@
 package com.iwfc.model;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,10 @@ public class FitnessSession {
     private Location location;
     private int maxCapacity;
     private List<Equipment> requiredEquipment;
+    private boolean recurring;
+    private String recurrenceNote;
+    private LocalDate validFrom;
+    private LocalDate validUntil;
 
     public FitnessSession(String sessionId, String name, String sessionType,
                           Instructor instructor, DayOfWeek dayOfWeek,
@@ -35,6 +41,45 @@ public class FitnessSession {
         this.location = location;
         this.maxCapacity = maxCapacity;
         this.requiredEquipment = new ArrayList<>();
+        this.recurring = true; // Default to true
+        this.recurrenceNote = "Every " + dayOfWeek.toString().substring(0, 1) + dayOfWeek.toString().substring(1).toLowerCase();
+        
+        // Defaults to a one-year validity starting today
+        this.validFrom = LocalDate.now();
+        this.validUntil = LocalDate.now().plusYears(1).withDayOfYear(LocalDate.now().plusYears(1).lengthOfYear());
+    }
+
+    /**
+     * Checks if this session is active on the given date.
+     * Must fall within the validFrom / validUntil range and match the DayOfWeek.
+     */
+    public boolean isActiveOn(LocalDate date) {
+        if (date.isBefore(validFrom) || date.isAfter(validUntil)) {
+            return false;
+        }
+        return date.getDayOfWeek() == this.dayOfWeek;
+    }
+
+    /**
+     * Returns all occurrences of this session in a specific month.
+     */
+    public List<LocalDate> getOccurrencesInMonth(YearMonth month) {
+        List<LocalDate> occurrences = new ArrayList<>();
+        LocalDate current = month.atDay(1);
+        LocalDate endOfMonth = month.atEndOfMonth();
+
+        // Find the first occurrence
+        while (current.getDayOfWeek() != this.dayOfWeek && !current.isAfter(endOfMonth)) {
+            current = current.plusDays(1);
+        }
+
+        while (!current.isAfter(endOfMonth)) {
+            if (isActiveOn(current)) {
+                occurrences.add(current);
+            }
+            current = current.plusWeeks(1);
+        }
+        return occurrences;
     }
 
     /**
@@ -54,18 +99,26 @@ public class FitnessSession {
     }
 
     /**
-     * Checks if this session overlaps in time with another session at the same location.
+     * Checks if this session overlaps in time with another session at the same location,
+     * or if the same instructor is scheduled for overlapping sessions.
      *
      * @param other the other session to check against
-     * @return true if there is a time and location conflict
+     * @return true if there is a location or instructor conflict
      */
     public boolean conflictsWith(FitnessSession other) {
         if (this.dayOfWeek != other.dayOfWeek) return false;
-        if (this.location != other.location) return false;
 
-        // Check time overlap: sessions conflict if one starts before the other ends
-        return this.startTime.isBefore(other.endTime) &&
-               other.startTime.isBefore(this.endTime);
+        boolean timeOverlap = this.startTime.isBefore(other.endTime) &&
+                              other.startTime.isBefore(this.endTime);
+                              
+        if (!timeOverlap) return false;
+
+        // Conflict if same location
+        if (this.location == other.location) return true;
+
+        // Conflict if same instructor
+        return this.instructor != null && other.instructor != null &&
+               this.instructor.getUserId().equals(other.instructor.getUserId());
     }
 
     // --- Encapsulated accessors ---
@@ -148,6 +201,38 @@ public class FitnessSession {
 
     public void setRequiredEquipment(List<Equipment> requiredEquipment) {
         this.requiredEquipment = requiredEquipment;
+    }
+
+    public boolean isRecurring() {
+        return recurring;
+    }
+
+    public void setRecurring(boolean recurring) {
+        this.recurring = recurring;
+    }
+
+    public String getRecurrenceNote() {
+        return recurrenceNote;
+    }
+
+    public void setRecurrenceNote(String recurrenceNote) {
+        this.recurrenceNote = recurrenceNote;
+    }
+
+    public LocalDate getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(LocalDate validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public LocalDate getValidUntil() {
+        return validUntil;
+    }
+
+    public void setValidUntil(LocalDate validUntil) {
+        this.validUntil = validUntil;
     }
 
     @Override

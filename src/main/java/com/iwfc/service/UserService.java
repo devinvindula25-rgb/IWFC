@@ -85,4 +85,12 @@ public class UserService {
                 .filter(u -> u.getRole() == role)
                 .toList();
     }
+
+    /**
+     * Adds a new user to the system.
+     * @param user the user to add
+     */
+    public void addUser(User user) {
+        dataStore.getUsers().add(user);
+    }
 }

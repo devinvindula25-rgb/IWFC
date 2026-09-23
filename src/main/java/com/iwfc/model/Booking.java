@@ -1,6 +1,7 @@
 package com.iwfc.model;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * Represents a booking made by a Member for a FitnessSession.
@@ -9,16 +10,25 @@ public class Booking {
     private String bookingId;
     private Member member;
     private FitnessSession session;
+    private LocalDate sessionDate;
     private LocalDateTime bookingDate;
-    private String status;
+    private BookingStatus status;
 
     public Booking(String bookingId, Member member, FitnessSession session,
-                   LocalDateTime bookingDate) {
+                   LocalDate sessionDate, LocalDateTime bookingDate) {
         this.bookingId = bookingId;
         this.member = member;
         this.session = session;
+        this.sessionDate = sessionDate;
         this.bookingDate = bookingDate;
-        this.status = "Confirmed";
+        this.status = BookingStatus.CONFIRMED;
+    }
+
+    /**
+     * Cancels the booking.
+     */
+    public void cancel() {
+        this.status = BookingStatus.CANCELLED;
     }
 
     // --- Encapsulated accessors ---
@@ -47,6 +57,14 @@ public class Booking {
         this.session = session;
     }
 
+    public LocalDate getSessionDate() {
+        return sessionDate;
+    }
+
+    public void setSessionDate(LocalDate sessionDate) {
+        this.sessionDate = sessionDate;
+    }
+
     public LocalDateTime getBookingDate() {
         return bookingDate;
     }
@@ -55,18 +73,18 @@ public class Booking {
         this.bookingDate = bookingDate;
     }
 
-    public String getStatus() {
+    public BookingStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(BookingStatus status) {
         this.status = status;
     }
 
     @Override
     public String toString() {
-        return String.format("Booking [%s] - %s booked %s on %s (%s)",
+        return String.format("Booking [%s] - %s booked %s on %s (booked on %s) (%s)",
                 bookingId, member.getName(), session.getName(),
-                bookingDate, status);
+                sessionDate, bookingDate, status.getDisplayName());
     }
 }

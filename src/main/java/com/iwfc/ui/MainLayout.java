@@ -21,6 +21,7 @@ public class MainLayout extends BorderPane {
     private final Runnable onLogout;
     private VBox sidebar;
     private Button activeNavButton;
+    private final java.util.Map<String, Button> navButtons = new java.util.HashMap<>();
 
     public MainLayout(IWFCSystemFacade facade, StackPane toastContainer, Runnable onLogout) {
         this.facade = facade;
@@ -76,8 +77,18 @@ public class MainLayout extends BorderPane {
         Button equipmentBtn = createNavButton("🏋️", "Equipment");
         Button sessionsBtn = createNavButton("📅", "Sessions");
         Button maintenanceBtn = createNavButton("🔧", "Maintenance");
+        
+        long unreadCount = facade.getUnreadNotificationCount();
+        String notifLabel = unreadCount > 0 ? "Notifications (" + unreadCount + ")" : "Notifications";
+        Button notificationsBtn = createNavButton("🔔", notifLabel);
+        // We want the internal view name to be "Notifications" even if label has count, so let's adjust createNavButton usage.
+        // Actually it's easier to change the label explicitly after creation, or store a map from label without count.
+        navItems.getChildren().addAll(dashboardBtn, equipmentBtn, sessionsBtn, maintenanceBtn, notificationsBtn);
 
-        navItems.getChildren().addAll(dashboardBtn, equipmentBtn, sessionsBtn, maintenanceBtn);
+        if (facade.getCurrentUser().getRole() == com.iwfc.model.Role.ADMIN) {
+            Button usersBtn = createNavButton("👥", "Users");
+            navItems.getChildren().add(usersBtn);
+        }
 
         // Spacer
         Region spacer = new Region();
@@ -118,13 +129,33 @@ public class MainLayout extends BorderPane {
         btn.setOnAction(e -> {
             navigateTo(label);
             setActiveButton(btn);
+            
+            // If navigating, update the unread count on the Notifications button
+            if (navButtons.containsKey("Notifications")) {
+                Button notifBtn = navButtons.get("Notifications");
+                if (notifBtn != null) {
+                    long unreadCount = facade.getUnreadNotificationCount();
+                    notifBtn.setText("🔔   Notifications" + (unreadCount > 0 ? " (" + unreadCount + ")" : ""));
+                }
+            }
         });
 
         if ("Dashboard".equals(label)) {
             setActiveButton(btn);
         }
+        
+        String baseLabel = label.split(" \\(")[0];
+        navButtons.put(baseLabel, btn);
 
         return btn;
+    }
+
+    private void navigateToWithHighlight(String view) {
+        Button btn = navButtons.get(view);
+        if (btn != null) {
+            setActiveButton(btn);
+        }
+        navigateTo(view);
     }
 
     private void setActiveButton(Button btn) {
@@ -140,12 +171,14 @@ public class MainLayout extends BorderPane {
         contentArea.getChildren().removeIf(node ->
             !node.getStyleClass().contains("toast-notification"));
 
-        Node content = switch (view) {
-            case "Dashboard" -> new DashboardView(facade);
+        Node content = switch (view.split(" \\(")[0]) { // Remove the unread count like " (3)" if it exists
+            case "Dashboard" -> new DashboardView(facade, this::navigateToWithHighlight);
             case "Equipment" -> new EquipmentView(facade);
             case "Sessions" -> new SessionView(facade);
             case "Maintenance" -> new MaintenanceView(facade);
-            default -> new DashboardView(facade);
+            case "Notifications" -> new NotificationView(facade);
+            case "Users" -> new UserManagementView(facade);
+            default -> new DashboardView(facade, this::navigateToWithHighlight);
         };
 
         // Insert content behind any existing toasts

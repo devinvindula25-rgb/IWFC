@@ -8,6 +8,8 @@ import com.iwfc.pattern.NotificationService;
 import com.iwfc.service.*;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 /**
@@ -89,11 +91,11 @@ public class IWFCSystemFacade {
     /**
      * Edits equipment attributes. Requires ADMIN role.
      */
-    public void editEquipment(String equipmentId, String name,
-                              EquipmentStatus status, Location location)
+    public void editEquipment(String equipmentId, String name, String category,
+                              EquipmentStatus status, Location location, double maintenanceThreshold)
             throws UnauthorizedAccessException {
         userService.checkPermission(currentUser, "MANAGE_EQUIPMENT");
-        equipmentService.editEquipment(equipmentId, name, status, location);
+        equipmentService.editEquipment(equipmentId, name, category, status, location, maintenanceThreshold);
     }
 
     /**
@@ -106,12 +108,21 @@ public class IWFCSystemFacade {
     }
 
     /**
+     * Removes equipment from the system. Requires ADMIN role.
+     */
+    public void removeEquipment(String equipmentId)
+            throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_EQUIPMENT");
+        equipmentService.removeEquipment(equipmentId);
+    }
+
+    /**
      * Logs usage hours for equipment. Available to ADMIN and INSTRUCTOR.
      */
     public void logEquipmentUsage(String equipmentId, double hours)
             throws UnauthorizedAccessException {
         userService.checkPermission(currentUser, "LOG_EQUIPMENT_USAGE");
-        equipmentService.logUsage(equipmentId, hours);
+        equipmentService.logUsage(equipmentId, hours, currentUser);
     }
 
     /**
@@ -136,6 +147,20 @@ public class IWFCSystemFacade {
     }
 
     /**
+     * Returns equipment filtered by category.
+     */
+    public List<Equipment> getEquipmentByCategory(String category) {
+        return equipmentService.getByCategory(category);
+    }
+
+    /**
+     * Returns equipment summary stats.
+     */
+    public java.util.Map<EquipmentStatus, Long> getEquipmentSummary() {
+        return equipmentService.getEquipmentSummary();
+    }
+
+    /**
      * Returns equipment by ID.
      */
     public Equipment getEquipmentById(String equipmentId) {
@@ -156,7 +181,16 @@ public class IWFCSystemFacade {
     }
 
     /**
-     * Books a member into a session. Available to MEMBER role.
+     * Edits a session. Available to ADMIN and INSTRUCTOR.
+     */
+    public void editSession(String sessionId, String name, java.time.LocalTime start, java.time.LocalTime end, int capacity)
+            throws InvalidBookingException, UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "CREATE_SESSION");
+        sessionService.editSession(sessionId, name, start, end, capacity);
+    }
+
+    /**
+     * Books a member into a session for the next available occurrence. Available to MEMBER role.
      */
     public Booking bookSession(String sessionId)
             throws InvalidBookingException, UnauthorizedAccessException {
@@ -165,6 +199,36 @@ public class IWFCSystemFacade {
             throw new InvalidBookingException("Only members can book sessions.");
         }
         return sessionService.bookSession(member, sessionId);
+    }
+    
+    /**
+     * Books a member into a session for a specific date. Available to MEMBER role.
+     */
+    public Booking bookSessionForDate(String sessionId, LocalDate date)
+            throws InvalidBookingException, UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "BOOK_SESSION");
+        if (!(currentUser instanceof Member member)) {
+            throw new InvalidBookingException("Only members can book sessions.");
+        }
+        return sessionService.bookSessionForDate(member, sessionId, date);
+    }
+
+    /**
+     * Cancels a member's booking. Available to MEMBER role.
+     */
+    public void cancelBooking(String bookingId)
+            throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "BOOK_SESSION");
+        sessionService.cancelBooking(bookingId, currentUser.getUserId());
+    }
+
+    /**
+     * Cancels a session and all its bookings. Available to ADMIN and INSTRUCTOR.
+     */
+    public void cancelSession(String sessionId)
+            throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "CREATE_SESSION");
+        sessionService.cancelSession(sessionId);
     }
 
     /**
@@ -179,6 +243,20 @@ public class IWFCSystemFacade {
      */
     public List<FitnessSession> getSessionsByDay(DayOfWeek day) {
         return sessionService.getSessionsByDay(day);
+    }
+    
+    /**
+     * Returns sessions for a specific date.
+     */
+    public List<FitnessSession> getSessionsForDate(LocalDate date) {
+        return sessionService.getSessionsForDate(date);
+    }
+    
+    /**
+     * Returns a map of sessions for a specific month.
+     */
+    public java.util.Map<LocalDate, List<FitnessSession>> getSessionsForMonth(YearMonth month) {
+        return sessionService.getSessionsForMonth(month);
     }
 
     /**
@@ -201,6 +279,13 @@ public class IWFCSystemFacade {
     public List<Booking> getBookingsForSession(String sessionId) {
         return sessionService.getBookingsForSession(sessionId);
     }
+    
+    /**
+     * Returns bookings for a specific session on a specific date.
+     */
+    public List<Booking> getBookingsForDate(String sessionId, LocalDate date) {
+        return sessionService.getBookingsForDate(sessionId, date);
+    }
 
     /**
      * Returns bookings for the current logged-in member.
@@ -208,6 +293,16 @@ public class IWFCSystemFacade {
     public List<Booking> getMyBookings() {
         if (currentUser != null) {
             return sessionService.getBookingsForMember(currentUser.getUserId());
+        }
+        return List.of();
+    }
+    
+    /**
+     * Returns bookings for the current logged-in member in a given month.
+     */
+    public List<Booking> getMyBookingsForMonth(YearMonth month) {
+        if (currentUser != null) {
+            return sessionService.getBookingsForMemberInMonth(currentUser.getUserId(), month);
         }
         return List.of();
     }
@@ -243,10 +338,23 @@ public class IWFCSystemFacade {
     /**
      * Completes a maintenance request. Requires ADMIN role.
      */
-    public void completeMaintenance(String requestId)
+    public void completeMaintenance(String requestId, String resolutionNotes)
             throws UnauthorizedAccessException {
         userService.checkPermission(currentUser, "UPDATE_MAINTENANCE_STATUS");
-        maintenanceService.completeRequest(requestId);
+        maintenanceService.completeRequest(requestId, resolutionNotes);
+    }
+
+    public void reopenMaintenanceRequest(String requestId) throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "UPDATE_MAINTENANCE_STATUS");
+        maintenanceService.reopenRequest(requestId);
+    }
+
+    public java.util.List<MaintenanceRequest> getRequestsForEquipment(String equipmentId) {
+        return maintenanceService.getRequestsForEquipment(equipmentId);
+    }
+
+    public java.util.Map<String, Long> getMaintenanceStats() {
+        return maintenanceService.getMaintenanceStats();
     }
 
     /**
@@ -263,6 +371,13 @@ public class IWFCSystemFacade {
         return maintenanceService.getRequestsByStatus(status);
     }
 
+    /**
+     * Returns HIGH urgency maintenance requests that are still PENDING.
+     */
+    public List<MaintenanceRequest> getHighUrgencyPendingRequests() {
+        return maintenanceService.getHighUrgencyPendingRequests();
+    }
+
     // =========================================================================
     // Users
     // =========================================================================
@@ -275,14 +390,57 @@ public class IWFCSystemFacade {
         return userService.getAllUsers();
     }
 
+    /**
+     * Returns all users of a specific role. Requires ADMIN role (MANAGE_USERS permission).
+     */
+    public List<User> getUsersByRole(com.iwfc.model.Role role) throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_USERS");
+        return userService.getUsersByRole(role);
+    }
+
+    /**
+     * Adds a new user to the system. Requires ADMIN role (MANAGE_USERS permission).
+     */
+    public void addUser(User user) throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_USERS");
+        userService.addUser(user);
+    }
+
     // =========================================================================
     // Notification Service (for UI to subscribe)
     // =========================================================================
 
-    /**
-     * Returns the notification service for the UI to subscribe to events.
-     */
     public NotificationService getNotificationService() {
         return notificationService;
+    }
+
+    public java.util.List<Notification> getNotifications() {
+        if (currentUser == null) return java.util.List.of();
+        return notificationService.getNotificationsForRole(currentUser.getRole());
+    }
+
+    public java.util.List<Notification> getNotificationsByCategory(com.iwfc.model.NotificationCategory category) {
+        if (currentUser == null) return java.util.List.of();
+        return notificationService.getNotificationsByCategory(category, currentUser.getRole());
+    }
+
+    public long getUnreadNotificationCount() {
+        if (currentUser == null) return 0;
+        return notificationService.getUnreadCount(currentUser.getRole());
+    }
+
+    public void markNotificationAsRead(String notificationId) {
+        notificationService.markAsRead(notificationId);
+    }
+
+    public void markAllNotificationsAsRead() {
+        if (currentUser != null) {
+            notificationService.markAllAsRead(currentUser.getRole());
+        }
+    }
+
+    public void clearAllNotifications() throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_USERS"); // Or some specific permission, but Admin has MANAGE_USERS
+        notificationService.clearAll();
     }
 }

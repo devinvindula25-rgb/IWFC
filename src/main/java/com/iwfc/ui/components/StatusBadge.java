@@ -1,9 +1,9 @@
 package com.iwfc.ui.components;
 
+import com.iwfc.model.BookingStatus;
 import com.iwfc.model.EquipmentStatus;
 import com.iwfc.model.RequestStatus;
 import com.iwfc.model.Urgency;
-import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 
 /**
@@ -13,9 +13,17 @@ import javafx.scene.control.Label;
 public class StatusBadge extends Label {
 
     public StatusBadge(String text, String colorClass) {
-        super(text);
+        super("● " + text);
         getStyleClass().addAll("status-badge", colorClass);
-        setPadding(new Insets(3, 10, 3, 10));
+        
+        if (colorClass.equals("badge-warning") || colorClass.equals("badge-danger")) {
+            javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(1000), this);
+            ft.setFromValue(1.0);
+            ft.setToValue(0.6);
+            ft.setCycleCount(javafx.animation.Animation.INDEFINITE);
+            ft.setAutoReverse(true);
+            ft.play();
+        }
     }
 
     /**
@@ -57,13 +65,15 @@ public class StatusBadge extends Label {
     /**
      * Creates a badge for booking status.
      */
-    public static StatusBadge forBookingStatus(String status) {
-        String colorClass = switch (status.toLowerCase()) {
-            case "confirmed" -> "badge-success";
-            case "pending" -> "badge-warning";
-            case "cancelled" -> "badge-danger";
+    public static StatusBadge forBookingStatus(BookingStatus status) {
+        if (status == null) {
+            return new StatusBadge("Unknown", "badge-info");
+        }
+        String colorClass = switch (status) {
+            case CONFIRMED -> "badge-success";
+            case CANCELLED -> "badge-danger";
             default -> "badge-info";
         };
-        return new StatusBadge(status, colorClass);
+        return new StatusBadge(status.getDisplayName(), colorClass);
     }
 }

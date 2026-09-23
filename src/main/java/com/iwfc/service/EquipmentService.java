@@ -4,6 +4,8 @@ import com.iwfc.exception.DuplicateDataException;
 import com.iwfc.model.Equipment;
 import com.iwfc.model.EquipmentStatus;
 import com.iwfc.model.Location;
+import com.iwfc.model.User;
+import com.iwfc.model.RequestStatus;
 import com.iwfc.pattern.DataStore;
 import com.iwfc.pattern.NotificationService;
 
@@ -45,16 +47,20 @@ public class EquipmentService {
      *
      * @param equipmentId the ID of the equipment to update
      * @param name        new name (null to keep existing)
+     * @param category    new category (null to keep existing)
      * @param status      new status (null to keep existing)
      * @param location    new location (null to keep existing)
+     * @param maintenanceThreshold new threshold (-1 to keep existing)
      * @throws IllegalArgumentException if equipment not found
      */
-    public void editEquipment(String equipmentId, String name,
-                              EquipmentStatus status, Location location) {
+    public void editEquipment(String equipmentId, String name, String category,
+                              EquipmentStatus status, Location location, double maintenanceThreshold) {
         Equipment equipment = getEquipmentById(equipmentId);
         if (name != null) equipment.setName(name);
+        if (category != null) equipment.setCategory(category);
         if (status != null) equipment.setStatus(status);
         if (location != null) equipment.setLocation(location);
+        if (maintenanceThreshold >= 0) equipment.setMaintenanceThreshold(maintenanceThreshold);
     }
 
     /**
@@ -72,11 +78,12 @@ public class EquipmentService {
      *
      * @param equipmentId the ID of the equipment
      * @param hours       the number of hours to add
+     * @param user        the user who logged the usage
      */
-    public void logUsage(String equipmentId, double hours) {
+    public void logUsage(String equipmentId, double hours, User user) {
         Equipment equipment = getEquipmentById(equipmentId);
         boolean wasBelowThreshold = !equipment.needsMaintenance();
-        equipment.addUsageHours(hours);
+        equipment.addUsageHours(hours, user.getUserId());
 
         if (wasBelowThreshold && equipment.needsMaintenance()) {
             notificationService.notifyListeners("EQUIPMENT_THRESHOLD",
@@ -84,6 +91,34 @@ public class EquipmentService {
                     equipment.getName(), equipment.getEquipmentId(),
                     equipment.getUsageHours(), equipment.getMaintenanceThreshold()));
         }
+    }
+
+    /**
+     * Removes equipment from the inventory.
+     *
+     * @param equipmentId the ID of the equipment to remove
+     * @throws IllegalStateException if equipment is required by a session or has pending/assigned maintenance
+     */
+    public void removeEquipment(String equipmentId) {
+        getEquipmentById(equipmentId); // Validates existence
+
+        // Validate no active sessions require this equipment
+        boolean isUsedInSession = dataStore.getSessionMap().values().stream()
+                .anyMatch(s -> s.getRequiredEquipment().stream()
+                        .anyMatch(e -> e.getEquipmentId().equals(equipmentId)));
+        if (isUsedInSession) {
+            throw new IllegalStateException("Cannot remove equipment: It is required by one or more fitness sessions.");
+        }
+
+        // Validate no pending or assigned maintenance requests
+        boolean hasPendingMaintenance = dataStore.getMaintenanceRequests().stream()
+                .anyMatch(r -> r.getEquipment().getEquipmentId().equals(equipmentId) &&
+                        (r.getStatus() == RequestStatus.PENDING || r.getStatus() == RequestStatus.ASSIGNED));
+        if (hasPendingMaintenance) {
+            throw new IllegalStateException("Cannot remove equipment: It has pending or assigned maintenance requests.");
+        }
+
+        dataStore.getEquipmentMap().remove(equipmentId);
     }
 
     /**
@@ -124,5 +159,22 @@ public class EquipmentService {
         return getAllEquipment().stream()
                 .filter(e -> e.getLocation() == location)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns equipment filtered by category.
+     */
+    public List<Equipment> getByCategory(String category) {
+        return getAllEquipment().stream()
+                .filter(e -> e.getCategory() != null && e.getCategory().equalsIgnoreCase(category))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a summary of equipment counts by status.
+     */
+    public Map<EquipmentStatus, Long> getEquipmentSummary() {
+        return getAllEquipment().stream()
+                .collect(Collectors.groupingBy(Equipment::getStatus, Collectors.counting()));
     }
 }

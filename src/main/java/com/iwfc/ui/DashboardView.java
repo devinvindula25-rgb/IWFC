@@ -18,9 +18,11 @@ import java.util.List;
 public class DashboardView extends VBox {
 
     private final IWFCSystemFacade facade;
+    private final java.util.function.Consumer<String> navCallback;
 
-    public DashboardView(IWFCSystemFacade facade) {
+    public DashboardView(IWFCSystemFacade facade, java.util.function.Consumer<String> navCallback) {
         this.facade = facade;
+        this.navCallback = navCallback;
         setSpacing(25);
         setPadding(new Insets(25));
         getStyleClass().add("dashboard-view");
@@ -36,7 +38,20 @@ public class DashboardView extends VBox {
         Label roleLabel = new Label(user.getRole().getDisplayName());
         roleLabel.getStyleClass().add("view-subtitle");
 
-        VBox header = new VBox(4, welcome, roleLabel);
+        VBox headerText = new VBox(4, welcome, roleLabel);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button refreshBtn = new Button("🔄 Refresh");
+        refreshBtn.getStyleClass().add("action-button");
+        refreshBtn.setOnAction(e -> {
+            getChildren().clear();
+            buildUI();
+        });
+
+        HBox header = new HBox(headerText, spacer, refreshBtn);
+        header.setAlignment(Pos.CENTER_LEFT);
 
         // Stat cards
         HBox statsRow = new HBox(15);
@@ -47,14 +62,19 @@ public class DashboardView extends VBox {
         int pendingMaintenance = facade.getMaintenanceByStatus(RequestStatus.PENDING).size();
         int totalBookings = facade.getAllBookings().size();
 
-        StatCard equipCard = new StatCard("Total Equipment", String.valueOf(totalEquipment),
+        StatCard equipCard = new StatCard("Total Equipment", String.valueOf(totalEquipment), "⚙️",
             "-fx-background-color: linear-gradient(to bottom right, #7c3aed, #6366f1);");
-        StatCard sessionCard = new StatCard("Active Sessions", String.valueOf(activeSessions),
+        StatCard sessionCard = new StatCard("Active Sessions", String.valueOf(activeSessions), "📅",
             "-fx-background-color: linear-gradient(to bottom right, #2563eb, #06b6d4);");
-        StatCard maintCard = new StatCard("Pending Maintenance", String.valueOf(pendingMaintenance),
+        StatCard maintCard = new StatCard("Pending Maintenance", String.valueOf(pendingMaintenance), "🔧",
             "-fx-background-color: linear-gradient(to bottom right, #0d9488, #10b981);");
-        StatCard bookingCard = new StatCard("Total Bookings", String.valueOf(totalBookings),
+        StatCard bookingCard = new StatCard("Total Bookings", String.valueOf(totalBookings), "🎟️",
             "-fx-background-color: linear-gradient(to bottom right, #ea580c, #f59e0b);");
+
+        equipCard.setOnMouseClicked(e -> navCallback.accept("Equipment"));
+        sessionCard.setOnMouseClicked(e -> navCallback.accept("Sessions"));
+        maintCard.setOnMouseClicked(e -> navCallback.accept("Maintenance"));
+        bookingCard.setOnMouseClicked(e -> navCallback.accept("Sessions"));
 
         statsRow.getChildren().addAll(equipCard, sessionCard, maintCard, bookingCard);
         HBox.setHgrow(equipCard, Priority.ALWAYS);
@@ -79,6 +99,28 @@ public class DashboardView extends VBox {
         bottomRow.getChildren().addAll(bookingsSection, maintenanceSection);
 
         getChildren().addAll(header, statsRow, bottomRow);
+
+        javafx.application.Platform.runLater(() -> playEntranceAnimations(header, statsRow, bookingsSection, maintenanceSection));
+    }
+
+    private void playEntranceAnimations(javafx.scene.Node... sections) {
+        int delay = 0;
+        for (javafx.scene.Node node : sections) {
+            node.setOpacity(0);
+            node.setTranslateY(20);
+
+            javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(400), node);
+            ft.setToValue(1);
+
+            javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(400), node);
+            tt.setToY(0);
+
+            javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(ft, tt);
+            pt.setDelay(javafx.util.Duration.millis(delay));
+            pt.play();
+
+            delay += 100;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -110,12 +152,12 @@ public class DashboardView extends VBox {
                 session.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")));
         });
 
-        TableColumn<Booking, String> statusCol = new TableColumn<>("Status");
+        TableColumn<Booking, BookingStatus> statusCol = new TableColumn<>("Status");
         statusCol.setCellValueFactory(data ->
-            new javafx.beans.property.SimpleStringProperty(data.getValue().getStatus()));
+            new javafx.beans.property.SimpleObjectProperty<>(data.getValue().getStatus()));
         statusCol.setCellFactory(col -> new TableCell<>() {
             @Override
-            protected void updateItem(String item, boolean empty) {
+            protected void updateItem(BookingStatus item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
@@ -159,6 +201,10 @@ public class DashboardView extends VBox {
             alertCard.setAlignment(Pos.CENTER_LEFT);
             alertCard.setPadding(new Insets(12));
             alertCard.getStyleClass().add("alert-card");
+
+            if (req.isHighUrgency()) {
+                alertCard.setStyle("-fx-background-color: rgba(239, 68, 68, 0.1); -fx-border-color: #ef4444; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+            }
 
             VBox info = new VBox(3);
             Label eqName = new Label(req.getEquipment().getName());

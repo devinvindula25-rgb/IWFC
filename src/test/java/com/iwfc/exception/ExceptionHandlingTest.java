@@ -27,7 +27,7 @@ class ExceptionHandlingTest {
         EquipmentService service = new EquipmentService(ns);
 
         // EQ001 already exists in seed data
-        Equipment duplicate = new Equipment("EQ001", "Duplicate Treadmill", Location.CARDIO_ZONE);
+        Equipment duplicate = new Equipment("EQ001", "Duplicate Treadmill", "Cardio", Location.CARDIO_ZONE);
 
         DuplicateDataException exception = assertThrows(
                 DuplicateDataException.class,

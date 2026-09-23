@@ -1,34 +1,32 @@
 package com.iwfc.pattern;
 
+import com.iwfc.model.Notification;
+import com.iwfc.model.NotificationCategory;
+import com.iwfc.model.Role;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * Observer Pattern — Event Publisher.
- * Manages subscriptions and dispatches events to registered listeners.
- * Decouples services (publishers) from UI components (subscribers).
- *
- * Event types used in the IWFC system:
- * - BOOKING_CONFIRMED: fired when a member successfully books a session
- * - MAINTENANCE_STATUS_CHANGED: fired when a maintenance request status transitions
- * - MAINTENANCE_ALERT: fired when equipment usage exceeds threshold
- * - EQUIPMENT_THRESHOLD: fired when equipment nears maintenance threshold
+ * Observer Pattern — Event Publisher & Notification Persistence.
+ * Manages subscriptions and dispatches transient events to registered listeners,
+ * while also persisting all events as Notification objects.
  */
 public class NotificationService {
 
     private final Map<String, List<EventListener<String>>> listeners;
+    private final DataStore dataStore;
 
     public NotificationService() {
         this.listeners = new HashMap<>();
+        this.dataStore = DataStore.getInstance();
     }
 
     /**
      * Subscribes a listener to a specific event type.
-     *
-     * @param eventType the event type to listen for
-     * @param listener  the listener to register
      */
     public void subscribe(String eventType, EventListener<String> listener) {
         listeners.computeIfAbsent(eventType, k -> new ArrayList<>()).add(listener);
@@ -36,9 +34,6 @@ public class NotificationService {
 
     /**
      * Unsubscribes a listener from a specific event type.
-     *
-     * @param eventType the event type to stop listening for
-     * @param listener  the listener to remove
      */
     public void unsubscribe(String eventType, EventListener<String> listener) {
         List<EventListener<String>> eventListeners = listeners.get(eventType);
@@ -48,12 +43,17 @@ public class NotificationService {
     }
 
     /**
-     * Notifies all listeners subscribed to the given event type.
-     *
-     * @param eventType the event type that occurred
-     * @param message   the event message/payload
+     * Notifies all listeners subscribed to the given event type AND persists the notification.
      */
     public void notifyListeners(String eventType, String message) {
+        // Map event type to category (simple mapping based on string content)
+        NotificationCategory category = mapEventTypeToCategory(eventType);
+        Role targetRole = mapEventTypeToRole(eventType);
+        
+        // Persist
+        addNotification(category, getTitleForEvent(eventType), message, targetRole);
+
+        // Notify transient listeners (like Toasts)
         List<EventListener<String>> eventListeners = listeners.get(eventType);
         if (eventListeners != null) {
             for (EventListener<String> listener : eventListeners) {
@@ -61,11 +61,77 @@ public class NotificationService {
             }
         }
     }
+    
+    private NotificationCategory mapEventTypeToCategory(String eventType) {
+        if (eventType.startsWith("BOOKING")) return NotificationCategory.BOOKING;
+        if (eventType.startsWith("SESSION")) return NotificationCategory.SESSION;
+        if (eventType.startsWith("MAINTENANCE")) return NotificationCategory.MAINTENANCE;
+        if (eventType.startsWith("EQUIPMENT")) return NotificationCategory.EQUIPMENT;
+        return NotificationCategory.SYSTEM;
+    }
+    
+    private String getTitleForEvent(String eventType) {
+        return eventType.replace("_", " ").substring(0, 1).toUpperCase() + 
+               eventType.replace("_", " ").substring(1).toLowerCase();
+    }
+    
+    private Role mapEventTypeToRole(String eventType) {
+        if (eventType.startsWith("BOOKING")) return Role.MEMBER; // Just as an example, actual logic might be more complex
+        if (eventType.startsWith("MAINTENANCE") || eventType.startsWith("EQUIPMENT")) return Role.INSTRUCTOR;
+        return null; // For everyone
+    }
 
     /**
-     * Returns the number of listeners for a given event type.
-     * Useful for testing.
+     * Persists a new notification.
      */
+    private void addNotification(NotificationCategory category, String title, String message, Role targetRole) {
+        String id = "NTF" + String.format("%04d", dataStore.getNotifications().size() + 1);
+        Notification notification = new Notification(id, category, title, message, targetRole);
+        dataStore.getNotifications().add(0, notification); // Add to front for newest-first
+    }
+
+    // --- Data retrieval & management ---
+
+    public List<Notification> getAllNotifications() {
+        return new ArrayList<>(dataStore.getNotifications());
+    }
+    
+    public List<Notification> getNotificationsForRole(Role role) {
+        if (role == Role.ADMIN) {
+            return getAllNotifications();
+        }
+        return dataStore.getNotifications().stream()
+                .filter(n -> n.getTargetRole() == null || n.getTargetRole() == role)
+                .collect(Collectors.toList());
+    }
+
+    public List<Notification> getNotificationsByCategory(NotificationCategory category, Role role) {
+        return getNotificationsForRole(role).stream()
+                .filter(n -> n.getCategory() == category)
+                .collect(Collectors.toList());
+    }
+
+    public long getUnreadCount(Role role) {
+        return getNotificationsForRole(role).stream()
+                .filter(n -> !n.isRead())
+                .count();
+    }
+
+    public void markAsRead(String notificationId) {
+        dataStore.getNotifications().stream()
+                .filter(n -> n.getNotificationId().equals(notificationId))
+                .findFirst()
+                .ifPresent(n -> n.setRead(true));
+    }
+
+    public void markAllAsRead(Role role) {
+        getNotificationsForRole(role).forEach(n -> n.setRead(true));
+    }
+
+    public void clearAll() {
+        dataStore.getNotifications().clear();
+    }
+
     public int getListenerCount(String eventType) {
         List<EventListener<String>> eventListeners = listeners.get(eventType);
         return eventListeners != null ? eventListeners.size() : 0;
