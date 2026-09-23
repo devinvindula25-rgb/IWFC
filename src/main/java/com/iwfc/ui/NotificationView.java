@@ -139,15 +139,28 @@ public class NotificationView extends BorderPane {
         }
         
         if (notifications.isEmpty()) {
-            Label emptyLbl = new Label("No notifications yet.");
-            emptyLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 16px; -fx-padding: 50px;");
-            listContainer.getChildren().add(emptyLbl);
+            VBox emptyState = new VBox(15);
+            emptyState.setAlignment(Pos.CENTER);
+            emptyState.setPadding(new Insets(100, 50, 50, 50));
+            
+            Label iconLbl = new Label("📭");
+            iconLbl.setStyle("-fx-font-size: 64px; -fx-opacity: 0.5;");
+            
+            Label emptyLbl = new Label("No notifications right now.");
+            emptyLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            Label subLbl = new Label("We'll let you know when something comes up.");
+            subLbl.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14px;");
+            
+            emptyState.getChildren().addAll(iconLbl, emptyLbl, subLbl);
+            listContainer.getChildren().add(emptyState);
             return;
         }
         
         int delay = 0;
         for (Notification n : notifications) {
             HBox card = createNotificationCard(n);
+            card.setOpacity(0.0); // Fix for initial flash
             listContainer.getChildren().add(card);
             
             // Slide-in animation
@@ -200,10 +213,14 @@ public class NotificationView extends BorderPane {
         Circle unreadDot = new Circle(4, Color.web("#3b82f6"));
         unreadDot.setVisible(!n.isRead());
         if (!n.isRead()) {
+            unreadDot.setEffect(new javafx.scene.effect.DropShadow(10, Color.web("#3b82f6")));
             Timeline pulse = new Timeline(
                 new KeyFrame(Duration.ZERO, new javafx.animation.KeyValue(unreadDot.radiusProperty(), 4)),
-                new KeyFrame(Duration.seconds(1), new javafx.animation.KeyValue(unreadDot.radiusProperty(), 6)),
-                new KeyFrame(Duration.seconds(2), new javafx.animation.KeyValue(unreadDot.radiusProperty(), 4))
+                new KeyFrame(Duration.ZERO, new javafx.animation.KeyValue(unreadDot.opacityProperty(), 1.0)),
+                new KeyFrame(Duration.seconds(1), new javafx.animation.KeyValue(unreadDot.radiusProperty(), 7)),
+                new KeyFrame(Duration.seconds(1), new javafx.animation.KeyValue(unreadDot.opacityProperty(), 0.5)),
+                new KeyFrame(Duration.seconds(2), new javafx.animation.KeyValue(unreadDot.radiusProperty(), 4)),
+                new KeyFrame(Duration.seconds(2), new javafx.animation.KeyValue(unreadDot.opacityProperty(), 1.0))
             );
             pulse.setCycleCount(Timeline.INDEFINITE);
             pulse.play();

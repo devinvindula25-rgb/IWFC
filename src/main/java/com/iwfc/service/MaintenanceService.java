@@ -28,7 +28,11 @@ public class MaintenanceService {
      */
     public void reportIssue(MaintenanceRequest request) {
         request.getEquipment().setStatus(EquipmentStatus.FAULTY);
-        dataStore.getMaintenanceRequests().add(request);
+        try {
+            dataStore.getMaintenanceRequests().save(request);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            throw new RuntimeException("Failed to report issue: " + e.getMessage());
+        }
 
         notificationService.notifyListeners("MAINTENANCE_ALERT",
             String.format("🔧 New maintenance report: %s — %s [Urgency: %s]",
@@ -95,9 +99,7 @@ public class MaintenanceService {
      * Retrieves a maintenance request by ID.
      */
     public MaintenanceRequest getRequestById(String requestId) {
-        return dataStore.getMaintenanceRequests().stream()
-                .filter(r -> r.getRequestId().equals(requestId))
-                .findFirst()
+        return dataStore.getMaintenanceRequests().findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException(
                     "Maintenance request not found with ID: " + requestId));
     }
@@ -106,7 +108,7 @@ public class MaintenanceService {
      * Returns all maintenance requests.
      */
     public List<MaintenanceRequest> getAllRequests() {
-        return dataStore.getAll(MaintenanceRequest.class);
+        return dataStore.getMaintenanceRequests().findAll();
     }
 
     /**
@@ -140,7 +142,7 @@ public class MaintenanceService {
      * Generates a new unique request ID.
      */
     public String generateRequestId() {
-        int nextId = dataStore.getMaintenanceRequests().size() + 1;
+        int nextId = dataStore.getMaintenanceRequests().findAll().size() + 1;
         return "MR" + String.format("%03d", nextId);
     }
 

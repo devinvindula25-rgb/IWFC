@@ -6,7 +6,7 @@ import java.time.LocalDate;
 /**
  * Represents a booking made by a Member for a FitnessSession.
  */
-public class Booking {
+public class Booking implements Identifiable {
     private String bookingId;
     private Member member;
     private FitnessSession session;
@@ -34,6 +34,11 @@ public class Booking {
     // --- Encapsulated accessors ---
 
     public String getBookingId() {
+        return bookingId;
+    }
+
+    @Override
+    public String getId() {
         return bookingId;
     }
 

@@ -34,12 +34,7 @@ public class EquipmentService {
      * @throws DuplicateDataException if equipment with the same ID already exists
      */
     public void addEquipment(Equipment equipment) throws DuplicateDataException {
-        Map<String, Equipment> equipmentMap = dataStore.getEquipmentMap();
-        if (equipmentMap.containsKey(equipment.getEquipmentId())) {
-            throw new DuplicateDataException(
-                "Equipment with ID '" + equipment.getEquipmentId() + "' already exists.");
-        }
-        equipmentMap.put(equipment.getEquipmentId(), equipment);
+        dataStore.getEquipment().save(equipment);
     }
 
     /**
@@ -83,13 +78,13 @@ public class EquipmentService {
     public void logUsage(String equipmentId, double hours, User user) {
         Equipment equipment = getEquipmentById(equipmentId);
         boolean wasBelowThreshold = !equipment.needsMaintenance();
-        equipment.addUsageHours(hours, user.getUserId());
+        equipment.addUsageHours(hours);
 
         if (wasBelowThreshold && equipment.needsMaintenance()) {
             notificationService.notifyListeners("EQUIPMENT_THRESHOLD",
                 String.format("⚠ ALERT: %s [%s] has reached %.0f/%.0f usage hours — maintenance required!",
                     equipment.getName(), equipment.getEquipmentId(),
-                    equipment.getUsageHours(), equipment.getMaintenanceThreshold()));
+                    equipment.getCumulativeUsageHours(), equipment.getMaintenanceThreshold()));
         }
     }
 
@@ -103,7 +98,7 @@ public class EquipmentService {
         getEquipmentById(equipmentId); // Validates existence
 
         // Validate no active sessions require this equipment
-        boolean isUsedInSession = dataStore.getSessionMap().values().stream()
+        boolean isUsedInSession = dataStore.getSessions().findAll().stream()
                 .anyMatch(s -> s.getRequiredEquipment().stream()
                         .anyMatch(e -> e.getEquipmentId().equals(equipmentId)));
         if (isUsedInSession) {
@@ -111,14 +106,14 @@ public class EquipmentService {
         }
 
         // Validate no pending or assigned maintenance requests
-        boolean hasPendingMaintenance = dataStore.getMaintenanceRequests().stream()
+        boolean hasPendingMaintenance = dataStore.getMaintenanceRequests().findAll().stream()
                 .anyMatch(r -> r.getEquipment().getEquipmentId().equals(equipmentId) &&
                         (r.getStatus() == RequestStatus.PENDING || r.getStatus() == RequestStatus.ASSIGNED));
         if (hasPendingMaintenance) {
             throw new IllegalStateException("Cannot remove equipment: It has pending or assigned maintenance requests.");
         }
 
-        dataStore.getEquipmentMap().remove(equipmentId);
+        dataStore.getEquipment().delete(equipmentId);
     }
 
     /**
@@ -129,7 +124,7 @@ public class EquipmentService {
      * @throws IllegalArgumentException if not found
      */
     public Equipment getEquipmentById(String equipmentId) {
-        Equipment equipment = dataStore.getEquipmentMap().get(equipmentId);
+        Equipment equipment = dataStore.getEquipment().findById(equipmentId).orElse(null);
         if (equipment == null) {
             throw new IllegalArgumentException("Equipment not found with ID: " + equipmentId);
         }
@@ -140,7 +135,7 @@ public class EquipmentService {
      * Returns all equipment in the inventory.
      */
     public List<Equipment> getAllEquipment() {
-        return dataStore.getAll(Equipment.class);
+        return dataStore.getEquipment().findAll();
     }
 
     /**

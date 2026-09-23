@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * Represents a single persisted notification in the IWFC system.
  */
-public class Notification {
+public class Notification implements Identifiable {
 
     private String notificationId;
     private NotificationCategory category;
@@ -26,6 +26,11 @@ public class Notification {
     }
 
     public String getNotificationId() {
+        return notificationId;
+    }
+
+    @Override
+    public String getId() {
         return notificationId;
     }
 

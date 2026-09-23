@@ -4,13 +4,14 @@ package com.iwfc.exception;
  * Custom exception thrown when a booking operation violates business rules.
  * Scenarios: double-booking (same time + location), booking outside operating hours (06:00-22:00).
  */
-public class InvalidBookingException extends Exception {
+public class InvalidBookingException extends IWFCException {
 
     public InvalidBookingException(String message) {
-        super(message);
+        super(message, "ERR_INVALID_BOOKING");
     }
 
-    public InvalidBookingException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public String getUserFriendlyMessage() {
+        return "Booking Failed: " + getMessage();
     }
 }

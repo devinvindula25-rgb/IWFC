@@ -181,8 +181,7 @@ public class EquipmentView extends VBox {
         id.getStyleClass().add("equipment-id");
         nameBox.getChildren().addAll(name, category, id);
         HBox.setHgrow(nameBox, Priority.ALWAYS);
-
-        UsageRing ring = new UsageRing(eq.getUsageHours(), eq.getMaintenanceThreshold());
+        UsageRing ring = new UsageRing(eq.getCumulativeUsageHours(), eq.getMaintenanceThreshold());
 
         topRow.getChildren().addAll(nameBox, ring);
 
@@ -195,7 +194,7 @@ public class EquipmentView extends VBox {
 
         // Usage text
         Label usage = new Label(String.format("%.0f / %.0f hrs",
-                eq.getUsageHours(), eq.getMaintenanceThreshold()));
+                eq.getCumulativeUsageHours(), eq.getMaintenanceThreshold()));
         usage.getStyleClass().add("equipment-usage");
 
         Region spacer = new Region();

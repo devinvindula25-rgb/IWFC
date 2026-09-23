@@ -27,7 +27,7 @@ public class UserService {
      * @throws IllegalArgumentException if user not found
      */
     public User login(String userId) {
-        return dataStore.getUsers().stream()
+        return dataStore.getUsers().findAll().stream()
                 .filter(u -> u.getUserId().equals(userId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -45,10 +45,14 @@ public class UserService {
     public void checkAuthorization(User user, Role requiredRole)
             throws UnauthorizedAccessException {
         if (user.getRole() != requiredRole) {
-            throw new UnauthorizedAccessException(
-                "Access denied: User '" + user.getName() + "' with role '" +
+            String msg = "Access denied: User '" + user.getName() + "' with role '" +
                 user.getRole().getDisplayName() + "' is not authorized. " +
-                "Required role: " + requiredRole.getDisplayName());
+                "Required role: " + requiredRole.getDisplayName();
+            String entryId = "AUD" + String.format("%04d", dataStore.getAuditLogs().findAll().size() + 1);
+            try {
+                dataStore.getAuditLogs().save(new AuditEntry(entryId, user.getUserId(), "ROLE:" + requiredRole.name(), msg));
+            } catch (com.iwfc.exception.DuplicateDataException ignored) {}
+            throw new UnauthorizedAccessException(msg);
         }
     }
 
@@ -62,9 +66,13 @@ public class UserService {
     public void checkPermission(User user, String permission)
             throws UnauthorizedAccessException {
         if (!user.getPermissions().contains(permission)) {
-            throw new UnauthorizedAccessException(
-                "Access denied: User '" + user.getName() + "' does not have " +
-                "permission '" + permission + "'.");
+            String msg = "Access denied: User '" + user.getName() + "' does not have " +
+                "permission '" + permission + "'.";
+            String entryId = "AUD" + String.format("%04d", dataStore.getAuditLogs().findAll().size() + 1);
+            try {
+                dataStore.getAuditLogs().save(new AuditEntry(entryId, user.getUserId(), permission, msg));
+            } catch (com.iwfc.exception.DuplicateDataException ignored) {}
+            throw new UnauthorizedAccessException(msg);
         }
     }
 
@@ -72,7 +80,7 @@ public class UserService {
      * Returns all users in the system.
      */
     public List<User> getAllUsers() {
-        return dataStore.getAll(User.class);
+        return dataStore.getUsers().findAll();
     }
 
     /**
@@ -81,7 +89,7 @@ public class UserService {
      * @param role the role to filter by
      */
     public List<User> getUsersByRole(Role role) {
-        return dataStore.getUsers().stream()
+        return dataStore.getUsers().findAll().stream()
                 .filter(u -> u.getRole() == role)
                 .toList();
     }
@@ -90,7 +98,7 @@ public class UserService {
      * Adds a new user to the system.
      * @param user the user to add
      */
-    public void addUser(User user) {
-        dataStore.getUsers().add(user);
+    public void addUser(User user) throws com.iwfc.exception.DuplicateDataException {
+        dataStore.getUsers().save(user);
     }
 }

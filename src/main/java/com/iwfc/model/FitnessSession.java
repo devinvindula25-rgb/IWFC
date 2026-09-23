@@ -11,7 +11,7 @@ import java.util.List;
  * Represents a scheduled fitness session at the IWFC.
  * Contains scheduling details, instructor assignment, and equipment requirements.
  */
-public class FitnessSession {
+public class FitnessSession implements Identifiable {
     private String sessionId;
     private String name;
     private String sessionType;
@@ -124,6 +124,11 @@ public class FitnessSession {
     // --- Encapsulated accessors ---
 
     public String getSessionId() {
+        return sessionId;
+    }
+
+    @Override
+    public String getId() {
         return sessionId;
     }
 

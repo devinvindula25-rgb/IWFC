@@ -9,24 +9,24 @@ import java.time.LocalDateTime;
  * Tracks usage hours for preventative maintenance alerts.
  * Demonstrates Encapsulation — all fields private with controlled access.
  */
-public class Equipment {
+public class Equipment implements Identifiable {
     private String equipmentId;
     private String name;
     private String category;
     private EquipmentStatus status;
     private Location location;
-    private double usageHours;
+    private double cumulativeUsageHours;
     private double maintenanceThreshold;
     private List<UsageLogEntry> usageLog;
 
     public Equipment(String equipmentId, String name, String category, EquipmentStatus status,
-                     Location location, double usageHours, double maintenanceThreshold) {
+                     Location location, double cumulativeUsageHours, double maintenanceThreshold) {
         this.equipmentId = equipmentId;
         this.name = name;
         this.category = category;
         this.status = status;
         this.location = location;
-        this.usageHours = usageHours;
+        this.cumulativeUsageHours = cumulativeUsageHours;
         this.maintenanceThreshold = maintenanceThreshold;
         this.usageLog = new ArrayList<>();
     }
@@ -41,23 +41,21 @@ public class Equipment {
     /**
      * Adds usage hours to the cumulative total.
      *
-     * @param hours the number of hours to add (must be positive)
-     * @param loggedByUserId the user ID who logged the usage
-     * @throws IllegalArgumentException if hours is negative
+     * @param hours the number of hours to add
      */
-    public void addUsageHours(double hours, String loggedByUserId) {
+    public void addUsageHours(double hours) {
         if (hours < 0) {
             throw new IllegalArgumentException("Usage hours cannot be negative.");
         }
-        this.usageHours += hours;
-        this.usageLog.add(new UsageLogEntry(hours, loggedByUserId));
+        this.cumulativeUsageHours += hours;
+        this.usageLog.add(new UsageLogEntry(hours, "SYSTEM"));
     }
 
     /**
      * Resets usage hours to zero and adds a log entry for the reset.
      */
     public void resetUsageHours() {
-        this.usageHours = 0.0;
+        this.cumulativeUsageHours = 0.0;
         this.usageLog.add(new UsageLogEntry(LocalDateTime.now(), 0.0, "SYSTEM", "Usage reset after maintenance"));
     }
 
@@ -67,7 +65,7 @@ public class Equipment {
      * @return true if cumulative usage hours meet or exceed the threshold
      */
     public boolean needsMaintenance() {
-        return usageHours >= maintenanceThreshold;
+        return cumulativeUsageHours >= maintenanceThreshold;
     }
 
     /**
@@ -75,12 +73,17 @@ public class Equipment {
      */
     public double getUsagePercentage() {
         if (maintenanceThreshold <= 0) return 1.0;
-        return usageHours / maintenanceThreshold;
+        return cumulativeUsageHours / maintenanceThreshold;
     }
 
     // --- Encapsulated accessors ---
 
     public String getEquipmentId() {
+        return equipmentId;
+    }
+
+    @Override
+    public String getId() {
         return equipmentId;
     }
 
@@ -120,12 +123,12 @@ public class Equipment {
         this.location = location;
     }
 
-    public double getUsageHours() {
-        return usageHours;
+    public double getCumulativeUsageHours() {
+        return cumulativeUsageHours;
     }
 
-    public void setUsageHours(double usageHours) {
-        this.usageHours = usageHours;
+    public void setCumulativeUsageHours(double cumulativeUsageHours) {
+        this.cumulativeUsageHours = cumulativeUsageHours;
     }
 
     public double getMaintenanceThreshold() {
@@ -144,6 +147,6 @@ public class Equipment {
     public String toString() {
         return String.format("%s (%s) [%s] - %s at %s (%.1f/%.1f hrs)",
                 name, category, equipmentId, status.getDisplayName(),
-                location.getDisplayName(), usageHours, maintenanceThreshold);
+                location.getDisplayName(), cumulativeUsageHours, maintenanceThreshold);
     }
 }

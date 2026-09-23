@@ -1,0 +1,1190 @@
+================================================================================
+IWFC - INTELLIGENT WELLNESS AND FITNESS CENTER
+IMPLEMENTATION PLAN  v1.0
+Module: CMP 7001 - Advanced Programming (PRAC 1, 75% weighting)
+Author: Senura Wickramaratne
+Status: WORKING DOCUMENT - to be revised as ideas are added
+================================================================================
+
+--------------------------------------------------------------------------------
+0. PURPOSE OF THIS DOCUMENT
+--------------------------------------------------------------------------------
+This plan closes the five mandatory gaps identified between the CMP 7001
+assessment brief and the current JavaFX build, and folds in the Payment
+Gateway / Payment Methods enhancement as the vehicle for the missing
+Behavioural design pattern.
+
+Everything below is ordered by DEPENDENCY, not by difficulty. Work top to
+bottom. Later phases will not compile cleanly if earlier ones are skipped.
+
+Legend:
+  [M]  = MANDATORY per assessment brief - marks lost if absent
+  [E]  = ENHANCEMENT - not required, but explicitly encouraged or high value
+  [R]  = REFACTOR of existing code, not net-new
+
+
+--------------------------------------------------------------------------------
+1. GAP SUMMARY - WHAT IS MISSING RIGHT NOW
+--------------------------------------------------------------------------------
+G1 [M]  Behavioural design pattern            -> absent entirely
+G2 [M]  Java Generics                         -> not evidenced
+G3 [M]  Three named custom exceptions         -> not implemented as throws
+G4 [M]  JUnit test suite + failing test       -> absent entirely
+G5 [M]  Time-clash double-booking prevention  -> only capacity limits exist
+G6 [E]  Payment gateway + payment methods     -> new feature (carries G1)
+
+Current pattern coverage:
+  Creational  -> Singleton (DataStore)                    OK
+  Structural  -> Facade (IWFCSystemFacade)                OK
+  Behavioural -> NONE                                     <-- G1
+
+Target pattern coverage after this plan:
+  Creational  -> Singleton + Factory (sessions/equipment)
+  Structural  -> Facade
+  Behavioural -> Strategy (payments) + Observer (notifications)
+
+
+--------------------------------------------------------------------------------
+2. PHASE 1 - FOUNDATION REFACTOR  (do this first, everything depends on it)
+--------------------------------------------------------------------------------
+
+2.1 [M][R] GENERIC REPOSITORY LAYER  -> closes G2
+--------------------------------------------------
+Problem: DataStore currently holds separate raw collections for Users,
+Equipment, Sessions, MaintenanceLogs, Notifications. No generics evidenced.
+
+Build:
+  - interface Identifiable
+        String getId();
+
+  - class Repository<T extends Identifiable>
+        private final Map<String, T> items = new HashMap<>();
+        Optional<T> findById(String id)
+        List<T> findAll()
+        void save(T item)            throws DuplicateDataException
+        void update(T item)
+        void delete(String id)
+        List<T> findBy(Predicate<T> criteria)     // generic filtering
+        <R> List<R> mapTo(Function<T,R> mapper)   // bounded generic method
+
+Then:
+  - All entity classes implement Identifiable.
+  - DataStore (Singleton, retained) now exposes:
+        Repository<User>            users
+        Repository<Equipment>       equipment
+        Repository<Session>         sessions
+        Repository<MaintenanceLog>  maintenanceLogs
+        Repository<Notification>    notifications
+        Repository<Payment>         payments       (added in Phase 4)
+
+Why this ordering: the Repository's save() is where DuplicateDataException
+is thrown, so exceptions (2.2) must be defined in the same phase.
+
+Report/video talking point: bounded type parameters (<T extends Identifiable>)
++ a generic method with its own type parameter (<R>) = strong LO2 evidence.
+One class satisfies the Generics requirement across all six entity types
+and removes five near-duplicate collection blocks from DataStore.
+
+
+2.2 [M] CUSTOM EXCEPTION HIERARCHY  -> closes G3
+--------------------------------------------------
+Build an abstract base so polymorphic catch blocks are demonstrable:
+
+  abstract class IWFCException extends Exception
+        - String errorCode
+        - LocalDateTime timestamp
+        - abstract String getUserFriendlyMessage();
+
+  MANDATORY THREE (named in the brief):
+  1. InvalidBookingException     extends IWFCException
+        - thrown on: equipment/studio time clash
+        - thrown on: booking outside operating hours (06:00-22:00)
+        - thrown on: booking a session in the past
+  2. UnauthorizedAccessException extends IWFCException
+        - thrown on: Member attempting to open Admin logs / User Management
+        - thrown on: Instructor attempting to assign maintenance tasks
+        - MUST be thrown at the Facade layer, not merely hidden in the UI
+  3. DuplicateDataException      extends IWFCException
+        - thrown on: registering equipment with an existing ID
+        - thrown on: registering a user with an existing email
+
+  ADDED VIA PAYMENTS (Phase 4) - extends the hierarchy beyond the minimum:
+  4. PaymentFailedException      extends IWFCException
+  5. InsufficientFundsException  extends PaymentFailedException
+
+CRITICAL POINT: the current build validates permissions at the Facade but
+does not THROW. Change the Facade to throw UnauthorizedAccessException and
+let the UI catch it and raise a red Toast notification. The brief requires
+exception handling, not access gating.
+
+2.3 [E] UNAUTHORISED ACCESS AUDIT LOG
+--------------------------------------------------
+Every UnauthorizedAccessException caught at the Facade writes an
+AuditEntry (who, what, when, denied reason) into a Repository<AuditEntry>.
+Admin-only view. Cheap to build, turns an exception requirement into a
+visible demoable feature.
+
+
+--------------------------------------------------------------------------------
+3. PHASE 2 - BEHAVIOURAL PATTERNS  -> closes G1
+--------------------------------------------------------------------------------
+
+3.1 [M] OBSERVER PATTERN - Notification Engine  [R]
+--------------------------------------------------
+The existing Notification Centre is Observer in spirit. Formalise it:
+
+  - interface EventObserver
+        void onEvent(SystemEvent event);
+  - abstract class EventPublisher
+        private final List<EventObserver> observers
+        void subscribe / unsubscribe / notifyObservers(SystemEvent)
+  - Concrete observers:
+        NotificationObserver   -> creates in-app notification + toast
+        AuditObserver          -> writes to audit log
+        MaintenanceAlertObserver -> escalates High urgency items
+
+  Publishers: MaintenanceService (status change), BookingService (booking
+  confirmed/cancelled), PaymentService (payment completed/failed),
+  EquipmentService (usage threshold breached).
+
+  The brief explicitly requires notifications to fire AUTOMATICALLY when a
+  maintenance request status changes - Observer is the correct mechanism
+  and directly satisfies that functional requirement.
+
+3.2 [E] STRATEGY PATTERN - Payments
+--------------------------------------------------
+Covered in full in Phase 4. Second Behavioural pattern; the runtime swap of
+payment method is the cleanest polymorphism demo in the whole system.
+
+3.3 [E] COMMAND PATTERN - Admin actions with undo  (OPTIONAL / STRETCH)
+--------------------------------------------------
+  interface Command { void execute(); void undo(); String describe(); }
+  Implementations: AddEquipmentCommand, DeactivateEquipmentCommand,
+                   AssignMaintenanceCommand, EditEquipmentCommand
+  CommandInvoker holds a Deque<Command> history; Admin gets an "Undo last
+  action" button.
+  Strong video moment. Build ONLY if Phases 1-5 are complete and stable.
+
+
+--------------------------------------------------------------------------------
+4. PHASE 3 - FIX THE FUNCTIONAL REQUIREMENTS  -> closes G5 + smaller gaps
+--------------------------------------------------------------------------------
+
+4.1 [M] TIME-CLASH DOUBLE-BOOKING PREVENTION  -> closes G5
+--------------------------------------------------
+Current build prevents OVERBOOKING (class capacity). The brief requires
+preventing DOUBLE-BOOKING of the same equipment or studio at the same time.
+These are two different validations. Both must exist.
+
+  BookingService / SchedulingValidator:
+    boolean overlaps(TimeSlot a, TimeSlot b)
+        -> a.start < b.end && b.start < a.end
+    validateNoEquipmentClash(equipmentId, slot)  -> InvalidBookingException
+    validateNoRoomClash(roomId, slot)            -> InvalidBookingException
+    validateOperatingHours(slot)                 -> InvalidBookingException
+    validateCapacity(session)                    -> InvalidBookingException
+
+  This validator is the PRIMARY target of the JUnit suite in Phase 5.
+  Keep it as a separate, dependency-free class so it is trivially testable.
+
+4.2 [M] CUMULATIVE USAGE HOURS -> AUTO MAINTENANCE TRIGGER
+--------------------------------------------------
+Brief requires usage logs tracking cumulative hours to trigger preventative
+maintenance alerts. Currently only a visual usage ring exists - no logic.
+
+  - Equipment gains: double cumulativeUsageHours, double maintenanceThreshold
+  - UsageLog entity: equipmentId, sessionId, hoursAdded, recordedAt
+  - On session completion -> EquipmentService.recordUsage(...)
+  - If cumulativeUsageHours >= threshold:
+        auto-create MaintenanceLog (urgency = Medium, status = Pending)
+        publish event -> Observer fires notification to Admin
+  - Reset counter to 0 when maintenance marked Completed.
+
+  This chains three required features (usage logs -> maintenance -> auto
+  notification) into one 30-second demo sequence. High value for the video.
+
+4.3 [M] FULL EQUIPMENT LIFECYCLE
+--------------------------------------------------
+Brief requires ADD, EDIT and DEACTIVATE. Build currently has add + view only.
+  - editEquipment(...)  -> Admin only, throws UnauthorizedAccessException
+  - deactivateEquipment(id) -> soft delete (active flag), never hard delete;
+    deactivated units must not appear as bookable.
+
+4.4 [M] ALIGN ENUM NAMING WITH THE BRIEF
+--------------------------------------------------
+  EquipmentStatus: Active/Maintenance/Out of Order
+        -> RENAME to OPERATIONAL, FAULTY, UNDER_MAINTENANCE (+ DEACTIVATED)
+  Urgency: Low/Medium/High/Critical
+        -> Brief specifies Low/Medium/High only.
+        -> KEEP Critical (the pulsing red UI is a strength) BUT add one
+           sentence in the report justifying it as a deliberate extension.
+  MaintenanceStatus: Pending/In Progress/Resolved
+        -> RENAME to PENDING, ASSIGNED, COMPLETED  (brief's exact wording)
+
+  Free marks. The marker will pattern-match against the brief's vocabulary.
+
+4.5 [E] RECURRING WEEKLY SESSIONS
+--------------------------------------------------
+The ONLY enhancement the brief calls "highly encouraged". Do not skip.
+  - RecurrenceRule: dayOfWeek, startTime, duration, weeksToRepeat
+  - SessionFactory (Creational pattern #2) generates the session instances
+  - Each generated instance runs through the full clash validator
+  - Partial failure handling: if week 3 clashes, report it and create the
+    rest rather than aborting the whole series.
+
+
+--------------------------------------------------------------------------------
+5. PHASE 4 - PAYMENT GATEWAY & PAYMENT METHODS  -> G6
+--------------------------------------------------------------------------------
+DESIGN INTENT: payments are NOT mentioned in the brief and earn nothing on
+their own. They are justified here because they are the cleanest possible
+carrier for the Strategy pattern, they extend the exception hierarchy, and
+they give the JUnit suite non-trivial branching logic to test. Frame it in
+the report as "extending the domain model to demonstrate runtime
+polymorphism", not as "I added a payments feature".
+
+5.1 STRATEGY PATTERN - PAYMENT METHODS
+--------------------------------------------------
+  interface PaymentStrategy
+        PaymentResult pay(double amount, PaymentContext ctx)
+                throws PaymentFailedException;
+        String getMethodName();
+        double calculateProcessingFee(double amount);
+
+  Implementations (each with a DIFFERENT fee rule = real polymorphism):
+        CardPayment            - 2.5% fee, validates card number/expiry
+        CashPayment            - 0% fee, requires at-counter confirmation
+        BankTransferPayment    - flat LKR 50, requires reference number
+        DigitalWalletPayment   - 1.5% fee, validates wallet ID
+
+  PaymentContext carries method-specific data without polluting the
+  interface (card no, wallet id, reference, etc.).
+
+  Runtime selection: member picks method in the UI -> PaymentService
+  swaps the strategy object -> identical call site, different behaviour.
+  THIS IS THE POLYMORPHISM DEMO FOR THE VIDEO.
+
+5.2 SIMULATED GATEWAY  (DO NOT integrate a real SDK)
+--------------------------------------------------
+  class MockPaymentGateway
+        - authorise(): simulated latency (200-800ms), deterministic
+          success/failure based on a seeded flag so DEMOS ARE REPEATABLE
+        - forceFailureMode(boolean) for the intentional failing JUnit test
+        - returns transaction reference
+
+  Rationale: brief states database integration is not required and data may
+  be hard-coded. A real gateway adds network dependency during the video
+  demo and earns zero extra marks. Say this explicitly in the report -
+  justifying a deliberate scope decision reads as maturity, not as a
+  shortcut.
+
+5.3 PAYMENT ENTITY & MEMBER PROFILE HISTORY
+--------------------------------------------------
+  class Payment implements Identifiable
+        paymentId (PAY-0001...)   memberId
+        amount                     processingFee
+        totalCharged
+        PaymentMethod (enum)       PaymentStatus enum:
+                                     PENDING / COMPLETED / FAILED / REFUNDED
+        LocalDateTime paidAt       transactionReference
+        String description         (e.g. "Monthly Membership - October")
+        PaymentPurpose enum: MEMBERSHIP_FEE / SESSION_BOOKING /
+                             PERSONAL_TRAINING / DAY_PASS / MERCHANDISE
+
+  UI - third column of the existing User Management panel:
+        - Transaction table: date, description, method, amount, status badge
+        - Status colour coding reusing the existing badge CSS
+        - Filter by purpose and by date range
+        - CRITICAL: the existing "Total Payments" analytics figure must be
+          DERIVED from this list (a reduce over Repository<Payment>), not a
+          hard-coded number. That is the whole point of adding the entity.
+
+  Also surface: last payment date, next due date, outstanding balance,
+  and a payment-method breakdown feeding the existing chart components.
+
+5.4 PAYMENT EXCEPTIONS
+--------------------------------------------------
+  PaymentFailedException      - gateway declined, invalid card, timeout
+  InsufficientFundsException  - extends PaymentFailedException
+  Demonstrates a multi-level hierarchy + polymorphic catch:
+        catch (PaymentFailedException e)  // catches both
+
+5.5 OUT OF SCOPE - DO NOT BUILD
+--------------------------------------------------
+  Real Stripe/PayPal SDKs, refund workflows, tax/invoice numbering,
+  multi-currency, saved card tokenisation, recurring auto-billing.
+  All plausible-sounding, none assessed, all add failure surface.
+
+
+--------------------------------------------------------------------------------
+6. PHASE 5 - JUNIT TEST SUITE  -> closes G4  (HIGHEST MARK IMPACT)
+--------------------------------------------------------------------------------
+This is the single biggest gap. The rubric's upper bands all depend on a
+thorough test plan, findings, and reflection on bugs found and fixed.
+
+Framework: JUnit 5 (Jupiter) via Maven. Add surefire plugin.
+
+6.1 [M] SESSION SCHEDULING & VALIDATION TESTS
+        - books into an empty slot                       -> succeeds
+        - exact same equipment, same time                -> InvalidBooking
+        - partial overlap (10:00-11:00 vs 10:30-11:30)   -> InvalidBooking
+        - back-to-back (10:00-11:00 vs 11:00-12:00)      -> succeeds
+                                                    (BOUNDARY CASE - test it)
+        - same room, different equipment, same time      -> InvalidBooking
+        - booking at 05:59 / 22:01                       -> InvalidBooking
+        - booking a full-capacity session                -> InvalidBooking
+        - @ParameterizedTest over a set of overlap cases
+
+6.2 [M] MAINTENANCE WORKFLOW TRANSITION TESTS
+        - PENDING -> ASSIGNED                            -> valid
+        - ASSIGNED -> COMPLETED                          -> valid
+        - PENDING -> COMPLETED (skipping assignment)     -> rejected
+        - COMPLETED -> PENDING (reopening)               -> rejected
+        - status change fires exactly one notification   -> Observer verified
+        - completing maintenance resets usage counter to 0
+
+6.3 [M] INTENTIONAL FAILING TEST - EXCEPTION VERIFICATION
+        Brief requires AT LEAST ONE deliberate failing test proving custom
+        exceptions are correctly thrown AND handled.
+
+        Implement as an assertThrows block that proves the error path:
+          - Member calls facade.viewMaintenanceLog()
+                -> assertThrows(UnauthorizedAccessException.class, ...)
+          - registerEquipment with an existing ID
+                -> assertThrows(DuplicateDataException.class, ...)
+          - MockPaymentGateway.forceFailureMode(true), then pay()
+                -> assertThrows(PaymentFailedException.class, ...)
+
+        Also assert on the exception CONTENTS (errorCode, user-friendly
+        message), not just the type. That is what separates a 60s answer
+        from a 70s+ answer.
+
+        DOCUMENT IT CLEARLY: label these in the report as deliberate
+        negative-path tests so the marker does not read a red test as a
+        defect.
+
+6.4 [M] GENERIC REPOSITORY TESTS
+        - save/findById/delete round trip across TWO different entity types
+          using the SAME Repository<T> class - this is the proof that the
+          generic abstraction actually works.
+
+6.5 [E] PAYMENT STRATEGY TESTS
+        - each strategy returns its correct processing fee
+        - strategy swap at runtime changes behaviour with an identical call
+        - insufficient funds -> InsufficientFundsException
+
+TARGET: 25-30 tests minimum. Screenshot the green run AND the documented
+negative-path results for the report.
+
+
+--------------------------------------------------------------------------------
+7. PHASE 6 - SOURCE CONTROL  [M]
+--------------------------------------------------------------------------------
+GitHub or Bitbucket is MANDATORY per the brief and is currently not set up.
+Do not leave this to the last day - the commit history itself is evidence.
+
+  - Create private repo: iwfc-advanced-programming
+  - .gitignore: target/, .idea/, *.iml, out/
+  - Commit per phase with meaningful messages, e.g.
+        "feat: add generic Repository<T> to replace raw collections"
+        "feat: implement Strategy pattern for payment methods"
+        "test: add negative-path tests for custom exceptions"
+        "fix: back-to-back bookings incorrectly flagged as clash"
+  - The bug-fix commits ARE your video "reflection on bugs identified"
+    section. Write them honestly as you go - do not reconstruct them later.
+  - README.md: build/run instructions, class diagram image, pattern map.
+  - Put the repo URL in the report and on the PowerPoint.
+
+
+--------------------------------------------------------------------------------
+8. CLASS COUNT MANAGEMENT  [M] - IMPORTANT
+--------------------------------------------------------------------------------
+The brief specifies 10-15 well-structured classes. A JavaFX MVC build with
+theming, charts, slide-out panels AND payments will run far past that.
+
+DO NOT strip the application back. Instead, present it correctly:
+
+  CORE ARCHITECTURE DIAGRAM (target 14 classes shown):
+    Entities (6):   User(abstract), Equipment, Session, MaintenanceLog,
+                    Payment, Notification
+    Services (4):   BookingService, MaintenanceService, PaymentService,
+                    EquipmentService
+    Patterns (3):   IWFCSystemFacade, DataStore(Singleton),
+                    PaymentStrategy(interface + impls)
+    Infra (1):      Repository<T>
+
+  APPENDIX (not counted in the main diagram):
+    All JavaFX controllers, ThemeManager, CSS helpers, chart builders,
+    concrete strategy implementations, exception classes.
+
+  State this split explicitly in the report so the marker sees you met the
+  10-15 structural requirement deliberately rather than overshooting it
+  accidentally.
+
+
+--------------------------------------------------------------------------------
+9. REMAINING DELIVERABLES (NOT YET STARTED)
+--------------------------------------------------------------------------------
+9.1 REPORT - 3000 words, A4, Arial/Times New Roman 12pt, 1" margins,
+    0.5" binding margin, 1" header/footer, single sided.
+    Harvard referencing with a reference list. Include coversheet and
+    feedback sheet. Do NOT copy the assignment question into the answer.
+    Submit as PDF to Turnitin (Moodle) titled:  stXXXXXXXX CMP7001 PRAC1
+    Submit Word version to ICBT SIS titled:     stXXXXXXXX_CMP7001_PRAC1
+    Deadline: 2.00pm on the Moodle-published date. Late = non-attempt.
+
+    Suggested section weighting (3000 words):
+      Introduction & scenario analysis        250
+      System design & architecture            500  (+ class diagram)
+      Design patterns: justification          600  (3 categories, why each)
+      OOP principles evidence                 450  (abstraction/encaps/poly)
+      Collections & generics                  300
+      Exception handling strategy             350
+      Testing: plan, results, bugs fixed      400
+      Limitations, reflection, conclusion     150
+
+9.2 POWERPOINT - video link MUST be on slide 1.
+
+9.3 VIDEO - 10 minutes. Cover: class diagrams, implemented design patterns,
+    polymorphism, exception handling, live running demo, and reflection on
+    test results / bugs found and how they were addressed.
+
+    Suggested runtime split:
+      0:00-1:00  Scenario + architecture overview
+      1:00-3:00  Class diagram + the three pattern categories
+      3:00-4:30  Generics + collections walkthrough
+      4:30-6:00  Live demo: booking clash, auto-maintenance trigger, payment
+      6:00-7:30  Exception handling incl. unauthorised access
+      7:30-9:00  JUnit run + the deliberate negative-path tests
+      9:00-10:00 Bugs found, fixes made, limitations
+
+
+--------------------------------------------------------------------------------
+10. EXECUTION ORDER - CONDENSED CHECKLIST
+--------------------------------------------------------------------------------
+  [ ]  1. Identifiable + Repository<T>                        [M] G2
+  [ ]  2. IWFCException hierarchy (3 mandatory)               [M] G3
+  [ ]  3. Facade THROWS UnauthorizedAccessException           [M] G3
+  [ ]  4. Observer: EventPublisher / EventObserver            [M] G1
+  [ ]  5. Time-clash validator (equipment + room)             [M] G5
+  [ ]  6. Operating-hours validation                          [M] G5
+  [ ]  7. Enum renaming to brief vocabulary                   [M]
+  [ ]  8. Equipment edit + deactivate                         [M]
+  [ ]  9. Usage hours -> auto maintenance trigger             [M]
+  [ ] 10. Payment entity + Repository<Payment>                [E] G6
+  [ ] 11. PaymentStrategy + 4 implementations                 [E] G1/G6
+  [ ] 12. MockPaymentGateway + payment exceptions             [E] G6
+  [ ] 13. Payment history UI on member profile                [E] G6
+  [ ] 14. JUnit suite - scheduling                            [M] G4
+  [ ] 15. JUnit suite - maintenance transitions               [M] G4
+  [ ] 16. JUnit - intentional negative-path tests             [M] G4
+  [ ] 17. SessionFactory + recurring weekly sessions          [E]
+  [ ] 18. Audit log of denied access attempts                 [E]
+  [ ] 19. Command pattern + undo            (STRETCH ONLY)    [E]
+  [ ] 20. Git repo, commit history, README                    [M]
+  [ ] 21. Class diagram (core 14) + appendix split            [M]
+  [ ] 22. 3000-word report -> PDF + Word                      [M]
+  [ ] 23. PowerPoint with video link on slide 1               [M]
+  [ ] 24. Record and upload 10-minute video                   [M]
+
+Items 1-9 and 14-16 and 20-24 are non-negotiable.
+Items 10-13 are the payment work. Item 19 only if time remains.
+
+--------------------------------------------------------------------------------
+11. PHASE 7 - FITNESS PLANS & INSTRUCTOR SELECTION  [E]  (added v1.1)
+--------------------------------------------------------------------------------
+DESIGN INTENT: like payments, fitness plans are not named in the brief. They
+are justified here because (a) enrolment collides with the SAME clash
+validator built in 4.1, giving the JUnit suite far richer branching, (b) the
+plan catalogue is a natural Factory/Builder use case = Creational pattern #2,
+(c) instructor reassignment is a genuine state-transition workflow that
+mirrors the maintenance workflow already being tested, and (d) it finally
+gives the Member role real agency - currently Members can only view and book.
+
+Frame it in the report as "extending the domain model so the Member actor has
+meaningful behaviour", NOT as "I added more features".
+
+11.1 FITNESS PLAN DOMAIN MODEL
+--------------------------------------------------
+  abstract class FitnessPlan implements Identifiable
+        planId, name, description
+        PlanCategory category (enum)
+        DifficultyLevel level: BEGINNER / INTERMEDIATE / ADVANCED
+        int durationWeeks
+        int sessionsPerWeek
+        double monthlyFee
+        List<String> requiredEquipmentTypes
+        Set<String> qualifiedInstructorSpecialisations
+        abstract double calculateMonthlyFee();      // POLYMORPHIC
+        abstract String getProgressionSummary();    // POLYMORPHIC
+
+  Three concrete subclasses - this is the INHERITANCE + POLYMORPHISM evidence
+  the brief wants for LO1, and it is stronger evidence than the User hierarchy
+  because the fee logic genuinely differs:
+
+    class GroupClassPlan extends FitnessPlan
+        - maxParticipants, sharedStudio
+        - fee = base * (1 - groupDiscount)      // cheapest per head
+    class PersonalTrainingPlan extends FitnessPlan
+        - oneToOne, dedicatedInstructorRequired = true
+        - fee = base + (instructorHourlyRate * sessionsPerWeek * 4)
+    class SelfGuidedPlan extends FitnessPlan
+        - no instructor required, equipment access only
+        - fee = base (flat, no instructor loading)
+
+  PlanCategory enum: STRENGTH, CARDIO, FLEXIBILITY, REHAB, WEIGHT_MANAGEMENT,
+                     ENDURANCE, MIND_BODY, SPORTS_SPECIFIC
+
+11.2 THE CATALOGUE - 18 HARD-CODED PLANS
+--------------------------------------------------
+Brief allows hard-coded data, so seed these in a PlanCatalogueFactory.
+18 plans (>15 requested) spread across all categories and all three subclasses
+so the polymorphic fee calculation is visibly exercised across the catalogue.
+
+ #   PLAN NAME                  CATEGORY          LEVEL    WKS  S/WK  TYPE
+ --  -------------------------  ----------------  -------  ---  ----  --------
+ 01  Foundation Strength        STRENGTH          BEG      8    3     Group
+ 02  Hypertrophy Builder        STRENGTH          INT      12   4     Group
+ 03  Powerlifting Prep          STRENGTH          ADV      16   4     Personal
+ 04  Fat Burn Express           CARDIO            BEG      6    3     Group
+ 05  HIIT Inferno               CARDIO            INT      8    4     Group
+ 06  Endurance Engine           ENDURANCE         INT      12   5     Group
+ 07  Marathon Ready             ENDURANCE         ADV      20   5     Personal
+ 08  Spin Cycle Challenge       CARDIO            INT      8    3     Group
+ 09  Yoga Flow Basics           MIND_BODY         BEG      6    2     Group
+ 10  Advanced Vinyasa           MIND_BODY         ADV      10   3     Group
+ 11  Pilates Core Control       FLEXIBILITY       BEG      8    2     Group
+ 12  Mobility & Stretch         FLEXIBILITY       BEG      4    2     SelfGuided
+ 13  Post-Injury Rehab          REHAB             BEG      12   2     Personal
+ 14  Senior Active Living       REHAB             BEG      10   3     Group
+ 15  Weight Loss Transformation WEIGHT_MANAGEMENT INT      16   4     Personal
+ 16  Lean & Tone               WEIGHT_MANAGEMENT  BEG      10   3     Group
+ 17  Athletic Performance       SPORTS_SPECIFIC   ADV      14   5     Personal
+ 18  Open Gym Access            STRENGTH          BEG      4    0     SelfGuided
+
+  Note plan 18 has sessionsPerWeek = 0 - a deliberate EDGE CASE for the test
+  suite (no instructor, no scheduled sessions, equipment access only).
+
+  Build with a Builder pattern (Creational #2 alongside Singleton):
+        new FitnessPlanBuilder()
+            .name("HIIT Inferno").category(CARDIO).level(INTERMEDIATE)
+            .duration(8).sessionsPerWeek(4).requiresEquipment("Treadmill")
+            .build();
+  18 chained builder calls in the factory reads far better than 18 monster
+  constructors, and gives you a clean Builder justification for the report.
+
+11.3 MEMBER ENROLMENT WORKFLOW
+--------------------------------------------------
+  class Enrollment implements Identifiable
+        enrollmentId, memberId, planId, instructorId (nullable)
+        startDate, endDate
+        EnrollmentStatus: ACTIVE / PAUSED / COMPLETED / CANCELLED
+        int sessionsCompleted
+        List<InstructorChange> changeHistory
+
+  MemberService / EnrollmentService:
+        browseCatalogue(filter by category/level/fee)
+        enroll(memberId, planId, instructorId) throws:
+              - PlanUnavailableException      (plan deactivated / full)
+              - InvalidBookingException       (schedule clash with existing
+                                               enrolment - REUSES 4.1 VALIDATOR)
+              - InstructorUnavailableException
+        pauseEnrollment / resumeEnrollment / cancelEnrollment
+        Enrolment triggers a Payment (Phase 4) -> PLANS AND PAYMENTS CONNECT.
+        Plan monthly fee flows straight into the PaymentStrategy - this is
+        why payments stop looking bolted-on.
+
+  Rules to enforce (and test):
+        - a Member may hold max 2 ACTIVE enrolments
+        - cannot enrol twice in the same plan while ACTIVE
+        - SelfGuidedPlan must NOT accept an instructorId
+        - PersonalTrainingPlan MUST have an instructorId
+
+11.4 INSTRUCTOR SELECTION
+--------------------------------------------------
+  Instructor gains:
+        Set<String> specialisations   (Yoga, Strength, Rehab, Cardio...)
+        int maxTrainees               (capacity cap)
+        List<TimeSlot> availability
+        double hourlyRate
+        double rating
+
+  getEligibleInstructors(planId) returns only instructors whose
+  specialisations intersect the plan's qualifiedInstructorSpecialisations
+  AND who are under maxTrainees AND whose availability covers the plan's
+  required slots. Member picks from that filtered list.
+
+  UI: instructor picker cards reusing the EXISTING mini-card component from
+  the Trainee Roster - shows avatar, specialisations, rating, current load
+  (e.g. "8/12 trainees"), and next available slot.
+
+11.5 INSTRUCTOR CHANGE / REASSIGNMENT  <- the feature you actually asked for
+--------------------------------------------------
+  class InstructorChange
+        changeId, enrollmentId
+        previousInstructorId, newInstructorId
+        ChangeReason enum: SCHEDULE_CONFLICT, INSTRUCTOR_UNAVAILABLE,
+                           PERSONAL_PREFERENCE, SPECIALISATION_MISMATCH,
+                           INSTRUCTOR_LEFT, PERFORMANCE_CONCERN
+        String notes, requestedAt, ChangeStatus: PENDING/APPROVED/REJECTED
+        approvedByAdminId
+
+  requestInstructorChange(enrollmentId, newInstructorId, reason) validates:
+        - requester owns the enrolment  -> else UnauthorizedAccessException
+        - new instructor != current                (reject no-op)
+        - new instructor holds required specialisation
+        - new instructor under maxTrainees         -> InstructorUnavailable
+        - new instructor's availability has no clash  -> REUSES 4.1 VALIDATOR
+        - cooling-off: max 2 changes per enrolment per 30 days
+          (prevents abuse; a nice realistic business rule to defend in viva)
+
+  POLICY DECISION - make this explicit in the report:
+        Members REQUEST a change; an Admin APPROVES it. Auto-approve only
+        when reason = INSTRUCTOR_UNAVAILABLE or INSTRUCTOR_LEFT (system's
+        fault, not the member's). This preserves the Member/Admin authority
+        boundary that UnauthorizedAccessException already enforces, rather
+        than letting Members silently rewrite instructor rosters.
+
+  Observer integration (Phase 3.1) - one change fires three notifications:
+        -> previous instructor  ("trainee removed from your roster")
+        -> new instructor       ("new trainee assigned")
+        -> member               ("change approved / rejected")
+  Excellent 20-second video moment: one action, three observers react.
+
+  Full changeHistory is displayed on the member profile as a timeline, so
+  "if something happens" is auditable rather than silent.
+
+11.6 NEW EXCEPTIONS ADDED BY THIS PHASE
+--------------------------------------------------
+        PlanUnavailableException        extends IWFCException
+        InstructorUnavailableException  extends IWFCException
+        EnrollmentLimitException        extends IWFCException
+  Hierarchy now spans 3 mandatory + 2 payment + 3 plan = 8 custom exceptions.
+  Well beyond the brief's minimum and easy to evidence for LO3.
+
+11.7 UI ADDITIONS
+--------------------------------------------------
+  - "Fitness Plans" sidebar tab: filterable catalogue grid, reusing the
+    existing equipment-card styling (category colour, level badge, fee).
+  - Plan detail slide-out: description, weekly breakdown, required equipment,
+    eligible instructor list, "Enrol" CTA -> payment method selection.
+  - Member profile gains: active plans with progress ring
+    (sessionsCompleted / total), instructor card with "Request Change"
+    button, and the instructor-change timeline.
+  - Admin gains: pending instructor-change approvals queue.
+
+11.8 JUNIT ADDITIONS (append to Phase 5)
+--------------------------------------------------
+        - polymorphic fee: same call, 3 subclasses, 3 different results
+        - enrolling in a 3rd active plan        -> EnrollmentLimitException
+        - enrolling twice in same active plan   -> DuplicateDataException
+        - SelfGuidedPlan with an instructorId   -> rejected
+        - PersonalTrainingPlan without one      -> rejected
+        - instructor at maxTrainees             -> InstructorUnavailable
+        - instructor lacking specialisation     -> rejected
+        - 3rd change within 30 days             -> rejected (cooling-off)
+        - approved change fires exactly 3 notifications (Observer verified)
+        - plan 18 (0 sessions/week) enrols with no schedule generated
+        - @ParameterizedTest across all 18 plans: fee > 0 and category non-null
+
+11.9 CLASS COUNT IMPACT - REVISE SECTION 8
+--------------------------------------------------
+Phase 7 adds ~8 core classes. The core diagram target moves from 14 to a
+selected 15 (the brief's ceiling). Revised core selection:
+    Entities (7):  User(abstract), Equipment, Session, MaintenanceLog,
+                   Payment, FitnessPlan(abstract), Enrollment
+    Services (4):  BookingService, MaintenanceService, PaymentService,
+                   EnrollmentService
+    Patterns (3):  IWFCSystemFacade, DataStore(Singleton), PaymentStrategy
+    Infra (1):     Repository<T>
+Everything else - plan subclasses, builder, InstructorChange, Notification,
+EquipmentService, observers, all 8 exceptions, all JavaFX controllers -
+moves to the appendix diagram. Say this split is deliberate.
+
+11.10 EXECUTION ORDER - INSERT INTO SECTION 10
+--------------------------------------------------
+Insert AFTER item 13 (payment history UI), BEFORE item 14 (JUnit):
+  [ ] 13a. FitnessPlan hierarchy + 3 subclasses               [E]
+  [ ] 13b. FitnessPlanBuilder + 18-plan catalogue factory     [E]
+  [ ] 13c. Enrollment entity + enrolment rules                [E]
+  [ ] 13d. Instructor specialisations, capacity, availability [E]
+  [ ] 13e. Eligible-instructor filtering + picker UI          [E]
+  [ ] 13f. InstructorChange request/approve workflow          [E]
+  [ ] 13g. Observer wiring for 3-way change notifications     [E]
+  [ ] 13h. Plan catalogue + member profile UI                 [E]
+Then extend items 14-16 with the tests in 11.8.
+
+WARNING ON SEQUENCING: Phase 7 depends on the clash validator (4.1), the
+exception base class (2.2), the Observer (3.1) and PaymentStrategy (5.1).
+Do NOT start it before those four are working, or you will build the
+enrolment validation twice.
+
+--------------------------------------------------------------------------------
+12. PHASE 8 - SIDEBAR NAVIGATION REDESIGN  [E]  (added v1.2)
+--------------------------------------------------------------------------------
+REFERENCE: flat, minimal, light-weight rail with grouped sections, hairline
+dividers, thin monoline icons, a pill-shaped active state, and an EXPANDABLE
+parent item whose children sit under a vertical guide line.
+
+MARKING REALITY CHECK - read before spending time here:
+The brief states a console menu is the minimum and that "excellence will be
+judged on the underlying architecture and OOP principles, not visual
+aesthetics." So this phase earns ZERO direct marks. Do it ONLY after Phases
+1-5 are green. Its real value is the video demo reading as a credible
+product, plus one honest paragraph in the report on separation of concerns.
+Budget it as polish, not as a deliverable.
+
+12.1 STRUCTURE - MAP THE REFERENCE ONTO IWFC
+--------------------------------------------------
+Reference uses 3 groups separated by hairline dividers. Mirror that exactly,
+with role-based visibility layered on top:
+
+  GROUP 1 - Discover            (all roles)
+      Explore            -> catalogue / global search entry
+      Settings           -> profile, theme toggle, preferences
+      Resources          -> help, equipment guides, plan documentation
+
+  ---- hairline divider ----
+
+  GROUP 2 - Workspace           (all roles, content differs)
+      Dashboard          [drag-handle icon, ACTIVE PILL by default]
+      Timelines          -> session calendar / enrolment timeline
+
+  ---- hairline divider ----
+
+  GROUP 3 - Operations
+      Reports            [EXPANDABLE PARENT - mirrors reference exactly]
+          All Reports
+          Equipment Utilisation
+          Maintenance Backlog
+          Revenue & Payments
+          Instructor Impact
+      Workflows          -> maintenance queue, instructor-change approvals
+      Fitness Plans      -> Phase 7 catalogue
+      Documents          -> exports, receipts, audit log
+      Locations          -> Cardio Zone, Studio A, etc.
+      Action Items       -> pending tasks for the logged-in role
+
+ROLE VISIBILITY (enforced at Facade, NOT just hidden in UI - see 2.2):
+      Admin       : everything
+      Instructor  : no Revenue & Payments, no audit log
+      Member      : Explore, Settings, Resources, Dashboard, Timelines,
+                    Fitness Plans, Documents(own receipts), Action Items
+Hiding a node in the UI is cosmetic. The Facade must STILL throw
+UnauthorizedAccessException if the route is invoked - that is the marked
+behaviour, and it is what the negative-path JUnit tests assert.
+
+12.2 THE UI/UX TECHNIQUES TO IMPLEMENT
+--------------------------------------------------
+These are the specific details that make the reference look premium. Each is
+cheap in JavaFX/CSS:
+
+  a) ACTIVE STATE PILL
+     Rounded rect (radius 8), subtle grey fill, NO border, full-width minus
+     8px inset. Label goes 500-weight. Animate fill-in over 150ms rather
+     than snapping.
+
+  b) DRAG HANDLES ON REORDERABLE ITEMS
+     The 6-dot grid icon in the reference (Dashboard, Reports) signals
+     drag-to-reorder. Implement real reordering with JavaFX drag-and-drop
+     and persist order per user in DataStore. This is the ONE piece of the
+     sidebar with genuine engineering substance - mention it in the video.
+
+  c) EXPAND/COLLAPSE WITH GUIDE LINE
+     Children indented ~20px with a 1px vertical dotted guide line at the
+     indent origin (reference shows this clearly). Animate height with a
+     Timeline + easing; rotate the parent's chevron 90deg in the same
+     150-200ms window.
+
+  d) ICONOGRAPHY
+     Thin monoline, 16px, consistent 1.5px stroke, matching the label's
+     optical weight. Use Ikonli (FontAwesome5 / Material pack) via Maven -
+     do NOT hand-draw SVG paths. Icons inherit text colour so theming is
+     free.
+
+  e) TYPOGRAPHY & RHYTHM
+     Labels 13-14px, 400 weight, ~0.1px letter-spacing. Row height 36-40px.
+     Icon-to-label gap 12px. Group padding 8px vertical. Consistent 4px
+     spacing grid throughout - inconsistent gaps are what make homemade UIs
+     look homemade.
+
+  f) HAIRLINE DIVIDERS
+     1px at ~8% opacity of the foreground colour, inset 12px from both
+     edges. Never a full-bleed solid line.
+
+  g) HOVER STATE
+     Background at ~40% of the active pill's opacity, 100ms fade. Cursor
+     HAND. No scaling on nav rows (scaling suits cards, not lists).
+
+  h) COLLAPSIBLE RAIL
+     Toggle between 240px expanded and 64px icon-only. Animate width over
+     200ms with Interpolator.EASE_BOTH; fade labels out over the first
+     80ms so text never squashes. Show tooltips when collapsed.
+
+  i) NOTIFICATION BADGES
+     Keep the existing unread-count badge. Right-aligned pill, 10px text.
+     When the rail is collapsed, degrade to a 6px dot on the icon corner.
+
+  j) FOCUS / ACCESSIBILITY
+     Visible focus ring on keyboard Tab, full arrow-key traversal, and
+     Enter/Space activation. Cheap to add, and it is defensible EDGE
+     (Ethical/Digital) evidence in the report.
+
+  k) SCROLL BEHAVIOUR
+     Group headers stay put; only the item list scrolls. Hide scrollbar
+     until hover.
+
+12.3 IMPLEMENTATION APPROACH - KEEP IT MVC
+--------------------------------------------------
+Do NOT hard-code 16 buttons in FXML. Drive the sidebar from data so it stays
+architecturally defensible:
+
+  class NavItem implements Identifiable
+        id, label, iconLiteral, route
+        List<NavItem> children
+        Set<Role> visibleTo
+        boolean reorderable
+        IntegerProperty badgeCount
+        int displayOrder
+
+  NavigationService
+        List<NavItem> buildMenuFor(Role role)     // filters by visibleTo
+        void persistOrder(String userId, List<NavItem> order)
+
+  SidebarController renders recursively from the NavItem tree.
+
+WHY THIS MATTERS FOR MARKS: a data-driven, role-filtered, recursively
+rendered menu is a legitimate architecture talking point (Composite-like
+tree + separation of concerns). Sixteen hard-coded buttons are not. If you
+build the sidebar any other way, skip discussing it in the report entirely.
+
+12.4 THEME CONFLICT - DECIDE THIS NOW
+--------------------------------------------------
+The reference is flat, light, near-white, low-contrast minimalism. Your
+current build is glassmorphism with frosted panels and drop shadows. These
+two languages fight each other.
+
+  OPTION A (recommended): adopt the flat rail as the LIGHT theme's sidebar
+  and keep frosted glass for the DARK theme. Your ThemeManager already
+  supports both, so this becomes a feature, not an inconsistency.
+
+  OPTION B: go flat everywhere and drop glassmorphism from the sidebar only
+  - keeps cards frosted, rail flat. Visually cleaner, but you lose the
+  "stunning premium UI" framing in your existing documentation.
+
+  Pick one and state it in the report. What you must NOT do is half-apply
+  the reference and end up with frosted panels behind flat rows - that
+  reads as unfinished rather than deliberate.
+
+12.5 EXECUTION ORDER - APPEND TO SECTION 10
+--------------------------------------------------
+  [ ] 25. NavItem model + NavigationService (role filtering)   [E]
+  [ ] 26. Recursive SidebarController rendering                [E]
+  [ ] 27. Active pill, hover, hairline dividers, typography    [E]
+  [ ] 28. Expand/collapse with guide line + chevron animation  [E]
+  [ ] 29. Ikonli icon set wired in                             [E]
+  [ ] 30. Collapsible 240/64px rail with tooltips              [E]
+  [ ] 31. Drag-to-reorder + persisted order                    [E]
+  [ ] 32. Keyboard traversal + focus rings                     [E]
+  [ ] 33. Theme decision applied (12.4)                        [E]
+
+  Items 25-27 give ~80% of the visual result. Items 31-32 are the only ones
+  with engineering substance worth mentioning in the video. Everything here
+  is strictly AFTER the mandatory items 1-9, 14-16 and 20-24.
+
+--------------------------------------------------------------------------------
+13. PHASE 9 - ARCHITECTURAL ENHANCEMENTS  [E]  (added v1.3)
+--------------------------------------------------------------------------------
+Five additions, each attached to a learning outcome rather than added for
+feature count. Listed in recommended build order (highest marks-per-hour
+first). Section 3.3's "Command pattern (STRETCH ONLY)" is SUPERSEDED by
+13.1 below and is now promoted to a firm deliverable.
+
+PATTERN COVERAGE AFTER PHASE 9:
+  Creational  -> Singleton, Builder, Factory
+  Structural  -> Facade, Composite
+  Behavioural -> Observer, Strategy (x2: payment + promotion), Command
+  Far beyond the brief's "at least one from each category". Do NOT let this
+  sprawl - the report must still argue WHY each was chosen, not just list
+  them. A pattern you cannot justify in one sentence should be cut.
+
+
+13.1 COMMAND PATTERN WITH UNDO  (PROMOTED FROM STRETCH - BUILD THIS)
+--------------------------------------------------
+Best remaining idea. Second Behavioural pattern, textbook abstraction +
+polymorphism evidence, and the single strongest demo moment in the video.
+
+  interface Command
+        void execute() throws IWFCException;
+        void undo()    throws IWFCException;
+        String describe();          // for history UI + audit log
+        boolean isUndoable();
+
+  Implementations (Admin actions only):
+        AddEquipmentCommand          undo -> remove
+        EditEquipmentCommand         undo -> restore previous snapshot
+        DeactivateEquipmentCommand   undo -> reactivate
+        AssignMaintenanceCommand     undo -> revert to PENDING, clear tech
+        ApproveInstructorChangeCommand  undo -> restore prior instructor
+        CancelSessionCommand         undo -> reinstate session + bookings
+
+  class CommandInvoker
+        private final Deque<Command> undoStack = new ArrayDeque<>();
+        private final Deque<Command> redoStack = new ArrayDeque<>();
+        void run(Command c)   // execute, push, clear redo
+        void undoLast()       // pop, undo, push to redo
+        void redoLast()
+        List<String> getHistory()   // uses describe()
+
+  CRITICAL DESIGN POINTS (these are what separate a good mark from a average
+  one - be ready to discuss them):
+    - EditEquipmentCommand must snapshot the FULL previous state on
+      execute(), not just the changed field. Implement a copy constructor
+      or a memento-style snapshot on Equipment.
+    - Commands that already fired notifications must NOT re-fire on undo.
+      Pass a "silent" flag into the Observer publish call during undo, or
+      publish an explicit ACTION_REVERTED event instead. Getting this wrong
+      is a realistic bug - and a GREAT one to document in the video's
+      "bugs identified and fixed" reflection.
+    - isUndoable() returns false for anything with external side effects
+      (a COMPLETED payment must never be silently undone - issue a refund
+      record instead).
+
+  UI: Admin header gets Undo / Redo buttons + a slide-out "Action History"
+  panel listing describe() output with timestamps. Wire Ctrl+Z / Ctrl+Y.
+
+  Integrates with 2.3 Audit Log - every Command execution and undo writes
+  an AuditEntry, so the audit trail and the undo stack share one source.
+
+  DEMO SCRIPT for the video: deactivate a treadmill -> it greys out and
+  disappears from bookable equipment -> Ctrl+Z -> it returns, fully
+  restored. 20 seconds, instantly legible to the marker.
+
+  JUnit:
+        - execute then undo restores exact prior state (assert field-by-field)
+        - undo on empty stack -> handled gracefully, no exception leak
+        - redo after undo reapplies correctly
+        - COMPLETED payment command -> isUndoable() == false
+        - undo does NOT duplicate notifications (Observer call count == 0)
+
+
+13.2 EQUIPMENT AS A COMPOSITE  -> second Structural pattern
+--------------------------------------------------
+Your data already has zones (Cardio Zone, Studio A), so the hierarchy exists
+implicitly. Make it explicit and recursive.
+
+  interface EquipmentComponent
+        String getName();
+        double getTotalUsageHours();
+        int getMaintenanceCount();
+        int getOperationalCount();
+        void display(int depth);        // indented tree print - console demo
+
+  class SingleEquipment implements EquipmentComponent    // LEAF
+        wraps the existing Equipment entity
+
+  class EquipmentZone implements EquipmentComponent      // COMPOSITE
+        private final List<EquipmentComponent> children
+        add(EquipmentComponent) / remove(...)
+        getTotalUsageHours() -> children.stream()
+                                 .mapToDouble(EquipmentComponent::getTotalUsageHours)
+                                 .sum();
+
+  Zones may nest (Main Floor > Cardio Zone > Treadmill Bank), which is what
+  makes it a genuine Composite rather than a two-level list. Build at least
+  one 3-level branch in the seed data so recursion is actually exercised.
+
+  Payoff: calling getTotalUsageHours() on "Main Floor" recurses the whole
+  tree with one line of client code. Zone-level utilisation feeds the
+  Reports section of the Phase 8 sidebar.
+
+  JUnit:
+        - leaf usage hours == its own hours
+        - zone total == sum of children (assert against a hand-computed value)
+        - 3-level nesting aggregates correctly
+        - empty zone returns 0, does not throw
+        - adding a zone to itself -> rejected (cycle guard)
+
+
+13.3 ATTENDANCE & CHECK-IN TRACKING
+--------------------------------------------------
+Closes a real hole: the system currently BOOKS sessions but never records
+whether anyone attended - which means the existing "Total Hours Spent"
+analytics figure is unsourced. This is a correctness fix disguised as a
+feature, and it makes three already-built things honest.
+
+  class Attendance implements Identifiable
+        attendanceId, sessionId, memberId, enrollmentId
+        LocalDateTime checkInTime, checkOutTime
+        AttendanceStatus: BOOKED / CHECKED_IN / COMPLETED / NO_SHOW /
+                          LATE_CANCELLED
+        double hoursAttended   (derived from check-in/out)
+
+  AttendanceService
+        checkIn(memberId, sessionId)   validates:
+              - booking exists            -> InvalidBookingException
+              - session is today & within +/- 15 min of start
+              - not already checked in    -> DuplicateDataException
+        checkOut(...)  -> computes hoursAttended
+        markNoShows()  -> batch job run on session end
+        getAttendanceRate(memberId)  -> attended / booked
+
+  THE CHAIN THIS COMPLETES (state this explicitly in the report - it is the
+  best evidence that your features are designed, not bolted on):
+        check-out -> hoursAttended
+                  -> Equipment.cumulativeUsageHours (4.2)
+                  -> threshold breach
+                  -> auto MaintenanceLog created
+                  -> Observer fires notification to Admin
+                  -> Enrollment.sessionsCompleted increments (Phase 7)
+                  -> member profile progress ring updates
+  One check-out touches five subsystems. Demo it end-to-end in the video.
+
+  Also: 3 consecutive NO_SHOWs on an enrolment -> notification to the
+  member's instructor. Realistic, testable, and another Observer use.
+
+  JUnit:
+        - check-in outside the 15-min window -> InvalidBookingException
+        - double check-in -> DuplicateDataException
+        - check-out computes hours correctly (boundary: exactly 60 mins)
+        - no-show marking flips only BOOKED rows, not CHECKED_IN
+        - attendance rate maths with zero bookings -> no divide-by-zero
+        - usage hours propagate to Equipment after check-out
+
+
+13.4 WAITLIST WITH AUTO-PROMOTION  -> second Strategy use
+--------------------------------------------------
+Turns the existing capacity limit from a dead end into a workflow.
+
+  class WaitlistEntry implements Identifiable
+        entryId, sessionId, memberId, joinedAt, position
+        WaitlistStatus: WAITING / PROMOTED / EXPIRED / DECLINED
+
+  interface PromotionStrategy                    // STRATEGY #2
+        WaitlistEntry selectNext(List<WaitlistEntry> queue);
+        String getPolicyName();
+  Implementations:
+        FifoPromotionStrategy        - earliest joinedAt wins
+        TierPriorityStrategy         - Premium tier first, then FIFO
+        LoyaltyPromotionStrategy     - highest attendance rate wins
+                                       (depends on 13.3 - build after it)
+
+  WaitlistService
+        join(sessionId, memberId)   -> only when session is at capacity
+        onCancellation(sessionId)   -> strategy.selectNext() -> promote
+                                    -> Observer notifies promoted member
+                                    -> 2-hour window to confirm, else EXPIRED
+                                       and the next member is promoted
+        Admin can switch the active policy at runtime - SAME call site,
+        different queue behaviour. That runtime swap is the polymorphism
+        demo; do it live on camera.
+
+  JUnit (rich test material - this is why it is worth building):
+        - joining a non-full session -> rejected
+        - FIFO ordering across 5 entries
+        - tier priority overrides join order
+        - cancellation promotes exactly one member
+        - expired promotion cascades to the next in queue
+        - promotion on a session that already started -> rejected
+        - strategy swap changes outcome with identical input data
+
+
+13.5 COMPARATORS & SORTED TRAVERSAL OVER Repository<T>
+--------------------------------------------------
+Small effort, targeted directly at LO2. Right now your entire Collections
+and Generics evidence rests on ONE class (Repository<T>). This broadens it
+cheaply.
+
+  Add to Repository<T>:
+        List<T> findAllSorted(Comparator<T> comparator)
+        List<T> findBy(Predicate<T> p, Comparator<T> c, int limit)
+        Optional<T> findMax(Comparator<T> c)
+        Map<String, List<T>> groupBy(Function<T,String> classifier)
+
+  Comparator library (static factories, chained where useful):
+        EquipmentComparators.byUsageHours() / byStatus() / byLocation()
+        InstructorComparators.byRating() / byTraineeLoad()
+        PaymentComparators.byDate().reversed() / byAmount()
+        SessionComparators.byStartTime().thenComparing(byCapacity())
+        PlanComparators.byFee() / byDurationWeeks()
+
+  Demonstrate: Comparator.comparing(...).thenComparing(...).reversed(),
+  natural vs total ordering, and Comparable on one entity (Equipment by ID)
+  to contrast with Comparator. That contrast is a strong report paragraph.
+
+  Powers the Phase 8 Reports section and any sortable table headers.
+
+  JUnit:
+        - chained comparator tie-break resolves correctly
+        - reversed ordering
+        - sorting an empty repository -> empty list, no exception
+        - groupBy returns correct bucket sizes
+        - findMax on empty -> Optional.empty()
+
+
+13.6 EXPLICITLY OUT OF SCOPE - DO NOT BUILD
+--------------------------------------------------
+Considered and rejected. If you are tempted later, re-read this list:
+        nutrition / diet planning module
+        in-app chat or messaging between members and instructors
+        wearable / fitness-tracker device integration
+        QR-code or biometric check-in hardware
+        "AI-powered" workout recommendation engine
+        social feed, leaderboards, or gamification badges
+Reasons: none map to a learning outcome; all inflate the class count past
+the 10-15 structural target; and the AI one invites viva questions that
+hard-coded data cannot answer. Feature count is not the marking criterion.
+
+
+13.7 CLASS COUNT - REVISE SECTION 8 / 11.9 AGAIN
+--------------------------------------------------
+Phase 9 adds ~15 more classes. The core diagram CANNOT grow further - it is
+already at the brief's ceiling of 15. Keep the 15 from 11.9 EXACTLY as-is
+and push all of Phase 9 into the appendix diagram, grouped by pattern:
+        Appendix A - Design pattern implementations
+                     (Command + 6 concrete, Composite pair,
+                      PromotionStrategy + 3, PaymentStrategy + 4, Observers)
+        Appendix B - Supporting entities
+                     (Attendance, WaitlistEntry, AuditEntry, UsageLog,
+                      InstructorChange, NavItem)
+        Appendix C - Comparators and utilities
+        Appendix D - JavaFX controllers and view helpers
+
+  Report wording to use: "The core architecture comprises 15 classes as
+  specified; pattern implementations, supporting entities and presentation-
+  layer classes are documented in the appendices to keep the primary class
+  diagram legible." That sentence converts a potential over-scope criticism
+  into evidence of deliberate structural control.
+
+
+13.8 EXECUTION ORDER - APPEND TO SECTION 10
+--------------------------------------------------
+Build AFTER mandatory items 1-9, 14-16, 20-24 are green. Recommended order:
+
+  [ ] 34. Command interface + CommandInvoker + undo/redo stacks    [E]
+  [ ] 35. 6 concrete Commands with state snapshots                 [E]
+  [ ] 36. Undo/Redo UI + Action History panel + Ctrl+Z/Ctrl+Y      [E]
+  [ ] 37. Attendance entity + check-in/check-out service           [E]
+  [ ] 38. Wire attendance -> usage hours -> maintenance chain      [E]
+  [ ] 39. EquipmentComponent / SingleEquipment / EquipmentZone     [E]
+  [ ] 40. 3-level nested seed data + recursive aggregation         [E]
+  [ ] 41. WaitlistEntry + WaitlistService                          [E]
+  [ ] 42. PromotionStrategy + 3 implementations + runtime swap     [E]
+  [ ] 43. Comparator library + Repository<T> sorted methods        [E]
+  [ ] 44. JUnit for all of the above (approx 30 additional tests)  [E]
+
+  DEPENDENCIES - do not reorder blindly:
+        13.1 Command      needs 2.2 exceptions, 2.3 audit log, 3.1 Observer
+        13.3 Attendance   needs 4.2 usage hours, Phase 7 Enrollment
+        13.4 Waitlist     needs 4.1 validator, 3.1 Observer;
+                          LoyaltyPromotionStrategy needs 13.3 Attendance
+        13.5 Comparators  needs 2.1 Repository<T>
+
+  REVISED TEST TARGET: Phase 5 set a floor of 25-30 tests. With Phases 7-9
+  the realistic total is 55-70. State the final count and coverage in the
+  report - a concrete number reads far better than "comprehensive testing
+  was carried out".
+
+================================================================================
+END OF PLAN v1.3 - append new ideas below this line as they are agreed
+================================================================================

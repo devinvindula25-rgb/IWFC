@@ -5,13 +5,14 @@ package com.iwfc.exception;
  * with existing records.
  * Example: Registering equipment with an ID that already exists.
  */
-public class DuplicateDataException extends Exception {
+public class DuplicateDataException extends IWFCException {
 
     public DuplicateDataException(String message) {
-        super(message);
+        super(message, "ERR_DUPLICATE_DATA");
     }
 
-    public DuplicateDataException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public String getUserFriendlyMessage() {
+        return "Duplicate Data Error: " + getMessage();
     }
 }

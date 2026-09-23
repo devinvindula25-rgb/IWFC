@@ -2,15 +2,13 @@ package com.iwfc.pattern;
 
 import com.iwfc.model.*;
 
+import com.iwfc.repository.Repository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Singleton Pattern — Centralized In-Memory Data Store.
@@ -23,23 +21,27 @@ public class DataStore {
 
     private static volatile DataStore instance;
 
-    private final List<User> users;
-    private final Map<String, Equipment> equipmentMap;
-    private final Map<String, FitnessSession> sessionMap;
-    private final List<Booking> bookings;
-    private final List<MaintenanceRequest> maintenanceRequests;
-    private final List<Notification> notifications;
+    private final Repository<User> users;
+    private final Repository<Equipment> equipment;
+    private final Repository<FitnessSession> sessions;
+    private final Repository<Booking> bookings;
+    private final Repository<MaintenanceRequest> maintenanceRequests;
+    private final Repository<Notification> notifications;
+    private final Repository<Payment> payments;
+    private final Repository<AuditEntry> auditLogs;
 
     /**
      * Private constructor — prevents external instantiation (Singleton pattern).
      */
     private DataStore() {
-        this.users = new ArrayList<>();
-        this.equipmentMap = new HashMap<>();
-        this.sessionMap = new HashMap<>();
-        this.bookings = new ArrayList<>();
-        this.maintenanceRequests = new ArrayList<>();
-        this.notifications = new ArrayList<>();
+        this.users = new Repository<>();
+        this.equipment = new Repository<>();
+        this.sessions = new Repository<>();
+        this.bookings = new Repository<>();
+        this.maintenanceRequests = new Repository<>();
+        this.notifications = new Repository<>();
+        this.payments = new Repository<>();
+        this.auditLogs = new Repository<>();
 
         initSeedData();
     }
@@ -67,67 +69,38 @@ public class DataStore {
         }
     }
 
-    /**
-     * Generic accessor — returns all items of a given type.
-     * Demonstrates use of Java Generics.
-     *
-     * @param type the class type to filter by
-     * @param <T>  the generic type parameter
-     * @return a list of items matching the specified type
-     */
-    @SuppressWarnings("unchecked")
-    public <T> List<T> getAll(Class<T> type) {
-        if (type == User.class || type == Admin.class || type == Instructor.class || type == Member.class) {
-            List<T> result = new ArrayList<>();
-            for (User user : users) {
-                if (type.isInstance(user)) {
-                    result.add((T) user);
-                }
-            }
-            return result;
-        }
-        if (type == Equipment.class) {
-            return (List<T>) new ArrayList<>(equipmentMap.values());
-        }
-        if (type == FitnessSession.class) {
-            return (List<T>) new ArrayList<>(sessionMap.values());
-        }
-        if (type == Booking.class) {
-            return (List<T>) new ArrayList<>(bookings);
-        }
-        if (type == MaintenanceRequest.class) {
-            return (List<T>) new ArrayList<>(maintenanceRequests);
-        }
-        if (type == Notification.class) {
-            return (List<T>) new ArrayList<>(notifications);
-        }
-        return new ArrayList<>();
-    }
-
     // --- Direct accessors for each collection ---
 
-    public List<User> getUsers() {
+    public Repository<User> getUsers() {
         return users;
     }
 
-    public Map<String, Equipment> getEquipmentMap() {
-        return equipmentMap;
+    public Repository<Equipment> getEquipment() {
+        return equipment;
     }
 
-    public Map<String, FitnessSession> getSessionMap() {
-        return sessionMap;
+    public Repository<FitnessSession> getSessions() {
+        return sessions;
     }
 
-    public List<Booking> getBookings() {
+    public Repository<Booking> getBookings() {
         return bookings;
     }
 
-    public List<MaintenanceRequest> getMaintenanceRequests() {
+    public Repository<MaintenanceRequest> getMaintenanceRequests() {
         return maintenanceRequests;
     }
 
-    public List<Notification> getNotifications() {
+    public Repository<Notification> getNotifications() {
         return notifications;
+    }
+
+    public Repository<Payment> getPayments() {
+        return payments;
+    }
+
+    public Repository<AuditEntry> getAuditLogs() {
+        return auditLogs;
     }
 
     /**
@@ -188,12 +161,16 @@ public class DataStore {
         member3.setDietHabits("Balanced macro diet, 3000 kcal/day for bulking.");
         member3.getMachinesUsed().addAll(List.of("Cable Crossover Machine", "Dumbbell Set", "Rowing Machine"));
 
-        users.add(admin);
-        users.add(instructor1);
-        users.add(instructor2);
-        users.add(member1);
-        users.add(member2);
-        users.add(member3);
+        try {
+            users.save(admin);
+            users.save(instructor1);
+            users.save(instructor2);
+            users.save(member1);
+            users.save(member2);
+            users.save(member3);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            System.err.println("Failed to seed users: " + e.getMessage());
+        }
 
         // --- Equipment ---
         Equipment treadmill1 = new Equipment("EQ001", "Treadmill Pro X1", "Treadmill", EquipmentStatus.OPERATIONAL,
@@ -213,14 +190,18 @@ public class DataStore {
         Equipment cableMachine = new Equipment("EQ008", "Cable Crossover Machine", "Cable Machine", EquipmentStatus.UNDER_MAINTENANCE,
                 Location.WEIGHT_ROOM, 520.0, 500.0);
 
-        equipmentMap.put(treadmill1.getEquipmentId(), treadmill1);
-        equipmentMap.put(treadmill2.getEquipmentId(), treadmill2);
-        equipmentMap.put(spinBike1.getEquipmentId(), spinBike1);
-        equipmentMap.put(spinBike2.getEquipmentId(), spinBike2);
-        equipmentMap.put(rowingMachine.getEquipmentId(), rowingMachine);
-        equipmentMap.put(yogaMats.getEquipmentId(), yogaMats);
-        equipmentMap.put(dumbbellSet.getEquipmentId(), dumbbellSet);
-        equipmentMap.put(cableMachine.getEquipmentId(), cableMachine);
+        try {
+            equipment.save(treadmill1);
+            equipment.save(treadmill2);
+            equipment.save(spinBike1);
+            equipment.save(spinBike2);
+            equipment.save(rowingMachine);
+            equipment.save(yogaMats);
+            equipment.save(dumbbellSet);
+            equipment.save(cableMachine);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            System.err.println("Failed to seed equipment: " + e.getMessage());
+        }
 
         // --- Fitness Sessions ---
         FitnessSession hiitMon = new FitnessSession("SES001", "Morning HIIT Blast", "HIIT",
@@ -242,12 +223,16 @@ public class DataStore {
                 instructor1, DayOfWeek.SATURDAY, LocalTime.of(9, 0), LocalTime.of(10, 0),
                 Location.STUDIO_A, 20);
 
-        sessionMap.put(hiitMon.getSessionId(), hiitMon);
-        sessionMap.put(yogaTue.getSessionId(), yogaTue);
-        sessionMap.put(spinWed.getSessionId(), spinWed);
-        sessionMap.put(pilatesThu.getSessionId(), pilatesThu);
-        sessionMap.put(crossfitFri.getSessionId(), crossfitFri);
-        sessionMap.put(hiitSat.getSessionId(), hiitSat);
+        try {
+            sessions.save(hiitMon);
+            sessions.save(yogaTue);
+            sessions.save(spinWed);
+            sessions.save(pilatesThu);
+            sessions.save(crossfitFri);
+            sessions.save(hiitSat);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            System.err.println("Failed to seed sessions: " + e.getMessage());
+        }
         
         // --- Sample Bookings ---
         LocalDate nextMonday = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
@@ -257,9 +242,13 @@ public class DataStore {
         Booking b2 = new Booking("BK002", member2, hiitMon, nextMonday, LocalDateTime.now().minusDays(2));
         Booking b3 = new Booking("BK003", member1, yogaTue, nextTuesday, LocalDateTime.now().minusHours(5));
         
-        bookings.add(b1);
-        bookings.add(b2);
-        bookings.add(b3);
+        try {
+            bookings.save(b1);
+            bookings.save(b2);
+            bookings.save(b3);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            System.err.println("Failed to seed bookings: " + e.getMessage());
+        }
 
         // --- Sample Maintenance Requests ---
         MaintenanceRequest req1 = new MaintenanceRequest("MR001", spinBike2, instructor1,
@@ -270,8 +259,12 @@ public class DataStore {
                 Urgency.HIGH);
         req2.assign("Tech Team Alpha");
 
-        maintenanceRequests.add(req1);
-        maintenanceRequests.add(req2);
+        try {
+            maintenanceRequests.save(req1);
+            maintenanceRequests.save(req2);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            System.err.println("Failed to seed maintenance requests: " + e.getMessage());
+        }
 
         // --- Sample Notifications ---
         Notification n1 = new Notification("NTF0001", NotificationCategory.MAINTENANCE, "High Urgency Maintenance", "Cable machine fraying reported by Mike Torres.", Role.INSTRUCTOR);
@@ -279,9 +272,13 @@ public class DataStore {
         Notification n3 = new Notification("NTF0003", NotificationCategory.SYSTEM, "System Maintenance", "Scheduled downtime this Sunday at 2 AM for upgrades.", null);
         Notification n4 = new Notification("NTF0004", NotificationCategory.EQUIPMENT, "New Equipment Added", "20 new Yoga Mats have arrived.", Role.ADMIN);
 
-        notifications.add(n1);
-        notifications.add(n2);
-        notifications.add(n3);
-        notifications.add(n4);
+        try {
+            notifications.save(n1);
+            notifications.save(n2);
+            notifications.save(n3);
+            notifications.save(n4);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            System.err.println("Failed to seed notifications: " + e.getMessage());
+        }
     }
 }

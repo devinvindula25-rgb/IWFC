@@ -25,6 +25,7 @@ public class IWFCSystemFacade {
     private final EquipmentService equipmentService;
     private final SessionService sessionService;
     private final MaintenanceService maintenanceService;
+    private final PaymentService paymentService;
     private final UserService userService;
     private final NotificationService notificationService;
 
@@ -35,6 +36,7 @@ public class IWFCSystemFacade {
         this.equipmentService = new EquipmentService(notificationService);
         this.sessionService = new SessionService(notificationService);
         this.maintenanceService = new MaintenanceService(notificationService);
+        this.paymentService = new PaymentService(notificationService);
         this.userService = new UserService();
         this.currentUser = null;
     }
@@ -122,7 +124,24 @@ public class IWFCSystemFacade {
     public void logEquipmentUsage(String equipmentId, double hours)
             throws UnauthorizedAccessException {
         userService.checkPermission(currentUser, "LOG_EQUIPMENT_USAGE");
+        
+        Equipment equipment = equipmentService.getEquipmentById(equipmentId);
+        boolean wasBelowThreshold = !equipment.needsMaintenance();
+        
         equipmentService.logUsage(equipmentId, hours, currentUser);
+        
+        if (wasBelowThreshold && equipment.needsMaintenance()) {
+            // Auto-generate maintenance request
+            String requestId = maintenanceService.generateRequestId();
+            // Using SYSTEM as the reporter since it's auto-generated, but we need an instructor type.
+            // For now, if current user is an instructor, use them, otherwise pass null (which might fail validation).
+            Instructor reporter = (currentUser instanceof Instructor) ? (Instructor) currentUser : null;
+            MaintenanceRequest request = new MaintenanceRequest(
+                    requestId, equipment, reporter, 
+                    "AUTO-GENERATED: Usage threshold exceeded (" + equipment.getCumulativeUsageHours() + " hrs)", 
+                    Urgency.HIGH);
+            maintenanceService.reportIssue(request);
+        }
     }
 
     /**
@@ -401,7 +420,7 @@ public class IWFCSystemFacade {
     /**
      * Adds a new user to the system. Requires ADMIN role (MANAGE_USERS permission).
      */
-    public void addUser(User user) throws UnauthorizedAccessException {
+    public void addUser(User user) throws UnauthorizedAccessException, DuplicateDataException {
         userService.checkPermission(currentUser, "MANAGE_USERS");
         userService.addUser(user);
     }
@@ -442,5 +461,35 @@ public class IWFCSystemFacade {
     public void clearAllNotifications() throws UnauthorizedAccessException {
         userService.checkPermission(currentUser, "MANAGE_USERS"); // Or some specific permission, but Admin has MANAGE_USERS
         notificationService.clearAll();
+    }
+
+    // =========================================================================
+    // Payment Management
+    // =========================================================================
+
+    public com.iwfc.model.Payment processPayment(String memberId, double amount, 
+                                                 com.iwfc.model.PaymentMethod method, 
+                                                 com.iwfc.model.PaymentPurpose purpose, 
+                                                 String description, 
+                                                 com.iwfc.pattern.payment.PaymentContext ctx) 
+            throws com.iwfc.exception.PaymentFailedException, UnauthorizedAccessException {
+        // Members process their own payments, or Admins process them for members
+        if (currentUser.getRole() != com.iwfc.model.Role.ADMIN && !currentUser.getUserId().equals(memberId)) {
+            // Need a specific permission for this, or just throw
+            throw new UnauthorizedAccessException("Cannot process payments for other members.");
+        }
+        return paymentService.processPayment(memberId, amount, method, purpose, description, ctx);
+    }
+
+    public java.util.List<com.iwfc.model.Payment> getPaymentsForMember(String memberId) 
+            throws UnauthorizedAccessException {
+        if (currentUser.getRole() != com.iwfc.model.Role.ADMIN && !currentUser.getUserId().equals(memberId)) {
+            throw new UnauthorizedAccessException("Cannot view payments for other members.");
+        }
+        return paymentService.getPaymentsForMember(memberId);
+    }
+    
+    public double getTotalPaymentsForMember(String memberId) {
+        return paymentService.getTotalPaymentsForMember(memberId);
     }
 }

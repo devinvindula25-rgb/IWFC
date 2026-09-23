@@ -247,8 +247,10 @@ public class UserManagementView extends HBox {
         // Stats HBox
         HBox statsBox = new HBox(15);
         
-        VBox hoursStat = createStatBox("⏱️ Hours Spent", String.valueOf(member.getHoursSpent()), "#ecfdf5", "#10b981");
-        VBox payStat = createStatBox("💳 Payments", "$" + String.format("%.2f", member.getTotalPayments()), "#eff6ff", "#3b82f6");
+        VBox hoursStat = createStatBox("⏱️ Hours Spent", String.format("%.1f", member.getHoursSpent()), "#ecfdf5", "#10b981");
+        
+        double totalPayments = facade.getTotalPaymentsForMember(member.getUserId());
+        VBox payStat = createStatBox("💳 Payments", "LKR " + String.format("%.2f", totalPayments), "#eff6ff", "#3b82f6");
         
         statsBox.getChildren().addAll(hoursStat, payStat);
 
@@ -303,10 +305,77 @@ public class UserManagementView extends HBox {
         series.getData().add(new XYChart.Data<>("Fri", Math.random() * 5));
         chart.getData().add(series);
         chart.setLegendVisible(false);
+        chart.getStyleClass().add("premium-bar-chart");
+        
+        // Disable grid lines for a cleaner look
+        chart.setHorizontalGridLinesVisible(false);
+        chart.setVerticalGridLinesVisible(false);
+        xAxis.setTickMarkVisible(false);
+        yAxis.setTickMarkVisible(false);
+        yAxis.setVisible(false); // Hide y-axis completely for a modern look
 
         chartCard.getChildren().addAll(chartTitle, chart);
 
-        insightsColumn.getChildren().addAll(statsBox, detailsCard, chartCard);
+        // Payment History Table
+        VBox paymentCard = new VBox(15);
+        paymentCard.getStyleClass().add("glass-card");
+        paymentCard.setPadding(new Insets(20));
+        
+        HBox pHeader = new HBox();
+        pHeader.setAlignment(Pos.CENTER_LEFT);
+        Label pTitle = new Label("Payment History");
+        pTitle.getStyleClass().add("h2");
+        
+        Region pSpacer = new Region();
+        HBox.setHgrow(pSpacer, Priority.ALWAYS);
+        
+        Button payBtn = new Button("Make Payment");
+        payBtn.getStyleClass().add("primary-btn");
+        payBtn.setOnAction(e -> showPaymentDialog(member));
+        
+        pHeader.getChildren().addAll(pTitle, pSpacer, payBtn);
+
+        TableView<Payment> paymentTable = new TableView<>();
+        paymentTable.setPrefHeight(150);
+        paymentTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Payment, String> dateCol = new TableColumn<>("Date");
+        dateCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+            data.getValue().getPaidAt().format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+        ));
+
+        TableColumn<Payment, String> purposeCol = new TableColumn<>("Purpose");
+        purposeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+            data.getValue().getPurpose().getDisplayName()
+        ));
+
+        TableColumn<Payment, String> methodCol = new TableColumn<>("Method");
+        methodCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+            data.getValue().getMethod().getDisplayName()
+        ));
+
+        TableColumn<Payment, String> amountCol = new TableColumn<>("Amount");
+        amountCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+            String.format("LKR %.2f", data.getValue().getTotalCharged())
+        ));
+
+        TableColumn<Payment, String> statusCol = new TableColumn<>("Status");
+        statusCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+            data.getValue().getStatus().getDisplayName()
+        ));
+
+        paymentTable.getColumns().addAll(dateCol, purposeCol, methodCol, amountCol, statusCol);
+
+        try {
+            List<Payment> pList = facade.getPaymentsForMember(member.getUserId());
+            paymentTable.getItems().addAll(pList);
+        } catch (UnauthorizedAccessException ex) {
+            // Should not happen as we check before
+        }
+
+        paymentCard.getChildren().addAll(pHeader, paymentTable);
+
+        insightsColumn.getChildren().addAll(statsBox, detailsCard, chartCard, paymentCard);
     }
 
     private void renderInstructorInsights(Instructor instructor) {
@@ -327,15 +396,24 @@ public class UserManagementView extends HBox {
         bgCircle.setStroke(javafx.scene.paint.Color.web("rgba(255,255,255,0.1)"));
         bgCircle.setStrokeWidth(8);
         
-        javafx.scene.shape.Arc progressArc = new javafx.scene.shape.Arc(0, 0, 40, 40, 90, -360 * (instructor.getPerformanceScore() / 100.0));
+        javafx.scene.shape.Arc progressArc = new javafx.scene.shape.Arc(0, 0, 40, 40, 90, 0); // Start at 0
         progressArc.setType(javafx.scene.shape.ArcType.OPEN);
         progressArc.setFill(javafx.scene.paint.Color.TRANSPARENT);
         progressArc.setStroke(javafx.scene.paint.Color.web("#8b5cf6"));
         progressArc.setStrokeWidth(8);
         progressArc.setStrokeLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
+        progressArc.setEffect(new javafx.scene.effect.DropShadow(15, javafx.scene.paint.Color.web("#8b5cf6")));
         
         Label scoreLbl = new Label(String.format("%.1f", instructor.getPerformanceScore()));
-        scoreLbl.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        scoreLbl.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;");
+        
+        // Animate the gauge filling up
+        double targetAngle = -360 * (instructor.getPerformanceScore() / 100.0);
+        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+            new javafx.animation.KeyFrame(javafx.util.Duration.ZERO, new javafx.animation.KeyValue(progressArc.lengthProperty(), 0)),
+            new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1.5), new javafx.animation.KeyValue(progressArc.lengthProperty(), targetAngle, javafx.animation.Interpolator.EASE_OUT))
+        );
+        timeline.play();
         
         gauge.getChildren().addAll(bgCircle, progressArc, scoreLbl);
         impactCard.getChildren().addAll(impactTitle, gauge);
@@ -425,6 +503,12 @@ public class UserManagementView extends HBox {
         series.getData().add(new XYChart.Data<>("Apr", instructor.getPerformanceScore()));
         chart.getData().add(series);
         chart.setLegendVisible(false);
+        chart.getStyleClass().add("premium-line-chart");
+        
+        chart.setHorizontalGridLinesVisible(true);
+        chart.setVerticalGridLinesVisible(false);
+        xAxis.setTickMarkVisible(false);
+        yAxis.setTickMarkVisible(false);
         chartCard.getChildren().addAll(chartTitle, chart);
 
         insightsColumn.getChildren().addAll(statsRow, rosterCard, feedCard, chartCard);
@@ -531,7 +615,100 @@ public class UserManagementView extends HBox {
             } catch (UnauthorizedAccessException ex) {
                 Alert a = new Alert(Alert.AlertType.ERROR, ex.getMessage());
                 a.show();
+            } catch (com.iwfc.exception.DuplicateDataException ex) {
+                Alert a = new Alert(Alert.AlertType.ERROR, "User ID already exists.");
+                a.show();
             }
         });
+    }
+
+    private void showPaymentDialog(Member member) {
+        Dialog<Boolean> dialog = new Dialog<>();
+        dialog.setTitle("Make Payment");
+        dialog.setHeaderText("Process a payment for " + member.getName());
+
+        ButtonType payBtnType = new ButtonType("Pay Now", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(payBtnType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(15);
+        grid.setPadding(new Insets(20));
+
+        ComboBox<PaymentPurpose> purposeCbx = new ComboBox<>();
+        purposeCbx.getItems().addAll(PaymentPurpose.values());
+        purposeCbx.setValue(PaymentPurpose.MEMBERSHIP_FEE);
+
+        TextField amountF = new TextField();
+        amountF.setPromptText("Base Amount (LKR)");
+
+        ComboBox<PaymentMethod> methodCbx = new ComboBox<>();
+        methodCbx.getItems().addAll(PaymentMethod.values());
+        methodCbx.setValue(PaymentMethod.CARD);
+
+        TextField extraF = new TextField();
+        extraF.setPromptText("Card No (16) / Ref / Wallet ID (10)");
+        
+        methodCbx.setOnAction(e -> {
+            PaymentMethod m = methodCbx.getValue();
+            if (m == PaymentMethod.CARD) {
+                extraF.setPromptText("Card No (min 16 digits)");
+            } else if (m == PaymentMethod.BANK_TRANSFER) {
+                extraF.setPromptText("Reference Number");
+            } else if (m == PaymentMethod.DIGITAL_WALLET) {
+                extraF.setPromptText("Wallet ID (10 digits)");
+            } else {
+                extraF.setPromptText("N/A for Cash");
+            }
+        });
+
+        grid.add(new Label("Purpose:"), 0, 0);
+        grid.add(purposeCbx, 1, 0);
+        grid.add(new Label("Amount:"), 0, 1);
+        grid.add(amountF, 1, 1);
+        grid.add(new Label("Method:"), 0, 2);
+        grid.add(methodCbx, 1, 2);
+        grid.add(new Label("Details:"), 0, 3);
+        grid.add(extraF, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(b -> {
+            if (b == payBtnType) {
+                try {
+                    double amt = Double.parseDouble(amountF.getText());
+                    com.iwfc.pattern.payment.PaymentContext ctx = new com.iwfc.pattern.payment.PaymentContext();
+                    
+                    PaymentMethod m = methodCbx.getValue();
+                    if (m == PaymentMethod.CARD) {
+                        ctx.setCardNumber(extraF.getText());
+                        ctx.setExpiryDate("12/25"); // hardcoded for demo
+                    } else if (m == PaymentMethod.BANK_TRANSFER) {
+                        ctx.setReferenceNumber(extraF.getText());
+                    } else if (m == PaymentMethod.DIGITAL_WALLET) {
+                        ctx.setWalletId(extraF.getText());
+                    }
+
+                    facade.processPayment(
+                        member.getUserId(), amt, m, purposeCbx.getValue(), 
+                        "Manual Payment", ctx
+                    );
+                    
+                    // Refresh view
+                    if (selectedUser != null && selectedUser.getUserId().equals(member.getUserId())) {
+                        renderProfile();
+                    }
+                    
+                    return true;
+                } catch (Exception ex) {
+                    Alert a = new Alert(Alert.AlertType.ERROR, "Payment Failed: " + ex.getMessage());
+                    a.showAndWait();
+                    return false;
+                }
+            }
+            return false;
+        });
+
+        dialog.showAndWait();
     }
 }

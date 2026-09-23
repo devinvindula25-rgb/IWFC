@@ -85,22 +85,28 @@ public class NotificationService {
      * Persists a new notification.
      */
     private void addNotification(NotificationCategory category, String title, String message, Role targetRole) {
-        String id = "NTF" + String.format("%04d", dataStore.getNotifications().size() + 1);
+        String id = "NTF" + String.format("%04d", dataStore.getNotifications().findAll().size() + 1);
         Notification notification = new Notification(id, category, title, message, targetRole);
-        dataStore.getNotifications().add(0, notification); // Add to front for newest-first
+        try {
+            dataStore.getNotifications().save(notification);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            throw new RuntimeException("Failed to persist notification: " + e.getMessage());
+        }
     }
 
     // --- Data retrieval & management ---
 
     public List<Notification> getAllNotifications() {
-        return new ArrayList<>(dataStore.getNotifications());
+        return dataStore.getNotifications().findAll().stream()
+                .sorted((n1, n2) -> n2.getTimestamp().compareTo(n1.getTimestamp()))
+                .collect(Collectors.toList());
     }
     
     public List<Notification> getNotificationsForRole(Role role) {
         if (role == Role.ADMIN) {
             return getAllNotifications();
         }
-        return dataStore.getNotifications().stream()
+        return getAllNotifications().stream()
                 .filter(n -> n.getTargetRole() == null || n.getTargetRole() == role)
                 .collect(Collectors.toList());
     }
@@ -118,7 +124,7 @@ public class NotificationService {
     }
 
     public void markAsRead(String notificationId) {
-        dataStore.getNotifications().stream()
+        dataStore.getNotifications().findAll().stream()
                 .filter(n -> n.getNotificationId().equals(notificationId))
                 .findFirst()
                 .ifPresent(n -> n.setRead(true));
@@ -129,7 +135,7 @@ public class NotificationService {
     }
 
     public void clearAll() {
-        dataStore.getNotifications().clear();
+        dataStore.getNotifications().findAll().forEach(n -> dataStore.getNotifications().delete(n.getId()));
     }
 
     public int getListenerCount(String eventType) {

@@ -35,7 +35,7 @@ public class SessionService {
         this.sessionBookings = new HashMap<>();
 
         // Index existing bookings by session ID
-        for (Booking booking : dataStore.getBookings()) {
+        for (Booking booking : dataStore.getBookings().findAll()) {
             sessionBookings.computeIfAbsent(booking.getSession().getSessionId(),
                     k -> new ArrayList<>()).add(booking);
         }
@@ -49,9 +49,19 @@ public class SessionService {
      *                                 or falls outside operating hours
      */
     public void createSession(FitnessSession session) throws InvalidBookingException {
-        validateOperatingHours(session.getStartTime(), session.getEndTime());
-        validateNoConflict(session);
-        dataStore.getSessionMap().put(session.getSessionId(), session);
+        SchedulingValidator validator = new SchedulingValidator();
+        TimeSlot slot = new TimeSlot(
+            session.getValidFrom().atTime(session.getStartTime()),
+            session.getValidFrom().atTime(session.getEndTime())
+        );
+        validator.validateOperatingHours(slot);
+        validator.validateNoRoomClash(session, dataStore.getSessions().findAll());
+        validator.validateNoInstructorClash(session, dataStore.getSessions().findAll());
+        try {
+            dataStore.getSessions().save(session);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            throw new RuntimeException("Failed to create session: " + e.getMessage());
+        }
     }
 
     /**
@@ -66,7 +76,13 @@ public class SessionService {
      */
     public void editSession(String sessionId, String name, LocalTime start, LocalTime end, int capacity) throws InvalidBookingException {
         FitnessSession session = getSessionById(sessionId);
-        validateOperatingHours(start, end);
+        
+        SchedulingValidator validator = new SchedulingValidator();
+        TimeSlot slot = new TimeSlot(
+            session.getValidFrom().atTime(start),
+            session.getValidFrom().atTime(end)
+        );
+        validator.validateOperatingHours(slot);
         
         // Check for conflicts with other sessions using a temporary copy
         FitnessSession tempSession = new FitnessSession(
@@ -74,7 +90,8 @@ public class SessionService {
                 session.getInstructor(), session.getDayOfWeek(), start, end,
                 session.getLocation(), capacity
         );
-        validateNoConflict(tempSession);
+        validator.validateNoRoomClash(tempSession, dataStore.getSessions().findAll());
+        validator.validateNoInstructorClash(tempSession, dataStore.getSessions().findAll());
         
         session.setName(name);
         session.setStartTime(start);
@@ -129,11 +146,9 @@ public class SessionService {
         long activeBookings = existingBookings.stream()
                 .filter(b -> b.getStatus() != BookingStatus.CANCELLED && b.getSessionDate().equals(date))
                 .count();
-        if (activeBookings >= session.getMaxCapacity()) {
-            throw new InvalidBookingException(
-                "Session '" + session.getName() + "' on " + date + " is fully booked (capacity: " +
-                session.getMaxCapacity() + ").");
-        }
+        
+        SchedulingValidator validator = new SchedulingValidator();
+        validator.validateCapacity((int) activeBookings, session.getMaxCapacity());
 
         // Check if member already booked this session on this date
         boolean alreadyBooked = existingBookings.stream()
@@ -147,10 +162,14 @@ public class SessionService {
         }
 
         // Create booking
-        String bookingId = "BK" + String.format("%03d", dataStore.getBookings().size() + 1);
+        String bookingId = "BK" + String.format("%03d", dataStore.getBookings().findAll().size() + 1);
         Booking booking = new Booking(bookingId, member, session, date, LocalDateTime.now());
 
-        dataStore.getBookings().add(booking);
+        try {
+            dataStore.getBookings().save(booking);
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            throw new RuntimeException("Failed to save booking: " + e.getMessage());
+        }
         sessionBookings.computeIfAbsent(sessionId, k -> new ArrayList<>()).add(booking);
 
         // Fire Observer notification
@@ -170,7 +189,7 @@ public class SessionService {
      * @throws IllegalArgumentException if the booking is not found or does not belong to the member
      */
     public void cancelBooking(String bookingId, String memberId) {
-        Booking booking = dataStore.getBookings().stream()
+        Booking booking = dataStore.getBookings().findAll().stream()
                 .filter(b -> b.getBookingId().equals(bookingId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
@@ -208,7 +227,7 @@ public class SessionService {
         }
         
         // Remove the session
-        dataStore.getSessionMap().remove(sessionId);
+        dataStore.getSessions().delete(sessionId);
 
         notificationService.notifyListeners("SESSION_CANCELLED",
             String.format("⚠ Session cancelled: '%s' on %s has been cancelled.",
@@ -223,17 +242,9 @@ public class SessionService {
      * @throws InvalidBookingException if a conflict exists
      */
     public void validateNoConflict(FitnessSession newSession) throws InvalidBookingException {
-        for (FitnessSession existing : dataStore.getSessionMap().values()) {
-            if (existing.getSessionId().equals(newSession.getSessionId())) continue;
-            if (existing.conflictsWith(newSession)) {
-                throw new InvalidBookingException(
-                    "Schedule conflict: '" + newSession.getName() +
-                    "' conflicts with existing session '" + existing.getName() +
-                    "' at " + existing.getLocation().getDisplayName() +
-                    " on " + existing.getDayOfWeek() + " " +
-                    existing.getStartTime() + "-" + existing.getEndTime());
-            }
-        }
+        SchedulingValidator validator = new SchedulingValidator();
+        validator.validateNoRoomClash(newSession, dataStore.getSessions().findAll());
+        validator.validateNoInstructorClash(newSession, dataStore.getSessions().findAll());
     }
 
     /**
@@ -241,22 +252,16 @@ public class SessionService {
      */
     public void validateOperatingHours(LocalTime startTime, LocalTime endTime)
             throws InvalidBookingException {
-        if (startTime.isBefore(OPERATING_START) || endTime.isAfter(OPERATING_END)) {
-            throw new InvalidBookingException(
-                "Session times must be within operating hours (" +
-                OPERATING_START + " - " + OPERATING_END + ").");
-        }
-        if (!startTime.isBefore(endTime)) {
-            throw new InvalidBookingException(
-                "Session start time must be before end time.");
-        }
+        SchedulingValidator validator = new SchedulingValidator();
+        TimeSlot slot = new TimeSlot(LocalDate.now().atTime(startTime), LocalDate.now().atTime(endTime));
+        validator.validateOperatingHours(slot);
     }
 
     /**
      * Returns a session by its ID.
      */
     public FitnessSession getSessionById(String sessionId) {
-        FitnessSession session = dataStore.getSessionMap().get(sessionId);
+        FitnessSession session = dataStore.getSessions().findById(sessionId).orElse(null);
         if (session == null) {
             throw new IllegalArgumentException("Session not found with ID: " + sessionId);
         }
@@ -267,7 +272,7 @@ public class SessionService {
      * Returns all sessions.
      */
     public List<FitnessSession> getAllSessions() {
-        return dataStore.getAll(FitnessSession.class);
+        return dataStore.getSessions().findAll();
     }
 
     /**
@@ -346,14 +351,14 @@ public class SessionService {
      * Returns all bookings.
      */
     public List<Booking> getAllBookings() {
-        return dataStore.getAll(Booking.class);
+        return dataStore.getBookings().findAll();
     }
 
     /**
      * Returns bookings for a specific member.
      */
     public List<Booking> getBookingsForMember(String memberId) {
-        return dataStore.getBookings().stream()
+        return dataStore.getBookings().findAll().stream()
                 .filter(b -> b.getMember().getUserId().equals(memberId))
                 .collect(Collectors.toList());
     }

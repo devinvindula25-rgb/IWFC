@@ -7,7 +7,7 @@ import java.util.List;
  * Demonstrates Abstraction — subclasses must provide role-specific behavior.
  * Demonstrates Encapsulation — all fields are private with controlled access.
  */
-public abstract class User {
+public abstract class User implements Identifiable {
     private String userId;
     private String name;
     private String email;
@@ -44,6 +44,11 @@ public abstract class User {
     // --- Encapsulated accessors ---
 
     public String getUserId() {
+        return userId;
+    }
+
+    @Override
+    public String getId() {
         return userId;
     }
 

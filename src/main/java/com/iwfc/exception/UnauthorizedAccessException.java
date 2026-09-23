@@ -5,13 +5,14 @@ package com.iwfc.exception;
  * that is restricted to a different role.
  * Example: A Member trying to access Administrator maintenance logs.
  */
-public class UnauthorizedAccessException extends Exception {
+public class UnauthorizedAccessException extends IWFCException {
 
     public UnauthorizedAccessException(String message) {
-        super(message);
+        super(message, "ERR_UNAUTHORIZED");
     }
 
-    public UnauthorizedAccessException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public String getUserFriendlyMessage() {
+        return "Access Denied: " + getMessage();
     }
 }

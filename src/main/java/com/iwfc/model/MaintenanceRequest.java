@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
  * Represents a maintenance request reported by an Instructor for faulty equipment.
  * Follows the workflow: PENDING -> ASSIGNED -> COMPLETED.
  */
-public class MaintenanceRequest {
+public class MaintenanceRequest implements Identifiable {
     private String requestId;
     private Equipment equipment;
     private Instructor reportedBy;
@@ -79,6 +79,11 @@ public class MaintenanceRequest {
     // --- Encapsulated accessors ---
 
     public String getRequestId() {
+        return requestId;
+    }
+
+    @Override
+    public String getId() {
         return requestId;
     }
 
