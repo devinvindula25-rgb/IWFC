@@ -5,6 +5,7 @@ import com.iwfc.exception.InvalidBookingException;
 import com.iwfc.exception.UnauthorizedAccessException;
 import com.iwfc.model.*;
 import com.iwfc.pattern.NotificationService;
+import com.iwfc.pattern.plan.PlanCatalogueFactory;
 import com.iwfc.service.*;
 
 import java.time.DayOfWeek;
@@ -28,6 +29,10 @@ public class IWFCSystemFacade {
     private final PaymentService paymentService;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final EnrollmentService enrollmentService;
+    private final ScheduleMaker scheduleMaker;
+    private final MeasurementAnalyzer measurementAnalyzer;
+    private final List<FitnessPlan> planCatalogue;
 
     private User currentUser;
 
@@ -38,6 +43,47 @@ public class IWFCSystemFacade {
         this.maintenanceService = new MaintenanceService(notificationService);
         this.paymentService = new PaymentService(notificationService);
         this.userService = new UserService();
+        this.enrollmentService = new EnrollmentService();
+        this.planCatalogue = PlanCatalogueFactory.createInitialCatalogue();
+        this.scheduleMaker = new ScheduleMaker(sessionService);
+        this.measurementAnalyzer = new MeasurementAnalyzer();
+        
+        this.currentUser = com.iwfc.pattern.DataStore.getInstance().getUsers().findById("ADM001").orElse(null);
+        if (this.currentUser != null) {
+            try {
+                List<User> members = com.iwfc.pattern.DataStore.getInstance().getUsers().findAll().stream()
+                    .filter(u -> u.getRole() == com.iwfc.model.Role.MEMBER).collect(java.util.stream.Collectors.toList());
+                List<User> instructors = com.iwfc.pattern.DataStore.getInstance().getUsers().findAll().stream()
+                    .filter(u -> u.getRole() == com.iwfc.model.Role.INSTRUCTOR).collect(java.util.stream.Collectors.toList());
+                
+                for (int i = 0; i < members.size(); i++) {
+                    Member m = (Member) members.get(i);
+                    com.iwfc.model.FitnessPlan plan1 = planCatalogue.get(i % planCatalogue.size());
+                    String instrId1 = instructors.get(i % instructors.size()).getUserId();
+                    com.iwfc.pattern.payment.PaymentContext cardCtx = new com.iwfc.pattern.payment.PaymentContext();
+                    cardCtx.setCardNumber("1234567812345678");
+                    cardCtx.setExpiryDate("12/25");
+                    assignWorkoutPlanToMember(m.getUserId(), plan1.getId(), instrId1, com.iwfc.model.PaymentMethod.CARD, cardCtx);
+                    
+                    if (i % 3 == 0) {
+                        com.iwfc.model.FitnessPlan plan2 = planCatalogue.get((i + 5) % planCatalogue.size());
+                        String instrId2 = instructors.get((i + 1) % instructors.size()).getUserId();
+                        com.iwfc.pattern.payment.PaymentContext walletCtx = new com.iwfc.pattern.payment.PaymentContext();
+                        walletCtx.setWalletId("5551234567");
+                        assignWorkoutPlanToMember(m.getUserId(), plan2.getId(), instrId2, com.iwfc.model.PaymentMethod.DIGITAL_WALLET, walletCtx);
+                    }
+                    
+                    measurementAnalyzer.addLog(new com.iwfc.model.BodyMeasurementLog("BML_AUTO_1_" + i, m.getUserId(), java.time.LocalDate.now().minusDays(30), 80.0 - (i % 5), 175.0, 95.0, 30.0, 50.0, 35.0));
+                    measurementAnalyzer.addLog(new com.iwfc.model.BodyMeasurementLog("BML_AUTO_2_" + i, m.getUserId(), java.time.LocalDate.now(), 78.0 - (i % 5), 175.0, 93.0, 29.0, 49.0, 34.5));
+                    
+                    int hours = sessionService.getBookingsForMember(m.getUserId()).size();
+                    m.setHoursSpent(hours);
+                    com.iwfc.pattern.DataStore.getInstance().getUsers().update(m);
+                }
+            } catch(Exception e) {
+                System.err.println("Facade initialization error: " + e.getMessage());
+            }
+        }
         this.currentUser = null;
     }
 
@@ -483,13 +529,162 @@ public class IWFCSystemFacade {
 
     public java.util.List<com.iwfc.model.Payment> getPaymentsForMember(String memberId) 
             throws UnauthorizedAccessException {
-        if (currentUser.getRole() != com.iwfc.model.Role.ADMIN && !currentUser.getUserId().equals(memberId)) {
-            throw new UnauthorizedAccessException("Cannot view payments for other members.");
+        if (currentUser.getRole() == com.iwfc.model.Role.ADMIN || currentUser.getUserId().equals(memberId)) {
+            return paymentService.getPaymentsForMember(memberId);
+        } else if (currentUser instanceof Instructor instructor) {
+            if (instructor.getTraineeIds().contains(memberId)) {
+                return paymentService.getPaymentsForMember(memberId);
+            }
         }
-        return paymentService.getPaymentsForMember(memberId);
+        throw new UnauthorizedAccessException("Cannot view payments for other members.");
     }
     
     public double getTotalPaymentsForMember(String memberId) {
         return paymentService.getTotalPaymentsForMember(memberId);
+    }
+
+    public java.util.List<com.iwfc.model.Payment> getAllPayments() throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_USERS");
+        return paymentService.getAllPayments();
+    }
+
+    // =========================================================================
+    // Enrollment & Fitness Plans
+    // =========================================================================
+
+    public List<FitnessPlan> getPlanCatalogue() {
+        return planCatalogue;
+    }
+
+    public FitnessPlan getPlanById(String planId) {
+        return planCatalogue.stream().filter(p -> p.getId().equals(planId)).findFirst().orElse(null);
+    }
+
+    public Enrollment enrollMember(String memberId, String planId, String instructorId, int durationWeeks) throws DuplicateDataException, UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_USERS"); // Or self-service check
+        return enrollmentService.enrollMember(memberId, planId, instructorId, durationWeeks);
+    }
+
+    /**
+     * Complete flow: Enroll a member, process payment, and generate their schedule.
+     */
+    public final Enrollment assignWorkoutPlanToMember(String memberId, String planId, String instructorId, PaymentMethod paymentMethod, com.iwfc.pattern.payment.PaymentContext paymentCtx) throws Exception {
+        if (currentUser.getRole() == Role.MEMBER && !currentUser.getUserId().equals(memberId)) {
+            throw new UnauthorizedAccessException("Cannot assign plans to other members.");
+        }
+        if (currentUser.getRole() == Role.INSTRUCTOR) {
+            Instructor instr = (Instructor) currentUser;
+            if (!instr.getTraineeIds().contains(memberId) && instructorId != null && !instructorId.equals(instr.getUserId())) {
+                throw new UnauthorizedAccessException("Instructors can only assign plans to their own trainees.");
+            }
+        }
+        
+        FitnessPlan plan = getPlanById(planId);
+        if (plan == null) throw new IllegalArgumentException("Plan not found: " + planId);
+
+        Enrollment enrollment = enrollmentService.enrollMember(memberId, planId, instructorId, plan.getDurationWeeks());
+        
+        double cost = plan.calculateTotalCost();
+        if (cost > 0) {
+            paymentService.processPayment(memberId, cost, paymentMethod, PaymentPurpose.MEMBERSHIP_FEE, 
+                "Plan Enrollment: " + plan.getTitle(), paymentCtx);
+        }
+
+        User uMember = com.iwfc.pattern.DataStore.getInstance().getUsers().findById(memberId).orElse(null);
+        User uInstructor = instructorId != null ? com.iwfc.pattern.DataStore.getInstance().getUsers().findById(instructorId).orElse(null) : null;
+        
+        if (uMember instanceof Member m) {
+            Instructor i = (uInstructor instanceof Instructor) ? (Instructor) uInstructor : null;
+            scheduleMaker.generateScheduleForEnrollment(enrollment, plan, m, i);
+        }
+        
+        return enrollment;
+    }
+
+    /**
+     * Change an existing workout plan.
+     */
+    public Enrollment changeWorkoutPlanForMember(String enrollmentId, String newPlanId, String newInstructorId, PaymentMethod paymentMethod, com.iwfc.pattern.payment.PaymentContext paymentCtx) throws Exception {
+        Enrollment oldEnrollment = enrollmentService.getEnrollmentById(enrollmentId);
+        if (oldEnrollment == null) throw new IllegalArgumentException("Enrollment not found");
+
+        if (currentUser.getRole() == Role.MEMBER && !currentUser.getUserId().equals(oldEnrollment.getMemberId())) {
+            throw new UnauthorizedAccessException("Cannot change plans for other members.");
+        }
+
+        // Expire old enrollment
+        oldEnrollment.setExpirationDate(LocalDate.now());
+        enrollmentService.updateEnrollment(oldEnrollment);
+
+        // Assign new plan
+        return assignWorkoutPlanToMember(oldEnrollment.getMemberId(), newPlanId, newInstructorId, paymentMethod, paymentCtx);
+    }
+    
+    public void updateEnrollment(Enrollment enrollment) {
+        enrollmentService.updateEnrollment(enrollment);
+    }
+
+    public List<Enrollment> getEnrollmentsForMember(String memberId) {
+        return enrollmentService.getEnrollmentsForMember(memberId);
+    }
+
+    public List<Enrollment> getEnrollmentsForInstructor(String instructorId) {
+        return enrollmentService.getEnrollmentsForInstructor(instructorId);
+    }
+
+    public InstructorChange requestInstructorChange(String enrollmentId, String requestedInstructorId, String reason) throws InvalidBookingException, DuplicateDataException {
+        return enrollmentService.requestInstructorChange(enrollmentId, requestedInstructorId, reason);
+    }
+
+    public void approveInstructorChange(String requestId) throws InvalidBookingException, UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_USERS");
+        enrollmentService.approveInstructorChange(requestId);
+    }
+
+    public void rejectInstructorChange(String requestId) throws InvalidBookingException, UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_USERS");
+        enrollmentService.rejectInstructorChange(requestId);
+    }
+
+    public List<InstructorChange> getPendingInstructorChanges() {
+        return enrollmentService.getPendingChangeRequests();
+    }
+
+    // =========================================================================
+    // Body Measurements
+    // =========================================================================
+
+    public void addMeasurementLog(BodyMeasurementLog log) throws DuplicateDataException, UnauthorizedAccessException {
+        if (currentUser.getRole() == Role.MEMBER && !currentUser.getUserId().equals(log.getMemberId())) {
+            throw new UnauthorizedAccessException("Cannot log measurements for other members.");
+        }
+        measurementAnalyzer.addLog(log);
+    }
+
+    public List<BodyMeasurementLog> getMeasurementLogs(String memberId) throws UnauthorizedAccessException {
+        if (currentUser.getRole() == Role.MEMBER && !currentUser.getUserId().equals(memberId)) {
+            throw new UnauthorizedAccessException("Cannot view measurements of other members.");
+        }
+        if (currentUser.getRole() == Role.INSTRUCTOR) {
+            Instructor instr = (Instructor) currentUser;
+            if (!instr.getTraineeIds().contains(memberId)) {
+                throw new UnauthorizedAccessException("Instructors can only view measurements of their own trainees.");
+            }
+        }
+        return measurementAnalyzer.getLogsForMember(memberId);
+    }
+
+    public com.iwfc.service.MeasurementAnalyzer.InsightReport getMeasurementAnalysis(String memberId) throws UnauthorizedAccessException {
+        // reuse same permission check by calling getMeasurementLogs (which will throw if not allowed)
+        getMeasurementLogs(memberId);
+        return measurementAnalyzer.generateInsightReport(memberId);
+    }
+
+    // =========================================================================
+    // Follow Ups
+    // =========================================================================
+
+    public List<FollowUp> getFollowUps() {
+        return com.iwfc.pattern.DataStore.getInstance().getFollowUps().findAll();
     }
 }

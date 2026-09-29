@@ -1,0 +1,21 @@
+.premium-checkbox {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 13px; font-size: 13px;
+}
+
+.premium-checkbox .box {
+    -fx-background-color: rgba(255, 255, 255, 0.05); background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 4px; border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 0; padding: 0;
+}
+
+.premium-checkbox:selected .box {
+    -fx-background-color: #3b82f6; background-color: #3b82f6;
+    -fx-border-color: #3b82f6; border-color: #3b82f6;
+}
+
+.premium-checkbox:selected .mark {
+    -fx-background-color: white; background-color: white;
+}

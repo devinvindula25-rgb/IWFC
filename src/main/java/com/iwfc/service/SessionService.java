@@ -22,9 +22,6 @@ import java.util.stream.Collectors;
  */
 public class SessionService {
 
-    private static final LocalTime OPERATING_START = LocalTime.of(6, 0);
-    private static final LocalTime OPERATING_END = LocalTime.of(22, 0);
-
     private final DataStore dataStore;
     private final NotificationService notificationService;
     private final Map<String, List<Booking>> sessionBookings;

@@ -2,10 +2,8 @@ package com.iwfc.service;
 
 import com.iwfc.exception.InvalidBookingException;
 import com.iwfc.model.FitnessSession;
-import com.iwfc.model.Location;
 import com.iwfc.model.TimeSlot;
 
-import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 

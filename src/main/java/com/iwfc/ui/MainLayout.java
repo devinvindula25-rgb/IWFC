@@ -9,6 +9,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
 
 /**
  * Main layout with sidebar navigation and swappable content area.
@@ -40,7 +42,7 @@ public class MainLayout extends BorderPane {
 
     private void buildSidebar() {
         sidebar = new VBox(5);
-        sidebar.setPrefWidth(220);
+        sidebar.setPrefWidth(270);
         sidebar.setPadding(new Insets(20, 10, 20, 10));
         sidebar.getStyleClass().add("sidebar");
 
@@ -69,26 +71,46 @@ public class MainLayout extends BorderPane {
 
         Separator sep1 = new Separator();
 
-        // Navigation buttons
-        VBox navItems = new VBox(3);
-        navItems.setPadding(new Insets(15, 0, 0, 0));
+        // Navigation buttons grouped into premium sections
+        VBox navItems = new VBox(2);
+        navItems.setPadding(new Insets(10, 15, 0, 15)); // Inner padding for floated buttons
 
+        // --- OVERVIEW ---
+        navItems.getChildren().add(createSectionHeader("Overview"));
         Button dashboardBtn = createNavButton("📊", "Dashboard");
-        Button equipmentBtn = createNavButton("🏋️", "Equipment");
-        Button sessionsBtn = createNavButton("📅", "Sessions");
-        Button maintenanceBtn = createNavButton("🔧", "Maintenance");
+        Button plansBtn = createNavButton("💪", "Workout Plans", facade.getPlanCatalogue().size());
+        Button sessionsBtn = createNavButton("📅", "Sessions", facade.getAllSessions().size());
+        navItems.getChildren().addAll(dashboardBtn, plansBtn, sessionsBtn);
         
-        long unreadCount = facade.getUnreadNotificationCount();
-        String notifLabel = unreadCount > 0 ? "Notifications (" + unreadCount + ")" : "Notifications";
-        Button notificationsBtn = createNavButton("🔔", notifLabel);
-        // We want the internal view name to be "Notifications" even if label has count, so let's adjust createNavButton usage.
-        // Actually it's easier to change the label explicitly after creation, or store a map from label without count.
-        navItems.getChildren().addAll(dashboardBtn, equipmentBtn, sessionsBtn, maintenanceBtn, notificationsBtn);
-
-        if (facade.getCurrentUser().getRole() == com.iwfc.model.Role.ADMIN) {
-            Button usersBtn = createNavButton("👥", "Users");
-            navItems.getChildren().add(usersBtn);
+        // --- MANAGEMENT ---
+        navItems.getChildren().add(createSectionHeader("Management"));
+        if (facade.getCurrentUser().getRole() == com.iwfc.model.Role.ADMIN || facade.getCurrentUser().getRole() == com.iwfc.model.Role.INSTRUCTOR) {
+            long memberCount = com.iwfc.pattern.DataStore.getInstance().getUsers().findAll().stream()
+                .filter(u -> u.getRole() == com.iwfc.model.Role.MEMBER).count();
+            navItems.getChildren().add(createNavButton("🙋‍♂️", "Members", (int) memberCount));
         }
+        Button equipmentBtn = createNavButton("🏋️", "Equipment", facade.getAllEquipment().size());
+        Button maintenanceBtn = createNavButton("🔧", "Maintenance");
+        navItems.getChildren().addAll(equipmentBtn, maintenanceBtn);
+
+        // --- OPERATIONS ---
+        navItems.getChildren().add(createSectionHeader("Operations"));
+        Button followUpsBtn = createNavButton("📋", "Follow Ups", facade.getFollowUps().size());
+        long unreadCount = facade.getUnreadNotificationCount();
+        Button notificationsBtn = createNavButton("🔔", "Notifications", unreadCount > 0 ? (int) unreadCount : null);
+        Button reportsBtn = createNavButton("📈", "Reports");
+        navItems.getChildren().addAll(followUpsBtn, notificationsBtn, reportsBtn);
+
+        // --- BUSINESS SETTINGS ---
+        navItems.getChildren().add(createSectionHeader("Business Settings"));
+        if (facade.getCurrentUser().getRole() == com.iwfc.model.Role.ADMIN || facade.getCurrentUser().getRole() == com.iwfc.model.Role.INSTRUCTOR) {
+            long teamCount = com.iwfc.pattern.DataStore.getInstance().getUsers().findAll().stream()
+                .filter(u -> u.getRole() != com.iwfc.model.Role.MEMBER).count();
+            Button teamBtn = createNavButton("👥", "Team", (int) teamCount); 
+            navItems.getChildren().add(teamBtn);
+        }
+        Button paymentsBtn = createNavButton("💳", "Payments");
+        navItems.getChildren().add(paymentsBtn);
 
         // Spacer
         Region spacer = new Region();
@@ -119,23 +141,68 @@ public class MainLayout extends BorderPane {
         sidebar.getChildren().addAll(logoBar, sep1, navItems, spacer, userInfo);
     }
 
+    private Label createSectionHeader(String text) {
+        Label lbl = new Label(text.toUpperCase());
+        lbl.getStyleClass().add("sidebar-section-header");
+        lbl.setPadding(new Insets(20, 10, 8, 10)); // High padding for breathing room
+        return lbl;
+    }
+
     private Button createNavButton(String icon, String label) {
-        Button btn = new Button(icon + "   " + label);
+        return createNavButton(icon, label, null);
+    }
+
+    private Button createNavButton(String icon, String label, Integer count) {
+        Button btn = new Button();
         btn.getStyleClass().add("nav-button");
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.setAlignment(Pos.CENTER_LEFT);
         btn.setPrefHeight(40);
+        btn.setUserData(label);
+
+        HBox graphic = new HBox(12);
+        graphic.setAlignment(Pos.CENTER_LEFT);
+        
+        Label iconLbl = new Label(icon);
+        iconLbl.setStyle("-fx-font-size: 14px; -fx-min-width: 24px;");
+        iconLbl.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        
+        Label textLbl = new Label(label);
+        textLbl.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        
+        graphic.getChildren().addAll(iconLbl, textLbl, spacer);
+        
+        if (count != null && count > 0) {
+            Label badge = new Label(String.valueOf(count));
+            badge.getStyleClass().add("nav-badge");
+            badge.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            graphic.getChildren().add(badge);
+        }
+        
+        btn.setGraphic(graphic);
 
         btn.setOnAction(e -> {
             navigateTo(label);
             setActiveButton(btn);
             
-            // If navigating, update the unread count on the Notifications button
-            if (navButtons.containsKey("Notifications")) {
-                Button notifBtn = navButtons.get("Notifications");
-                if (notifBtn != null) {
-                    long unreadCount = facade.getUnreadNotificationCount();
-                    notifBtn.setText("🔔   Notifications" + (unreadCount > 0 ? " (" + unreadCount + ")" : ""));
+            if ("Notifications".equals(label)) {
+                long unread = facade.getUnreadNotificationCount();
+                if (unread == 0) {
+                    if (graphic.getChildren().size() > 3) {
+                        graphic.getChildren().remove(3);
+                    }
+                } else {
+                    if (graphic.getChildren().size() > 3) {
+                        ((Label)graphic.getChildren().get(3)).setText(String.valueOf(unread));
+                    } else {
+                        Label badge = new Label(String.valueOf(unread));
+                        badge.getStyleClass().add("nav-badge");
+                        badge.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+                        graphic.getChildren().add(badge);
+                    }
                 }
             }
         });
@@ -144,9 +211,7 @@ public class MainLayout extends BorderPane {
             setActiveButton(btn);
         }
         
-        String baseLabel = label.split(" \\(")[0];
-        navButtons.put(baseLabel, btn);
-
+        navButtons.put(label, btn);
         return btn;
     }
 
@@ -177,11 +242,22 @@ public class MainLayout extends BorderPane {
             case "Sessions" -> new SessionView(facade);
             case "Maintenance" -> new MaintenanceView(facade);
             case "Notifications" -> new NotificationView(facade);
-            case "Users" -> new UserManagementView(facade);
+            case "Follow Ups" -> new FollowUpView(facade);
+            case "Payments" -> new PaymentView(facade);
+            case "Reports" -> facade.getCurrentUser().getRole() == com.iwfc.model.Role.ADMIN ? new AdminReportsView(facade) : new AnalysisView(facade);
+            case "Team" -> new UserManagementView(facade); // Updated mapping from Users to Team
+            case "Members" -> new MembersManagementView(facade);
+            case "Workout Plans" -> new WorkoutPlansView(facade);
             default -> new DashboardView(facade, this::navigateToWithHighlight);
         };
 
         // Insert content behind any existing toasts
         contentArea.getChildren().add(0, content);
+
+        // Add premium fade-in animation
+        FadeTransition ft = new FadeTransition(Duration.millis(300), content);
+        ft.setFromValue(0.0);
+        ft.setToValue(1.0);
+        ft.play();
     }
 }

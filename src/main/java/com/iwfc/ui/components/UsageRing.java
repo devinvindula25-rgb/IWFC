@@ -31,14 +31,16 @@ public class UsageRing extends StackPane {
 
     private double currentValue;
     private double maxValue;
+    private final com.iwfc.model.EquipmentStatus status;
 
-    public UsageRing(double currentValue, double maxValue) {
+    public UsageRing(double currentValue, double maxValue, com.iwfc.model.EquipmentStatus status) {
         this.currentValue = currentValue;
         this.maxValue = maxValue;
+        this.status = status;
         this.animatedProgress = new SimpleDoubleProperty(0);
         this.animatedValue = new SimpleDoubleProperty(0);
 
-        canvas = new Canvas(SIZE, SIZE);
+        canvas = new Canvas(SIZE, SIZE / 2 + STROKE_WIDTH); // Height is half size plus stroke
         
         centerLabel = new Label("0");
         centerLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
@@ -49,9 +51,12 @@ public class UsageRing extends StackPane {
             centerLabel.setText(String.format("%.0f", newVal.doubleValue()))
         );
 
-        setAlignment(Pos.CENTER);
-        setPrefSize(SIZE, SIZE);
-        setMaxSize(SIZE, SIZE);
+        setAlignment(Pos.BOTTOM_CENTER);
+        setPrefSize(SIZE, SIZE / 2 + STROKE_WIDTH);
+        setMaxSize(SIZE, SIZE / 2 + STROKE_WIDTH);
+        
+        // Push the label slightly up from the absolute bottom
+        centerLabel.setTranslateY(-2); 
         getChildren().addAll(canvas, centerLabel);
 
         animatedProgress.addListener((obs, oldVal, newVal) -> draw(newVal.doubleValue()));
@@ -81,40 +86,29 @@ public class UsageRing extends StackPane {
 
         gc.clearRect(0, 0, SIZE, SIZE);
 
-        // Background track ring
-        gc.setStroke(Color.web("#ffffff", 0.05)); // Subtle transparent background
+        // Background track arc (180 degree semi-circle)
+        gc.setStroke(Color.web("#ffffff", 0.05)); 
         gc.setLineWidth(STROKE_WIDTH);
-        gc.strokeOval(STROKE_WIDTH / 2, STROKE_WIDTH / 2, radius * 2, radius * 2);
+        gc.strokeArc(STROKE_WIDTH / 2, STROKE_WIDTH / 2, radius * 2, radius * 2, 180, -180, javafx.scene.shape.ArcType.OPEN);
 
-        // Determine glow/arc color based on threshold
+        // Determine color based on exact status
         Color ringColor;
-        if (progress >= 0.9) {
-            ringColor = Color.web("#FF6B6B"); // Red
-        } else if (progress >= 0.7) {
-            ringColor = Color.web("#FFD43B"); // Yellow
-        } else {
-            ringColor = Color.web("#51CF66"); // Green
+        switch (this.status) {
+            case FAULTY -> ringColor = Color.web("#ef4444"); // Red
+            case UNDER_MAINTENANCE -> ringColor = Color.web("#f59e0b"); // Yellow
+            default -> ringColor = Color.web("#4ade80"); // Green
         }
 
         // Apply drop shadow glow to the canvas itself matching the color
         javafx.scene.effect.DropShadow glow = new javafx.scene.effect.DropShadow();
-        glow.setColor(ringColor);
+        glow.setColor(new Color(ringColor.getRed(), ringColor.getGreen(), ringColor.getBlue(), 0.3));
         glow.setRadius(10);
-        glow.setSpread(0.2);
         canvas.setEffect(glow);
 
+        // Draw progress arc
         gc.setStroke(ringColor);
-        gc.setLineWidth(STROKE_WIDTH);
-        gc.setLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
-        
-        double arcAngle = progress * 360;
-        if (arcAngle > 0) {
-            gc.strokeArc(STROKE_WIDTH / 2, STROKE_WIDTH / 2,
-                    radius * 2, radius * 2, 90, -arcAngle,
-                    javafx.scene.shape.ArcType.OPEN);
-        }
+        gc.strokeArc(STROKE_WIDTH / 2, STROKE_WIDTH / 2, radius * 2, radius * 2, 180, -180 * progress, javafx.scene.shape.ArcType.OPEN);
     }
-
     public void update(double currentValue, double maxValue) {
         this.currentValue = currentValue;
         this.maxValue = maxValue;

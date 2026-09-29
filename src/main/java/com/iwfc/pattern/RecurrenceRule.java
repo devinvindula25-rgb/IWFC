@@ -4,10 +4,10 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 public class RecurrenceRule {
-    private DayOfWeek dayOfWeek;
-    private LocalTime startTime;
-    private int durationMinutes;
-    private int weeksToRepeat;
+    private final DayOfWeek dayOfWeek;
+    private final LocalTime startTime;
+    private final int durationMinutes;
+    private final int weeksToRepeat;
 
     public RecurrenceRule(DayOfWeek dayOfWeek, LocalTime startTime, int durationMinutes, int weeksToRepeat) {
         this.dayOfWeek = dayOfWeek;

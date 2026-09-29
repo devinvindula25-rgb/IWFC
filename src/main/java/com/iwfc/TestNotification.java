@@ -1,7 +1,6 @@
 package com.iwfc;
 
 import com.iwfc.facade.IWFCSystemFacade;
-import com.iwfc.model.Notification;
 
 public class TestNotification {
     public static void main(String[] args) {

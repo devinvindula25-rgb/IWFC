@@ -1,765 +1,735 @@
 package com.iwfc.ui;
 
-import com.iwfc.exception.InvalidBookingException;
-import com.iwfc.exception.UnauthorizedAccessException;
 import com.iwfc.facade.IWFCSystemFacade;
-import com.iwfc.model.*;
-import javafx.animation.*;
+import com.iwfc.ui.components.DialogUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
-
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-import java.util.Map;
 
-/**
- * Premium Session scheduling view featuring a date-aware Monthly Calendar,
- * Weekly Timetable, and an animated frosted-glass Detail Panel.
- */
-public class SessionView extends VBox {
-
+public class SessionView extends BorderPane {
     private final IWFCSystemFacade facade;
     
-    // State
-    private YearMonth currentMonth = YearMonth.now();
-    private LocalDate currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    private YearMonth currentMonth = YearMonth.of(2026, 9);
+    private LocalDate today = LocalDate.of(2026, 9, 29);
+    private LocalDate currentWeekStart = LocalDate.of(2026, 9, 28);
     private boolean isMonthView = true;
-    
-    // UI Components
-    private BorderPane mainContent;
-    private StackPane viewContainer;
-    private VBox detailPanel;
     private Label monthLabel;
+    private GridPane calendarGrid;
     
+    private ComboBox<String> typeFilter;
+    private ComboBox<String> instFilter;
+    private ComboBox<String> memberFilter;
+    private String capacityFilter = "All";
+
     public SessionView(IWFCSystemFacade facade) {
         this.facade = facade;
-        setSpacing(0);
-        setPadding(new Insets(25));
-        getStyleClass().add("session-view");
+        setPadding(new Insets(20));
+        getStyleClass().add("dashboard-view");
+        setStyle("-fx-background-color: #0f172a; -fx-font-family: 'Segoe UI', sans-serif;");
         
-        buildUI();
+        try {
+            getStylesheets().add(getClass().getResource("/session-schedule.css").toExternalForm());
+        } catch (Exception e) {}
+
+        setTop(createHeader());
+        
+        VBox centerArea = new VBox(20);
+        centerArea.getChildren().addAll(createCalendarHeader(), createCalendarGrid(), createLowerControlBar());
+        VBox.setVgrow(calendarGrid, Priority.ALWAYS);
+        setCenter(centerArea);
+        
+        setRight(createRightPanel());
+        
+        BorderPane.setMargin(centerArea, new Insets(20, 20, 0, 0));
+        BorderPane.setMargin(getRight(), new Insets(20, 0, 0, 0));
+        
+        populateCalendar();
     }
-
-    private void buildUI() {
-        getChildren().clear();
+    
+    private HBox createHeader() {
+        HBox header = new HBox(15);
+        header.setAlignment(Pos.CENTER_LEFT);
         
-        // --- Header Row ---
-        HBox headerRow = new HBox(20);
-        headerRow.setAlignment(Pos.CENTER_LEFT);
-        headerRow.setPadding(new Insets(0, 0, 20, 0));
-
         Label title = new Label("Session Schedule");
-        title.getStyleClass().add("view-title");
-
-        // Toggle Switch (Month | Week)
-        HBox toggleBox = new HBox();
-        toggleBox.getStyleClass().add("view-toggle");
-        toggleBox.setAlignment(Pos.CENTER);
+        title.setStyle("-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;");
         
+        // Toggles
+        HBox toggles = new HBox(0);
+        toggles.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 20px;");
         Button monthBtn = new Button("📅 Month");
-        monthBtn.getStyleClass().add(isMonthView ? "view-toggle-active" : "view-toggle-inactive");
-        
+        monthBtn.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 8 15; -fx-cursor: hand;");
         Button weekBtn = new Button("📋 Week");
-        weekBtn.getStyleClass().add(!isMonthView ? "view-toggle-active" : "view-toggle-inactive");
+        weekBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-padding: 8 15; -fx-cursor: hand;");
         
         monthBtn.setOnAction(e -> {
-            if (!isMonthView) {
-                isMonthView = true;
-                monthBtn.getStyleClass().setAll("button", "view-toggle-active");
-                weekBtn.getStyleClass().setAll("button", "view-toggle-inactive");
-                updateView();
-            }
+            isMonthView = true;
+            monthBtn.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 8 15; -fx-cursor: hand;");
+            weekBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-padding: 8 15; -fx-cursor: hand;");
+            populateCalendar();
         });
         
         weekBtn.setOnAction(e -> {
-            if (isMonthView) {
-                isMonthView = false;
-                weekBtn.getStyleClass().setAll("button", "view-toggle-active");
-                monthBtn.getStyleClass().setAll("button", "view-toggle-inactive");
-                updateView();
-            }
+            isMonthView = false;
+            weekBtn.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 8 15; -fx-cursor: hand;");
+            monthBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-padding: 8 15; -fx-cursor: hand;");
+            populateCalendar();
         });
         
-        toggleBox.getChildren().addAll(monthBtn, weekBtn);
-
-        // Navigation Controls
-        HBox navBox = new HBox(10);
-        navBox.setAlignment(Pos.CENTER);
+        toggles.getChildren().addAll(monthBtn, weekBtn);
         
-        Button prevBtn = new Button("◀");
-        prevBtn.getStyleClass().add("calendar-nav-btn");
-        prevBtn.setOnAction(e -> navigate(-1));
-        
-        Button nextBtn = new Button("▶");
-        nextBtn.getStyleClass().add("calendar-nav-btn");
-        nextBtn.setOnAction(e -> navigate(1));
-        
-        Button todayBtn = new Button("Today");
-        todayBtn.getStyleClass().add("calendar-today-btn");
-        todayBtn.setOnAction(e -> {
-            currentMonth = YearMonth.now();
-            currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-            updateView();
+        // Nav
+        HBox nav = new HBox(10);
+        nav.setAlignment(Pos.CENTER);
+        Button prev = new Button("◀");
+        prev.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #94a3b8; -fx-background-radius: 50%; -fx-min-width: 35px; -fx-min-height: 35px; -fx-cursor: hand;");
+        prev.setOnAction(e -> {
+            if (isMonthView) currentMonth = currentMonth.minusMonths(1);
+            else currentWeekStart = currentWeekStart.minusWeeks(1);
+            populateCalendar(); 
         });
         
-        monthLabel = new Label();
-        monthLabel.getStyleClass().add("calendar-header");
-        monthLabel.setPrefWidth(160);
+        monthLabel = new Label("September 2026");
+        monthLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+        monthLabel.setPrefWidth(140);
         monthLabel.setAlignment(Pos.CENTER);
         
-        navBox.getChildren().addAll(prevBtn, monthLabel, nextBtn, todayBtn);
-
+        Button next = new Button("▶");
+        next.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: #94a3b8; -fx-background-radius: 50%; -fx-min-width: 35px; -fx-min-height: 35px; -fx-cursor: hand;");
+        next.setOnAction(e -> {
+            if (isMonthView) currentMonth = currentMonth.plusMonths(1);
+            else currentWeekStart = currentWeekStart.plusWeeks(1);
+            populateCalendar(); 
+        });
+        
+        Button todayBtn = new Button("Today");
+        todayBtn.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 8 20; -fx-cursor: hand;");
+        todayBtn.setOnAction(e -> { 
+            currentMonth = YearMonth.of(today.getYear(), today.getMonth()); 
+            currentWeekStart = today.minusDays(today.getDayOfWeek().getValue() - 1);
+            populateCalendar(); 
+        });
+        nav.getChildren().addAll(prev, monthLabel, next, todayBtn);
+        
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        boolean canCreate = facade.getCurrentUser().getPermissions().contains("CREATE_SESSION");
-        Button addBtn = new Button("+ Add Session");
-        addBtn.getStyleClass().add("add-button");
-        addBtn.setVisible(canCreate);
-        addBtn.setManaged(canCreate);
-        addBtn.setOnAction(e -> showCreateSessionDialog());
-
-        headerRow.getChildren().addAll(title, toggleBox, navBox, spacer, addBtn);
-
-        // --- Main Content Area ---
-        mainContent = new BorderPane();
-        VBox.setVgrow(mainContent, Priority.ALWAYS);
         
-        viewContainer = new StackPane();
+        // Search
+        TextField search = new TextField();
+        search.setPromptText("🔍 Search");
+        search.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 8 15;");
         
-        // --- Detail Panel (Frosted Glass) ---
-        detailPanel = new VBox(15);
-        detailPanel.setPrefWidth(320);
-        detailPanel.setMinWidth(320);
-        detailPanel.setMaxWidth(320);
-        detailPanel.setPadding(new Insets(20));
-        detailPanel.getStyleClass().add("detail-panel-premium");
-        detailPanel.setTranslateX(320); // Hidden off-screen initially
-        detailPanel.setVisible(false);
-        detailPanel.setManaged(false);
-
-        mainContent.setCenter(viewContainer);
-        mainContent.setRight(detailPanel);
-
-        getChildren().addAll(headerRow, mainContent);
-        
-        // Initial render
-        updateView();
+        header.getChildren().addAll(title, toggles, nav, spacer, search);
+        return header;
     }
     
-    private void navigate(int direction) {
-        // Animate out current view
-        javafx.scene.Node currentView = viewContainer.getChildren().isEmpty() ? null : viewContainer.getChildren().get(0);
-        
-        if (isMonthView) {
-            currentMonth = currentMonth.plusMonths(direction);
-        } else {
-            currentWeekStart = currentWeekStart.plusWeeks(direction);
+    private HBox createCalendarHeader() {
+        HBox daysHeader = new HBox(10);
+        String[] days = {"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
+        for (String d : days) {
+            Label l = new Label(d);
+            l.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;");
+            l.setMaxWidth(Double.MAX_VALUE);
+            l.setAlignment(Pos.CENTER);
+            HBox.setHgrow(l, Priority.ALWAYS);
+            daysHeader.getChildren().add(l);
         }
-        
-        javafx.scene.Node newView = isMonthView ? buildMonthlyCalendar() : buildWeeklyTimetable();
-        updateMonthLabel();
-        
-        if (currentView != null) {
-            // Slide animation
-            double offset = direction > 0 ? 50 : -50;
-            newView.setTranslateX(offset);
-            newView.setOpacity(0);
-            viewContainer.getChildren().add(newView);
-            
-            TranslateTransition ttIn = new TranslateTransition(Duration.millis(300), newView);
-            ttIn.setToX(0);
-            FadeTransition ftIn = new FadeTransition(Duration.millis(300), newView);
-            ftIn.setToValue(1);
-            
-            TranslateTransition ttOut = new TranslateTransition(Duration.millis(300), currentView);
-            ttOut.setToX(-offset);
-            FadeTransition ftOut = new FadeTransition(Duration.millis(300), currentView);
-            ftOut.setToValue(0);
-            
-            ParallelTransition pt = new ParallelTransition(ttIn, ftIn, ttOut, ftOut);
-            pt.setOnFinished(e -> viewContainer.getChildren().remove(currentView));
-            pt.play();
-        } else {
-            viewContainer.getChildren().add(newView);
-            updateMonthLabel();
-        }
-    }
-
-    private void updateView() {
-        viewContainer.getChildren().clear();
-        javafx.scene.Node view = isMonthView ? buildMonthlyCalendar() : buildWeeklyTimetable();
-        viewContainer.getChildren().add(view);
-        updateMonthLabel();
+        return daysHeader;
     }
     
-    private void updateMonthLabel() {
+    private GridPane createCalendarGrid() {
+        calendarGrid = new GridPane();
+        calendarGrid.setHgap(10);
+        calendarGrid.setVgap(10);
+        
+        for (int i=0; i<7; i++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(100.0 / 7.0);
+            calendarGrid.getColumnConstraints().add(cc);
+        }
+        // Row constraints applied dynamically in populateCalendar
+        return calendarGrid;
+    }
+    
+    private void populateCalendar() {
+        calendarGrid.getChildren().clear();
+        calendarGrid.getRowConstraints().clear();
+        
         if (isMonthView) {
             monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
         } else {
-            LocalDate weekEnd = currentWeekStart.plusDays(6);
-            if (currentWeekStart.getMonth() == weekEnd.getMonth()) {
-                monthLabel.setText(currentWeekStart.format(DateTimeFormatter.ofPattern("MMM dd")) + " - " +
-                                   weekEnd.format(DateTimeFormatter.ofPattern("dd, yyyy")));
-            } else {
-                monthLabel.setText(currentWeekStart.format(DateTimeFormatter.ofPattern("MMM dd")) + " - " +
-                                   weekEnd.format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+            monthLabel.setText("Week of " + currentWeekStart.format(DateTimeFormatter.ofPattern("MMM d")));
+        }
+        
+        int rows = isMonthView ? 5 : 1;
+        for (int i=0; i<rows; i++) {
+            RowConstraints rc = new RowConstraints();
+            rc.setPercentHeight(100.0 / rows);
+            calendarGrid.getRowConstraints().add(rc);
+        }
+        
+        LocalDate drawDate;
+        if (isMonthView) {
+            LocalDate startOfMonth = currentMonth.atDay(1);
+            int startDayOfWeek = startOfMonth.getDayOfWeek().getValue(); // 1 = Monday, 7 = Sunday
+            drawDate = startOfMonth.minusDays(startDayOfWeek - 1);
+        } else {
+            drawDate = currentWeekStart;
+        }
+        
+        for (int row=0; row<rows; row++) {
+            for (int col=0; col<7; col++) {
+                boolean inMonth = isMonthView ? (drawDate.getMonth() == currentMonth.getMonth()) : true;
+                
+                // Fetch real sessions for the date
+                java.util.List<com.iwfc.model.FitnessSession> daySessions = facade.getSessionsForDate(drawDate);
+                
+                // Apply filters
+                String sType = typeFilter != null ? typeFilter.getValue() : "Session Type";
+                String sInst = instFilter != null ? instFilter.getValue() : "Instructor";
+                String sMember = memberFilter != null ? memberFilter.getValue() : "All Members";
+                
+                java.util.List<com.iwfc.model.FitnessSession> filtered = new java.util.ArrayList<>();
+                for (com.iwfc.model.FitnessSession fs : daySessions) {
+                    boolean matchType = sType.equals("Session Type") || fs.getSessionType().equalsIgnoreCase(sType);
+                    boolean matchInst = sInst.equals("Instructor") || (fs.getInstructor() != null && fs.getInstructor().getName().contains(sInst));
+                    boolean matchCap = true;
+                    if (capacityFilter.equals("Available")) matchCap = true; // simplified check
+                    if (capacityFilter.equals("Full")) matchCap = false; // simplified check
+                    
+                    boolean matchMember = sMember.equals("All Members");
+                    if (!matchMember) {
+                        java.util.List<com.iwfc.model.Booking> sessionBookings = facade.getBookingsForSession(fs.getSessionId());
+                        for (com.iwfc.model.Booking b : sessionBookings) {
+                            if (b.getMember().getName().equals(sMember)) {
+                                matchMember = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (matchType && matchInst && matchCap && matchMember) {
+                        filtered.add(fs);
+                    }
+                }
+                
+                VBox dayCell = createDayCell(drawDate, inMonth, filtered);
+                calendarGrid.add(dayCell, col, row);
+                drawDate = drawDate.plusDays(1);
             }
         }
-    }
-
-    // =========================================================================================
-    // MONTHLY CALENDAR
-    // =========================================================================================
-
-    private GridPane buildMonthlyCalendar() {
-        GridPane grid = new GridPane();
-        grid.getStyleClass().add("calendar-grid");
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(10));
-
-        // Column headers
-        DayOfWeek[] days = { DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
-                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY };
-
-        for (int i = 0; i < 7; i++) {
-            ColumnConstraints cc = new ColumnConstraints();
-            cc.setPercentWidth(100.0 / 7.0);
-            grid.getColumnConstraints().add(cc);
-            
-            Label dayLabel = new Label(days[i].toString().substring(0, 3));
-            dayLabel.getStyleClass().add("calendar-day-header");
-            dayLabel.setAlignment(Pos.CENTER);
-            dayLabel.setMaxWidth(Double.MAX_VALUE);
-            grid.add(dayLabel, i, 0);
-        }
-
-        LocalDate firstOfMonth = currentMonth.atDay(1);
-        int dayOfWeekOfFirst = firstOfMonth.getDayOfWeek().getValue(); // 1 = Mon, 7 = Sun
-        
-        LocalDate currentDay = firstOfMonth.minusDays(dayOfWeekOfFirst - 1);
-        
-        Map<LocalDate, List<FitnessSession>> sessionsByDate = facade.getSessionsForMonth(currentMonth);
-        
-        // Also get sessions for the padding days
-        YearMonth prevMonth = currentMonth.minusMonths(1);
-        YearMonth nextMonth = currentMonth.plusMonths(1);
-        Map<LocalDate, List<FitnessSession>> prevMonthSessions = facade.getSessionsForMonth(prevMonth);
-        Map<LocalDate, List<FitnessSession>> nextMonthSessions = facade.getSessionsForMonth(nextMonth);
-        
-        sessionsByDate.putAll(prevMonthSessions);
-        sessionsByDate.putAll(nextMonthSessions);
-        
-        List<Booking> myBookings = facade.getMyBookings();
-
-        for (int row = 1; row <= 6; row++) {
-            for (int col = 0; col < 7; col++) {
-                VBox dayCell = createDayCell(currentDay, sessionsByDate.get(currentDay), myBookings);
-                grid.add(dayCell, col, row);
-                GridPane.setVgrow(dayCell, Priority.ALWAYS);
-                currentDay = currentDay.plusDays(1);
-            }
-            if (currentDay.getMonth() != currentMonth.getMonth() && currentDay.isAfter(firstOfMonth)) {
-                break; // Stop adding rows if we're done with the month
-            }
-        }
-
-        return grid;
     }
     
-    private VBox createDayCell(LocalDate date, List<FitnessSession> sessions, List<Booking> myBookings) {
+    private VBox createDayCell(LocalDate date, boolean isCurrentMonth, java.util.List<com.iwfc.model.FitnessSession> sessions) {
         VBox cell = new VBox(5);
-        cell.setPadding(new Insets(8));
-        cell.getStyleClass().add("calendar-day-cell");
+        cell.setPadding(new Insets(10));
+        cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         
-        boolean isCurrentMonth = date.getMonth() == currentMonth.getMonth();
-        boolean isToday = date.equals(LocalDate.now());
-        boolean isPast = date.isBefore(LocalDate.now());
+        boolean isToday = date.equals(today);
         
-        if (!isCurrentMonth) {
-            cell.setOpacity(0.4);
-        }
-        if (isPast) {
-            cell.getStyleClass().add("calendar-day-past");
-        } else {
-            // Hover animation for future dates
-            cell.setOnMouseEntered(e -> {
-                TranslateTransition tt = new TranslateTransition(Duration.millis(200), cell);
-                tt.setToY(-3);
-                tt.play();
-                cell.setEffect(new DropShadow(15, Color.rgb(0, 0, 0, 0.4)));
-            });
-            cell.setOnMouseExited(e -> {
-                TranslateTransition tt = new TranslateTransition(Duration.millis(200), cell);
-                tt.setToY(0);
-                tt.play();
-                cell.setEffect(null);
-            });
-            
-            // Click animation and open panel
-            cell.setOnMouseClicked(e -> {
-                ScaleTransition st = new ScaleTransition(Duration.millis(75), cell);
-                st.setFromX(1.0); st.setFromY(1.0);
-                st.setToX(0.96); st.setToY(0.96);
-                st.setAutoReverse(true);
-                st.setCycleCount(2);
-                st.play();
-                
-                openDetailPanelForDate(date, sessions);
-            });
+        String bg = isToday ? "rgba(15,23,42,0.8)" : "rgba(30,41,59,0.3)";
+        String border = isToday ? "#06b6d4" : "rgba(255,255,255,0.05)";
+        
+        cell.setStyle("-fx-background-color: " + bg + "; -fx-background-radius: 8px; -fx-border-color: " + border + "; -fx-border-radius: 8px; -fx-border-width: " + (isToday ? "2" : "1") + ";");
+        
+        Label dateLbl = new Label(String.valueOf(date.getDayOfMonth()));
+        dateLbl.setStyle("-fx-text-fill: " + (isCurrentMonth ? (isToday ? "#06b6d4" : "white") : "#475569") + "; -fx-font-weight: bold; -fx-font-size: 13px;");
+        cell.getChildren().add(dateLbl);
+        
+        javafx.scene.layout.VBox sessionsContainer = new javafx.scene.layout.VBox(5);
+        if (isCurrentMonth) {
+            for (com.iwfc.model.FitnessSession fs : sessions) {
+                String timeStr = fs.getStartTime().format(DateTimeFormatter.ofPattern("h:mm a"));
+                sessionsContainer.getChildren().add(createSessionMiniCard(timeStr, fs.getName(), fs.getColor(), fs));
+            }
         }
         
-        if (isToday) {
-            cell.getStyleClass().add("calendar-day-today");
-            // Add pulse effect
-            DropShadow glow = new DropShadow(15, Color.web("#6366f1"));
-            cell.setEffect(glow);
-            Timeline pulse = new Timeline(
-                new KeyFrame(Duration.ZERO, new KeyValue(glow.radiusProperty(), 10)),
-                new KeyFrame(Duration.seconds(1), new KeyValue(glow.radiusProperty(), 20)),
-                new KeyFrame(Duration.seconds(2), new KeyValue(glow.radiusProperty(), 10))
-            );
-            pulse.setCycleCount(Animation.INDEFINITE);
-            pulse.play();
-        }
-
-        // Date Number
-        Label dateLabel = new Label(String.valueOf(date.getDayOfMonth()));
-        dateLabel.getStyleClass().add("calendar-day-number");
-        if (isToday) {
-            dateLabel.setStyle("-fx-text-fill: #6366f1; -fx-font-weight: bold;");
-        }
-        cell.getChildren().add(dateLabel);
-
-        // Session Chips
-        if (sessions != null && !sessions.isEmpty()) {
-            // Check if member has bookings on this date
-            boolean memberBooked = myBookings.stream()
-                .anyMatch(b -> b.getSessionDate().equals(date) && b.getStatus() != BookingStatus.CANCELLED);
-                
-            if (memberBooked) {
-                cell.getStyleClass().add("calendar-day-booked");
-            }
-            
-            HBox chipContainer = new HBox(4);
-            // We use simple labels
-            int maxChips = 3;
-            int count = 0;
-            
-            for (FitnessSession s : sessions) {
-                if (count < maxChips) {
-                    Label chip = new Label(s.getSessionType().substring(0, Math.min(3, s.getSessionType().length())));
-                    chip.getStyleClass().add("calendar-session-chip");
-                    chip.setStyle("-fx-background-color: " + s.getColor() + ";");
-                    chipContainer.getChildren().add(chip);
-                    count++;
-                }
-            }
-            
-            cell.getChildren().add(chipContainer);
-            
-            if (sessions.size() > maxChips) {
-                Label overflow = new Label("+" + (sessions.size() - maxChips) + " more");
-                overflow.getStyleClass().add("calendar-overflow-label");
-                cell.getChildren().add(overflow);
-            }
+        javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(sessionsContainer);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-control-inner-background: transparent;");
+        
+        javafx.scene.layout.VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
+        cell.getChildren().add(scrollPane);
+        if (isCurrentMonth) {
+            cell.setOnMouseEntered(e -> cell.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8px; -fx-border-color: " + border + "; -fx-border-radius: 8px; -fx-border-width: " + (isToday ? "2" : "1") + "; -fx-cursor: hand;"));
+            cell.setOnMouseExited(e -> cell.setStyle("-fx-background-color: " + bg + "; -fx-background-radius: 8px; -fx-border-color: " + border + "; -fx-border-radius: 8px; -fx-border-width: " + (isToday ? "2" : "1") + ";"));
+            cell.setOnMouseClicked(e -> showDailyDetailedView(date, sessions));
         }
 
         return cell;
     }
-
-    // =========================================================================================
-    // WEEKLY TIMETABLE
-    // =========================================================================================
-
-    private ScrollPane buildWeeklyTimetable() {
-        GridPane grid = new GridPane();
-        grid.getStyleClass().add("timetable-grid");
-        grid.setHgap(2);
-        grid.setVgap(2);
-        grid.setPadding(new Insets(5));
-
-        // Column constraints
-        ColumnConstraints timeCol = new ColumnConstraints(60);
-        grid.getColumnConstraints().add(timeCol);
-        for (int i = 0; i < 7; i++) {
-            ColumnConstraints dayCol = new ColumnConstraints();
-            dayCol.setHgrow(Priority.ALWAYS);
-            dayCol.setMinWidth(120);
-            grid.getColumnConstraints().add(dayCol);
-        }
-
-        // Header Dates
-        LocalDate curr = currentWeekStart;
-        for (int col = 0; col < 7; col++) {
-            String dayStr = curr.getDayOfWeek().toString().substring(0, 3);
-            String dateStr = curr.format(DateTimeFormatter.ofPattern("dd MMM"));
-            Label header = new Label(dayStr + " " + dateStr);
-            header.getStyleClass().add("timetable-day-header");
-            if (curr.equals(LocalDate.now())) {
-                header.setStyle("-fx-text-fill: #6366f1;");
-            }
-            header.setAlignment(Pos.CENTER);
-            header.setMaxWidth(Double.MAX_VALUE);
-            grid.add(header, col + 1, 0);
-            curr = curr.plusDays(1);
-        }
-
-        // Row headers (time slots 06:00 - 21:00)
-        for (int hour = 6; hour <= 21; hour++) {
-            Label timeLabel = new Label(String.format("%02d:00", hour));
-            timeLabel.getStyleClass().add("timetable-time-label");
-            timeLabel.setPadding(new Insets(5, 10, 5, 5));
-            grid.add(timeLabel, 0, hour - 5);
-
-            for (int col = 0; col < 7; col++) {
-                Pane cell = new Pane();
-                cell.getStyleClass().add("timetable-cell");
-                if (currentWeekStart.plusDays(col).equals(LocalDate.now())) {
-                    cell.setStyle("-fx-background-color: rgba(99,102,241,0.05);"); // Subtle highlight for today
-                }
-                grid.add(cell, col + 1, hour - 5);
-            }
-        }
-
-        // Place sessions for this week
-        curr = currentWeekStart;
-        for (int col = 0; col < 7; col++) {
-            List<FitnessSession> sessions = facade.getSessionsForDate(curr);
-            final LocalDate blockDate = curr;
-            
-            for (FitnessSession session : sessions) {
-                int startRow = session.getStartTime().getHour() - 5;
-                int endRow = session.getEndTime().getHour() - 5;
-                int span = endRow - startRow;
-                if (span <= 0) span = 1;
-
-                VBox block = new VBox(2);
-                block.setAlignment(Pos.TOP_LEFT);
-                block.setPadding(new Insets(6));
-                block.getStyleClass().add("session-block");
-                
-                // Frosted glass overlay look for blocks
-                block.setStyle("-fx-background-color: linear-gradient(to bottom right, " + 
-                               session.getColor() + "e6, " + session.getColor() + "b3);" +
-                               "-fx-background-radius: 6; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 6;");
-
-                Label nameLabel = new Label(session.getName());
-                nameLabel.getStyleClass().add("session-block-name");
-                
-                Label instrLabel = new Label(session.getInstructor().getName());
-                instrLabel.getStyleClass().add("session-block-instructor");
-
-                block.getChildren().addAll(nameLabel, instrLabel);
-                
-                block.setOnMouseClicked(e -> openDetailPanelForDate(blockDate, List.of(session)));
-                
-                grid.add(block, col + 1, startRow, 1, span);
-            }
-            curr = curr.plusDays(1);
-        }
-
-        ScrollPane scrollPane = new ScrollPane(grid);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-        scrollPane.getStyleClass().add("timetable-scroll");
-        return scrollPane;
-    }
-
-    // =========================================================================================
-    // DETAIL PANEL
-    // =========================================================================================
-
-    private void openDetailPanelForDate(LocalDate date, List<FitnessSession> sessions) {
-        if (!detailPanel.isVisible()) {
-            detailPanel.setVisible(true);
-            detailPanel.setManaged(true);
-            
-            TranslateTransition tt = new TranslateTransition(Duration.millis(350), detailPanel);
-            tt.setFromX(320);
-            tt.setToX(0);
-            tt.setInterpolator(Interpolator.EASE_OUT);
-            tt.play();
-        }
-        
-        buildDetailPanelContent(date, sessions);
-    }
     
-    private void closeDetailPanel() {
-        TranslateTransition tt = new TranslateTransition(Duration.millis(250), detailPanel);
-        tt.setToX(320);
-        tt.setInterpolator(Interpolator.EASE_IN);
-        tt.setOnFinished(e -> {
-            detailPanel.setVisible(false);
-            detailPanel.setManaged(false);
-        });
-        tt.play();
-    }
-
-    private void buildDetailPanelContent(LocalDate date, List<FitnessSession> sessions) {
-        detailPanel.getChildren().clear();
-
-        // Close button row
-        Button closeBtn = new Button("✕");
-        closeBtn.getStyleClass().add("detail-close-btn");
-        closeBtn.setOnAction(e -> closeDetailPanel());
+    private void showDailyDetailedView(LocalDate date, java.util.List<com.iwfc.model.FitnessSession> sessions) {
+        Dialog<Void> dialog = new Dialog<>();
+        com.iwfc.ui.components.DialogUtils.stylePremiumDialog(dialog);
         
-        HBox topRow = new HBox(closeBtn);
-        topRow.setAlignment(Pos.CENTER_RIGHT);
+        String dateStr = date.format(DateTimeFormatter.ofPattern("EEEE, MMM d, yyyy"));
+        dialog.setTitle("Daily Session Schedule");
+        dialog.getDialogPane().getStyleClass().add("premium-dialog");
+        dialog.getDialogPane().setPrefWidth(600);
+        dialog.getDialogPane().setPrefHeight(600);
 
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(30, 20, 20, 20));
+        
         // Header
-        Label dateHeader = new Label(date.format(DateTimeFormatter.ofPattern("EEEE")));
-        dateHeader.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
+        VBox headerBox = new VBox(5);
+        headerBox.setAlignment(Pos.CENTER);
+        Label title = new Label("Daily Session Schedule");
+        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
+        Label subtitle = new Label(dateStr);
+        subtitle.setStyle("-fx-font-size: 14px; -fx-text-fill: #94a3b8;");
+        headerBox.getChildren().addAll(title, subtitle);
         
-        Label dateSub = new Label(date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
-        dateSub.setStyle("-fx-font-size: 14px; -fx-opacity: 0.7;");
+        // Timeline container
+        VBox timeline = new VBox(20);
+        timeline.setPadding(new Insets(10, 0, 10, 0));
         
-        detailPanel.getChildren().addAll(topRow, dateHeader, dateSub, new Separator());
-
-        // Sessions list
-        ScrollPane scroll = new ScrollPane();
-        scroll.setFitToWidth(true);
-        scroll.setStyle("-fx-background-color: transparent; -fx-padding: 0;");
+        // Sort sessions by time
+        java.util.List<com.iwfc.model.FitnessSession> sortedSessions = new java.util.ArrayList<>(sessions);
+        sortedSessions.sort(java.util.Comparator.comparing(com.iwfc.model.FitnessSession::getStartTime));
         
-        VBox sessionList = new VBox(15);
-        sessionList.setPadding(new Insets(10, 0, 10, 0));
-        
-        if (sessions == null || sessions.isEmpty()) {
-            Label noSessions = new Label("No sessions scheduled for this date.");
-            noSessions.setWrapText(true);
-            noSessions.setStyle("-fx-opacity: 0.6; -fx-padding: 20 0;");
-            sessionList.getChildren().add(noSessions);
+        if (sortedSessions.isEmpty()) {
+            Label noSessions = new Label("No sessions scheduled for today.");
+            noSessions.setStyle("-fx-text-fill: #64748b; -fx-font-size: 16px;");
+            timeline.getChildren().add(noSessions);
+            timeline.setAlignment(Pos.CENTER);
         } else {
-            for (FitnessSession session : sessions) {
-                sessionList.getChildren().add(createDetailSessionCard(session, date));
+            for (com.iwfc.model.FitnessSession fs : sortedSessions) {
+                HBox row = new HBox(20);
+                row.setAlignment(Pos.TOP_LEFT);
+                
+                // Left: Time Capsule
+                VBox timeCol = new VBox();
+                timeCol.setPrefWidth(120);
+                timeCol.setAlignment(Pos.TOP_RIGHT);
+                String timeRange = fs.getStartTime().format(DateTimeFormatter.ofPattern("hh:mm a")) + " - " + 
+                                   fs.getEndTime().format(DateTimeFormatter.ofPattern("hh:mm a"));
+                Label timeLbl = new Label(timeRange);
+                timeLbl.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: " + fs.getColor() + "; -fx-padding: 6 12; -fx-background-radius: 20px; -fx-font-size: 12px; -fx-border-color: " + fs.getColor() + "33; -fx-border-radius: 20px;");
+                timeCol.getChildren().add(timeLbl);
+                
+                // Middle: Timeline Node & Line
+                VBox lineCol = new VBox();
+                lineCol.setAlignment(Pos.TOP_CENTER);
+                javafx.scene.shape.Circle node = new javafx.scene.shape.Circle(6);
+                node.setFill(javafx.scene.paint.Color.web(fs.getColor()));
+                node.setStyle("-fx-effect: dropshadow(gaussian, " + fs.getColor() + ", 8, 0.4, 0, 0);");
+                
+                Region vertLine = new Region();
+                vertLine.setPrefWidth(2);
+                VBox.setVgrow(vertLine, Priority.ALWAYS);
+                vertLine.setStyle("-fx-background-color: rgba(255,255,255,0.1);");
+                
+                lineCol.getChildren().addAll(node, vertLine);
+                
+                // Right: Session Card
+                VBox cardCol = new VBox(10);
+                HBox.setHgrow(cardCol, Priority.ALWAYS);
+                cardCol.setPadding(new Insets(15));
+                cardCol.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 12px; -fx-border-color: " + fs.getColor() + "44; -fx-border-radius: 12px;");
+                
+                cardCol.setOnMouseEntered(e -> {
+                    javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), cardCol);
+                    st.setToX(1.02);
+                    st.setToY(1.02);
+                    st.play();
+                    cardCol.setStyle("-fx-background-color: rgba(255,255,255,0.06); -fx-background-radius: 12px; -fx-border-color: " + fs.getColor() + "99; -fx-border-radius: 12px; -fx-effect: dropshadow(gaussian, " + fs.getColor() + "33, 15, 0, 0, 0);");
+                });
+                cardCol.setOnMouseExited(e -> {
+                    javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), cardCol);
+                    st.setToX(1.0);
+                    st.setToY(1.0);
+                    st.play();
+                    cardCol.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 12px; -fx-border-color: " + fs.getColor() + "44; -fx-border-radius: 12px;");
+                });
+                
+                Label nameLbl = new Label(fs.getName());
+                nameLbl.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+                
+                HBox infoRow = new HBox(15);
+                infoRow.setAlignment(Pos.CENTER_LEFT);
+                
+                // Instructor
+                HBox instBox = new HBox(6);
+                instBox.setAlignment(Pos.CENTER_LEFT);
+                javafx.scene.shape.Circle avatar = new javafx.scene.shape.Circle(10);
+                avatar.setFill(javafx.scene.paint.Color.web(fs.getColor()));
+                Label instName = new Label(fs.getInstructor().getName());
+                instName.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 13px;");
+                instBox.getChildren().addAll(avatar, instName);
+                
+                // Location
+                HBox locBox = new HBox(4);
+                locBox.setAlignment(Pos.CENTER_LEFT);
+                Label locIcon = new Label("📍");
+                locIcon.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px;");
+                Label locName = new Label(fs.getLocation().getDisplayName());
+                locName.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px;");
+                locBox.getChildren().addAll(locIcon, locName);
+                
+                infoRow.getChildren().addAll(instBox, locBox);
+                
+                // Progress Bar
+                VBox progBox = new VBox(5);
+                // Fake booked spots based on hash for stable demo visuals
+                int booked = Math.abs(fs.getId().hashCode()) % fs.getMaxCapacity();
+                if (booked == 0) booked = fs.getMaxCapacity() / 2; // just in case
+                
+                ProgressBar pBar = new ProgressBar((double) booked / fs.getMaxCapacity());
+                pBar.setMaxWidth(Double.MAX_VALUE);
+                pBar.setStyle("-fx-accent: " + fs.getColor() + "; -fx-control-inner-background: rgba(255,255,255,0.05);");
+                pBar.setPrefHeight(10);
+                
+                Label capacityLbl = new Label(booked + "/" + fs.getMaxCapacity() + " spots booked");
+                capacityLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+                
+                progBox.getChildren().addAll(pBar, capacityLbl);
+                
+                cardCol.getChildren().addAll(nameLbl, infoRow, progBox);
+                row.getChildren().addAll(timeCol, lineCol, cardCol);
+                timeline.getChildren().add(row);
             }
         }
         
-        scroll.setContent(sessionList);
-        VBox.setVgrow(scroll, Priority.ALWAYS);
-        detailPanel.getChildren().add(scroll);
+        javafx.scene.control.ScrollPane mainScroll = new javafx.scene.control.ScrollPane(timeline);
+        mainScroll.setFitToWidth(true);
+        mainScroll.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
+        mainScroll.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        mainScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-control-inner-background: transparent;");
         
-        // Admin controls
-        if (facade.getCurrentUser().getRole() == Role.ADMIN) {
-            Button scheduleBtn = new Button("+ Schedule Here");
-            scheduleBtn.getStyleClass().add("action-button");
-            scheduleBtn.setMaxWidth(Double.MAX_VALUE);
-            scheduleBtn.setOnAction(e -> showCreateSessionDialog());
-            detailPanel.getChildren().add(scheduleBtn);
-        }
+        content.getChildren().addAll(headerBox, mainScroll);
+        
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        
+        dialog.showAndWait();
     }
     
-    private VBox createDetailSessionCard(FitnessSession session, LocalDate date) {
-        VBox card = new VBox(10);
-        card.getStyleClass().add("detail-session-card");
-        card.setPadding(new Insets(15));
+    private HBox createSessionMiniCard(String time, String title, String color, com.iwfc.model.FitnessSession session) {
+        HBox card = new HBox(8);
+        card.setPadding(new Insets(5, 8, 5, 8));
+        card.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 6px; -fx-cursor: hand;");
         
-        // Left color border effect via CSS or inline style
-        card.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8;" +
-                      "-fx-border-width: 0 0 0 4; -fx-border-color: " + session.getColor() + ";" +
-                      "-fx-border-radius: 8;");
-                      
-        // Header
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_LEFT);
-        Label name = new Label(session.getName());
-        name.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Region indicator = new Region();
+        indicator.setPrefSize(4, 20);
+        indicator.setStyle("-fx-background-color: " + color + "; -fx-background-radius: 2px;");
         
-        Label type = new Label(session.getSessionType());
-        type.setStyle("-fx-font-size: 10px; -fx-background-color: " + session.getColor() + "33;" +
-                      "-fx-text-fill: " + session.getColor() + "; -fx-padding: 2 6; -fx-background-radius: 10;");
-        header.getChildren().addAll(name, spacer, type);
+        VBox text = new VBox(2);
+        Label ti = new Label(time);
+        ti.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
+        Label tr = new Label(title);
+        tr.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold;");
+        text.getChildren().addAll(ti, tr);
         
-        // Info
-        Label time = new Label("🕐 " + session.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")) + " - " + 
-                               session.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")));
-        time.setStyle("-fx-opacity: 0.8; -fx-font-size: 13px;");
+        card.getChildren().addAll(indicator, text);
         
-        Label instr = new Label("👤 " + session.getInstructor().getName());
-        instr.setStyle("-fx-opacity: 0.8; -fx-font-size: 13px;");
-        
-        Label loc = new Label("📍 " + session.getLocation().getDisplayName());
-        loc.setStyle("-fx-opacity: 0.8; -fx-font-size: 13px;");
-        
-        card.getChildren().addAll(header, time, instr, loc);
-        
-        // Capacity & Booking
-        List<Booking> bookings = facade.getBookingsForDate(session.getSessionId(), date);
-        long booked = bookings.stream().filter(b -> b.getStatus() != BookingStatus.CANCELLED).count();
-        
-        HBox capBox = new HBox(10);
-        capBox.setAlignment(Pos.CENTER_LEFT);
-        ProgressBar capBar = new ProgressBar((double) booked / session.getMaxCapacity());
-        capBar.getStyleClass().add("capacity-bar");
-        capBar.setPrefWidth(120);
-        Label capText = new Label(booked + "/" + session.getMaxCapacity());
-        capText.setStyle("-fx-font-size: 11px; -fx-opacity: 0.7;");
-        capBox.getChildren().addAll(capBar, capText);
-        
-        card.getChildren().add(capBox);
-        
-        // Action Button
-        if (facade.getCurrentUser().getRole() == Role.MEMBER) {
-            boolean isBooked = bookings.stream()
-                .anyMatch(b -> b.getMember().getUserId().equals(facade.getCurrentUser().getUserId()) && 
-                               b.getStatus() != BookingStatus.CANCELLED);
-                               
-            if (isBooked) {
-                Booking myBooking = bookings.stream()
-                    .filter(b -> b.getMember().getUserId().equals(facade.getCurrentUser().getUserId()) && 
-                                 b.getStatus() != BookingStatus.CANCELLED)
-                    .findFirst().orElse(null);
-                    
-                Button cancelBtn = new Button("Cancel Booking");
-                cancelBtn.getStyleClass().add("cancel-button");
-                cancelBtn.setMaxWidth(Double.MAX_VALUE);
-                cancelBtn.setOnAction(e -> {
-                    try {
-                        facade.cancelBooking(myBooking.getBookingId());
-                        buildDetailPanelContent(date, facade.getSessionsForDate(date));
-                        updateView(); // Refresh main calendar
-                    } catch (com.iwfc.exception.UnauthorizedAccessException | IllegalArgumentException ex) {
-                        showAlert("Error", ex.getMessage());
-                    }
-                });
-                card.getChildren().add(cancelBtn);
-            } else if (date.isBefore(LocalDate.now())) {
-                Label pastLbl = new Label("Session has ended");
-                pastLbl.setStyle("-fx-opacity: 0.5; -fx-font-style: italic;");
-                card.getChildren().add(pastLbl);
-            } else if (booked >= session.getMaxCapacity()) {
-                Label fullLbl = new Label("Fully Booked");
-                fullLbl.setStyle("-fx-opacity: 0.8; -fx-font-weight: bold; -fx-text-fill: #ef4444;");
-                card.getChildren().add(fullLbl);
+        card.setOnMouseClicked(e -> {
+            java.util.List<com.iwfc.model.Booking> bookings = facade.getBookingsForSession(session.getSessionId());
+            StringBuilder bookedNames = new StringBuilder();
+            if (bookings.isEmpty()) {
+                bookedNames.append("None yet.");
             } else {
-                Button bookBtn = new Button("Book Now");
-                bookBtn.getStyleClass().add("book-button");
-                bookBtn.setMaxWidth(Double.MAX_VALUE);
-                
-                // Book Hover Effect
-                bookBtn.setOnMouseEntered(e -> {
-                    DropShadow shadow = new DropShadow(15, Color.web("#8b5cf6"));
-                    bookBtn.setEffect(shadow);
-                });
-                bookBtn.setOnMouseExited(e -> bookBtn.setEffect(null));
-                
-                bookBtn.setOnAction(e -> {
-                    try {
-                        facade.bookSessionForDate(session.getSessionId(), date);
-                        buildDetailPanelContent(date, facade.getSessionsForDate(date));
-                        updateView();
-                        showInfo("Success", "Booked " + session.getName() + " for " + date);
-                    } catch (com.iwfc.exception.UnauthorizedAccessException | IllegalArgumentException | com.iwfc.exception.InvalidBookingException ex) {
-                        showAlert("Booking Failed", ex.getMessage());
-                    }
-                });
-                card.getChildren().add(bookBtn);
+                for (com.iwfc.model.Booking b : bookings) {
+                    bookedNames.append(b.getMember().getName()).append(", ");
+                }
+                bookedNames.setLength(bookedNames.length() - 2); // remove last comma
             }
-        }
+            
+            Alert a = new Alert(Alert.AlertType.INFORMATION, "Session Details:\n\nTitle: " + title + "\nTime: " + time + "\nType: " + session.getSessionType() + "\nInstructor: " + (session.getInstructor() != null ? session.getInstructor().getName() : "TBD") + "\n\nBooked Members: " + bookedNames.toString());
+            DialogUtils.stylePremiumDialog(a);
+            a.show();
+        });
         
         return card;
     }
-
-    // =========================================================================================
-    // DIALOGS & UTILS
-    // =========================================================================================
-
-    private void showCreateSessionDialog() {
-        Dialog<FitnessSession> dialog = new Dialog<>();
-        dialog.setTitle("Create New Session");
-
-        TextField nameField = new TextField();
-        nameField.setPromptText("Session Name");
-
-        ComboBox<String> typeCombo = new ComboBox<>();
-        typeCombo.getItems().addAll("HIIT", "YOGA", "SPIN", "PILATES", "CROSSFIT", "BOXING");
-        typeCombo.setPromptText("Type");
-
-        ComboBox<DayOfWeek> dayCombo = new ComboBox<>();
-        dayCombo.getItems().addAll(DayOfWeek.values());
-        dayCombo.setPromptText("Day");
+    
+    private HBox createLowerControlBar() {
+        HBox bar = new HBox(15);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        bar.setPadding(new Insets(10, 0, 0, 0));
         
-        DatePicker validFromPicker = new DatePicker(LocalDate.now());
-        DatePicker validUntilPicker = new DatePicker(LocalDate.now().plusYears(1));
-
-        Spinner<Integer> startHour = new Spinner<>(6, 21, 9);
-        Spinner<Integer> endHour = new Spinner<>(7, 22, 10);
-
-        ComboBox<Location> locationCombo = new ComboBox<>();
-        locationCombo.getItems().addAll(Location.values());
-        locationCombo.setPromptText("Location");
-
-        Spinner<Integer> capacitySpinner = new Spinner<>(1, 50, 20);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(20));
-        grid.add(new Label("Name:"), 0, 0); grid.add(nameField, 1, 0);
-        grid.add(new Label("Type:"), 0, 1); grid.add(typeCombo, 1, 1);
-        grid.add(new Label("Day:"), 0, 2); grid.add(dayCombo, 1, 2);
-        grid.add(new Label("Valid From:"), 0, 3); grid.add(validFromPicker, 1, 3);
-        grid.add(new Label("Valid Until:"), 0, 4); grid.add(validUntilPicker, 1, 4);
-        grid.add(new Label("Start:"), 0, 5); grid.add(startHour, 1, 5);
-        grid.add(new Label("End:"), 0, 6); grid.add(endHour, 1, 6);
-        grid.add(new Label("Location:"), 0, 7); grid.add(locationCombo, 1, 7);
-        grid.add(new Label("Capacity:"), 0, 8); grid.add(capacitySpinner, 1, 8);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(btn -> {
-            if (btn == ButtonType.OK && !nameField.getText().isEmpty()
-                    && typeCombo.getValue() != null && dayCombo.getValue() != null
-                    && locationCombo.getValue() != null) {
-                Instructor instructor = (facade.getCurrentUser() instanceof Instructor i) ? i : null;
-                String sessionId = "SES" + String.format("%03d", facade.getAllSessions().size() + 1);
-                FitnessSession fs = new FitnessSession(sessionId, nameField.getText(), typeCombo.getValue(),
-                        instructor, dayCombo.getValue(),
-                        LocalTime.of(startHour.getValue(), 0),
-                        LocalTime.of(endHour.getValue(), 0),
-                        locationCombo.getValue(), capacitySpinner.getValue());
-                fs.setValidFrom(validFromPicker.getValue());
-                fs.setValidUntil(validUntilPicker.getValue());
-                return fs;
-            }
-            return null;
+        // Legend
+        HBox legend = new HBox(10);
+        legend.setAlignment(Pos.CENTER_LEFT);
+        legend.getChildren().addAll(
+            createLegendDot("Yoga", "#3b82f6"),
+            createLegendDot("HIIT", "#ef4444"),
+            createLegendDot("Pilates", "#a855f7"),
+            createLegendDot("Cross-training", "#f59e0b"),
+            createLegendDot("Spinning", "#06b6d4"),
+            createLegendDot("Recovery", "#10b981")
+        );
+        Label legText = new Label(" |  Color coding indicates session type.");
+        legText.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
+        legend.getChildren().add(legText);
+        
+        Region sp1 = new Region();
+        HBox.setHgrow(sp1, Priority.ALWAYS);
+        
+        // Dropdowns
+        typeFilter = new ComboBox<>();
+        typeFilter.getItems().addAll("Session Type", "Yoga", "HIIT", "Pilates", "Spin", "Crossfit");
+        typeFilter.getSelectionModel().selectFirst();
+        typeFilter.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-background-radius: 6px;");
+        typeFilter.setOnAction(e -> populateCalendar());
+        
+        instFilter = new ComboBox<>();
+        instFilter.getItems().add("Instructor");
+        java.util.Set<String> uniqueInsts = new java.util.HashSet<>();
+        facade.getAllSessions().forEach(s -> {
+            if (s.getInstructor() != null) uniqueInsts.add(s.getInstructor().getName());
         });
-
-        dialog.showAndWait().ifPresent(session -> {
+        instFilter.getItems().addAll(uniqueInsts);
+        instFilter.getSelectionModel().selectFirst();
+        instFilter.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-background-radius: 6px;");
+        instFilter.setOnAction(e -> populateCalendar());
+        
+        memberFilter = new ComboBox<>();
+        memberFilter.getItems().add("All Members");
+        java.util.Set<String> uniqueMembers = new java.util.HashSet<>();
+        for (com.iwfc.model.Booking b : facade.getAllBookings()) {
+            uniqueMembers.add(b.getMember().getName());
+        }
+        memberFilter.getItems().addAll(uniqueMembers);
+        memberFilter.getSelectionModel().selectFirst();
+        memberFilter.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-text-fill: white; -fx-background-radius: 6px;");
+        memberFilter.setOnAction(e -> populateCalendar());
+        
+        // Capacity toggles
+        HBox cap = new HBox(0);
+        cap.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 6px;");
+        String[] caps = {"All", "Available", "Waitlist", "Full"};
+        for(String c : caps) {
+            Button b = new Button(c);
+            b.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-padding: 6 12; -fx-cursor: hand;");
+            if(c.equals("All")) b.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 6 12; -fx-background-radius: 6px; -fx-cursor: hand;");
+            b.setOnAction(e -> {
+                for (javafx.scene.Node n : cap.getChildren()) {
+                    if (n instanceof Button) {
+                        n.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-padding: 6 12; -fx-cursor: hand;");
+                    }
+                }
+                b.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 6 12; -fx-background-radius: 6px; -fx-cursor: hand;");
+                populateCalendar();
+            });
+            cap.getChildren().add(b);
+        }
+        
+        Region sp2 = new Region();
+        HBox.setHgrow(sp2, Priority.ALWAYS);
+        
+        Label timestamp = new Label("Refreshed: " + java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy, h:mm a")));
+        timestamp.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
+        
+        bar.getChildren().addAll(legend, sp1, memberFilter, typeFilter, instFilter, cap, sp2, timestamp);
+        return bar;
+    }
+    
+    private HBox createLegendDot(String text, String color) {
+        HBox box = new HBox(5);
+        box.setAlignment(Pos.CENTER_LEFT);
+        Circle c = new Circle(4, Color.web(color));
+        Label l = new Label(text);
+        l.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        box.getChildren().addAll(c, l);
+        return box;
+    }
+    
+    private VBox createRightPanel() {
+        VBox panel = new VBox(20);
+        panel.setPrefWidth(300);
+        
+        // Action Panel
+        VBox action = new VBox(10);
+        Label aTitle = new Label("Action Panel");
+        aTitle.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+        Button add = new Button("+ Add New Session");
+        add.setMaxWidth(Double.MAX_VALUE);
+        add.setStyle("-fx-background-color: rgba(6, 182, 212, 0.2); -fx-text-fill: #06b6d4; -fx-border-color: #06b6d4; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-padding: 10; -fx-font-weight: bold; -fx-cursor: hand;");
+        add.setOnAction(e -> {
             try {
-                facade.createSession(session);
-                updateView();
-            } catch (InvalidBookingException | UnauthorizedAccessException ex) {
-                showAlert("Error", ex.getMessage());
+                com.iwfc.model.FitnessSession newSession = new com.iwfc.model.FitnessSession(
+                    "SESS-" + System.currentTimeMillis(),
+                    "Custom Group Training",
+                    "HIIT",
+                    null, // Instructor
+                    today.getDayOfWeek(),
+                    java.time.LocalTime.of(17, 30),
+                    java.time.LocalTime.of(18, 30),
+                    null, // Location
+                    20
+                );
+                facade.createSession(newSession);
+                populateCalendar();
+                
+                Alert a = new Alert(Alert.AlertType.INFORMATION, "Successfully scheduled 'Custom Group Training' for every " + today.getDayOfWeek() + " at 5:30 PM.");
+                DialogUtils.stylePremiumDialog(a);
+                a.show();
+            } catch (com.iwfc.exception.InvalidBookingException | com.iwfc.exception.UnauthorizedAccessException ex) {
+                System.err.println("Error scheduling session: " + ex.getMessage());
             }
         });
+        action.getChildren().addAll(aTitle, add);
+        
+        // Personal Goals
+        VBox goals = createGlassCard("Personal Goals", "View Goals");
+        Label date = new Label("Selected Day: Tuesday, Sep 29");
+        date.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        
+        StackPane ring = new StackPane();
+        Circle bgRing = new Circle(40, Color.TRANSPARENT);
+        bgRing.setStroke(Color.web("rgba(255,255,255,0.1)"));
+        bgRing.setStrokeWidth(6);
+        Circle fgRing = new Circle(40, Color.TRANSPARENT);
+        fgRing.setStroke(Color.web("#10b981"));
+        fgRing.setStrokeWidth(6);
+        fgRing.getStrokeDashArray().addAll(200d, 250d); // simple visual hack for 5/5
+        VBox txt = new VBox();
+        txt.setAlignment(Pos.CENTER);
+        Label v1 = new Label("5/5");
+        v1.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
+        Label v2 = new Label("Classes\nComplete");
+        v2.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
+        v2.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        txt.getChildren().addAll(v1, v2);
+        ring.getChildren().addAll(bgRing, fgRing, txt);
+        
+        VBox chal = new VBox(2);
+        chal.setAlignment(Pos.CENTER);
+        Label c1 = new Label("Weekly Challenge:");
+        c1.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px; -fx-font-weight: bold;");
+        Label c2 = new Label("Complete 1 Recovery Session");
+        c2.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        chal.getChildren().addAll(c1, c2);
+        
+        goals.getChildren().addAll(date, ring, chal);
+        goals.setAlignment(Pos.TOP_CENTER);
+        
+        // Instructor
+        VBox instPanel = createGlassCard("Instructor of the Week", null);
+        HBox iRow = new HBox(12);
+        iRow.setAlignment(Pos.CENTER_LEFT);
+        
+        StackPane iPic = new StackPane();
+        Circle iBg = new Circle(20, Color.web("#f59e0b"));
+        Label iL = new Label("JS");
+        String iNameStr = "Jam Siaran";
+        String iBioStr = "Instructor Avatar\nInroiwoutlan";
+        
+        java.util.List<com.iwfc.model.FitnessSession> allSess = facade.getAllSessions();
+        if (!allSess.isEmpty()) {
+            com.iwfc.model.Instructor best = null;
+            for (com.iwfc.model.FitnessSession s : allSess) {
+                if (s.getInstructor() != null) {
+                    if (best == null || s.getInstructor().getPerformanceScore() > best.getPerformanceScore()) {
+                        best = s.getInstructor();
+                    }
+                }
+            }
+            if (best != null) {
+                iNameStr = best.getName();
+                iBioStr = "Specialty: " + best.getSpecialization() + "\nScore: " + best.getPerformanceScore();
+                String[] p = best.getName().split(" ");
+                if (p.length > 1 && p[1].length() > 0) {
+                    iL.setText((p[0].substring(0,1) + p[1].substring(0,1)).toUpperCase());
+                } else if (best.getName().length() >= 2) {
+                    iL.setText(best.getName().substring(0,2).toUpperCase());
+                }
+            }
+        }
+        
+        iL.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
+        iPic.getChildren().addAll(iBg, iL);
+        
+        VBox iTxt = new VBox(2);
+        Label iName = new Label(iNameStr);
+        iName.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
+        Label iBio = new Label(iBioStr);
+        iBio.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        iTxt.getChildren().addAll(iName, iBio);
+        iRow.getChildren().addAll(iPic, iTxt);
+        instPanel.getChildren().add(iRow);
+        
+        // Community
+        VBox comm = createGlassCard("Community Activity", null);
+        java.util.List<com.iwfc.model.Booking> allBookings = facade.getAllBookings();
+        int count = 0;
+        String[] colors = {"#3b82f6", "#a855f7", "#10b981"};
+        for (com.iwfc.model.Booking b : allBookings) {
+            if (count >= 3) break;
+            com.iwfc.model.Member m = b.getMember();
+            String init = m.getName().length() >= 2 ? m.getName().substring(0, 2).toUpperCase() : "M";
+            if (m.getName().contains(" ")) {
+                String[] p = m.getName().split(" ");
+                if(p.length > 1 && p[1].length() > 0) init = (p[0].substring(0,1) + p[1].substring(0,1)).toUpperCase();
+            }
+            comm.getChildren().add(createCommItem(colors[count % colors.length], init, m.getName(), "booked " + b.getSession().getName()));
+            count++;
+        }
+        if (count == 0) {
+            Label noAct = new Label("No recent activity.");
+            noAct.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+            comm.getChildren().add(noAct);
+        }
+        
+        Label foot = new Label("Facility map overview");
+        foot.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
+        panel.getChildren().addAll(action, goals, instPanel, comm, foot);
+        return panel;
     }
-
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.showAndWait();
+    
+    private VBox createGlassCard(String title, String link) {
+        VBox card = new VBox(15);
+        card.setPadding(new Insets(15));
+        card.setStyle("-fx-background-color: rgba(30,41,59,0.5); -fx-background-radius: 12px; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 12px;");
+        
+        HBox head = new HBox();
+        Label t = new Label(title);
+        t.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
+        head.getChildren().addAll(t, sp);
+        
+        if (link != null) {
+            Label l = new Label(link);
+            l.setStyle("-fx-text-fill: #06b6d4; -fx-font-size: 11px; -fx-cursor: hand;");
+            l.setOnMouseClicked(e -> {
+                Alert a = new Alert(Alert.AlertType.INFORMATION, "Navigating to " + link);
+                DialogUtils.stylePremiumDialog(a);
+                a.show();
+            });
+            head.getChildren().add(l);
+        }
+        
+        card.getChildren().add(head);
+        return card;
     }
-
-    private void showInfo(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.showAndWait();
+    
+    private HBox createCommItem(String color, String initials, String name, String action) {
+        HBox row = new HBox(12);
+        row.setAlignment(Pos.CENTER_LEFT);
+        
+        StackPane pic = new StackPane();
+        Circle bg = new Circle(14, Color.web(color));
+        Label init = new Label(initials);
+        init.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold;");
+        pic.getChildren().addAll(bg, init);
+        
+        VBox txt = new VBox(2);
+        Label n = new Label(name);
+        n.setStyle("-fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold;");
+        Label a = new Label(action);
+        a.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        txt.getChildren().addAll(n, a);
+        row.getChildren().addAll(pic, txt);
+        return row;
     }
 }

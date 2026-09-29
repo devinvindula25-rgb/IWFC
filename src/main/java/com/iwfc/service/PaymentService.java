@@ -105,4 +105,13 @@ public class PaymentService {
                 .mapToDouble(Payment::getTotalCharged)
                 .sum();
     }
+
+    /**
+     * Retrieves all payments in the system.
+     */
+    public List<Payment> getAllPayments() {
+        return dataStore.getPayments().findAll().stream()
+                .sorted((a, b) -> b.getPaidAt().compareTo(a.getPaidAt()))
+                .collect(Collectors.toList());
+    }
 }

@@ -7,14 +7,14 @@ import java.time.LocalDateTime;
  */
 public class Payment implements Identifiable {
     private String paymentId;
-    private String memberId;
-    private double amount;
-    private double processingFee;
-    private double totalCharged;
-    private PaymentMethod method;
+    private final String memberId;
+    private final double amount;
+    private final double processingFee;
+    private final double totalCharged;
+    private final PaymentMethod method;
     private PaymentStatus status;
-    private PaymentPurpose purpose;
-    private LocalDateTime paidAt;
+    private final PaymentPurpose purpose;
+    private final LocalDateTime paidAt;
     private String transactionReference;
     private String description;
 

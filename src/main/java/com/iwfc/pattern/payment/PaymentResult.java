@@ -4,8 +4,8 @@ package com.iwfc.pattern.payment;
  * Result of a payment attempt.
  */
 public class PaymentResult {
-    private boolean success;
-    private String transactionReference;
+    private final boolean success;
+    private final String transactionReference;
 
     public PaymentResult(boolean success, String transactionReference) {
         this.success = success;
