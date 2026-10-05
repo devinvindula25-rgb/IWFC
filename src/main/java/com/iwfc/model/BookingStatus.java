@@ -5,6 +5,7 @@ package com.iwfc.model;
  */
 public enum BookingStatus {
     CONFIRMED("Confirmed"),
+    ATTENDED("Attended"),
     CANCELLED("Cancelled");
 
     private final String displayName;

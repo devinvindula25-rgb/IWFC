@@ -20,4 +20,5 @@ module com.iwfc {
     exports com.iwfc.exception;
     exports com.iwfc.ui;
     exports com.iwfc.ui.components;
+    exports com.iwfc.util;
 }

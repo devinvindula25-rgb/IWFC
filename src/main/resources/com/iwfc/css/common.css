@@ -1,165 +1,122 @@
 /* ============================================================
-   IWFC — Common Styles (shared between dark and light themes)
+   IWFC â€” Common Styles (shared between dark and light themes)
    ============================================================ */
 
 /* --- Typography --- */
 .root {
     -fx-font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", sans-serif;
-    font-family: "Segoe UI", "SF Pro Display", "Helvetica Neue", sans-serif;
     -fx-font-size: 13px;
-    font-size: 13px;
 }
 
 /* --- View Titles --- */
 .view-title {
     -fx-font-size: 24px;
-    font-size: 24px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .view-subtitle {
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-opacity: 0.7;
-    opacity: 0.7;
 }
 
 /* --- Sidebar --- */
 .sidebar {
     -fx-min-width: 270px;
-    min-width: 270px;
     -fx-max-width: 270px;
-    max-width: 270px;
 }
 
 .sidebar-logo {
     -fx-font-size: 28px;
-    font-size: 28px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .nav-button {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-background-radius: 8px;
     -fx-padding: 10 15;
-    padding: 10 15;
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-cursor: hand;
-    cursor: pointer;
     -fx-alignment: center-left;
 }
 
 .nav-button:hover {
     -fx-background-color: rgba(128, 128, 128, 0.15);
-    background-color: rgba(128, 128, 128, 0.15);
 }
 
 .nav-button-active {
     -fx-background-color: rgba(99, 102, 241, 0.2);
-    background-color: rgba(99, 102, 241, 0.2);
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .sidebar-user-info {
     -fx-padding: 12;
-    padding: 12;
     -fx-background-radius: 10;
 }
 
 .sidebar-user-name {
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .sidebar-user-role {
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-opacity: 0.6;
-    opacity: 0.6;
 }
 
 .logout-button {
     -fx-background-color: rgba(239, 68, 68, 0.15);
-    background-color: rgba(239, 68, 68, 0.15);
     -fx-text-fill: #ef4444;
     -fx-background-radius: 6;
     -fx-padding: 6 12;
-    padding: 6 12;
     -fx-cursor: hand;
-    cursor: pointer;
     -fx-font-size: 12px;
-    font-size: 12px;
 }
 
 .logout-button:hover {
     -fx-background-color: rgba(239, 68, 68, 0.3);
-    background-color: rgba(239, 68, 68, 0.3);
 }
 
 /* --- Theme Toggle --- */
 .theme-toggle-btn {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-font-size: 18px;
-    font-size: 18px;
     -fx-padding: 5;
-    padding: 5;
     -fx-cursor: hand;
-    cursor: pointer;
     -fx-background-radius: 20;
 }
 
 .theme-toggle-btn:hover {
     -fx-background-color: rgba(128, 128, 128, 0.2);
-    background-color: rgba(128, 128, 128, 0.2);
 }
 
 /* --- Stat Cards --- */
 .stat-card {
     -fx-background-radius: 16;
     -fx-border-color: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.2);
     -fx-border-width: 1.5;
-    border-width: 1.5;
     -fx-border-radius: 16;
-    border-radius: 16;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .stat-card-title {
     -fx-text-fill: rgba(255, 255, 255, 0.9);
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .stat-card-value {
     -fx-text-fill: white;
     -fx-font-size: 36px;
-    font-size: 36px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 4, 0, 0, 2);
 }
 
 .stat-card-icon {
     -fx-font-size: 20px;
-    font-size: 20px;
     -fx-background-color: rgba(255, 255, 255, 0.2);
-    background-color: rgba(255, 255, 255, 0.2);
     -fx-background-radius: 12;
     -fx-padding: 8;
-    padding: 8;
     -fx-alignment: center;
 }
 
@@ -167,46 +124,33 @@
 .status-badge {
     -fx-background-radius: 16;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-padding: 4 12;
-    padding: 4 12;
     -fx-border-radius: 16;
-    border-radius: 16;
     -fx-border-width: 1;
-    border-width: 1;
 }
 
 .badge-success {
     -fx-background-color: rgba(34, 197, 94, 0.15);
-    background-color: rgba(34, 197, 94, 0.15);
     -fx-border-color: rgba(34, 197, 94, 0.3);
-    border-color: rgba(34, 197, 94, 0.3);
     -fx-text-fill: #22c55e;
 }
 
 .badge-danger {
     -fx-background-color: rgba(239, 68, 68, 0.15);
-    background-color: rgba(239, 68, 68, 0.15);
     -fx-border-color: rgba(239, 68, 68, 0.3);
-    border-color: rgba(239, 68, 68, 0.3);
     -fx-text-fill: #ef4444;
 }
 
 .badge-warning {
     -fx-background-color: rgba(245, 158, 11, 0.15);
-    background-color: rgba(245, 158, 11, 0.15);
     -fx-border-color: rgba(245, 158, 11, 0.3);
-    border-color: rgba(245, 158, 11, 0.3);
     -fx-text-fill: #f59e0b;
 }
 
 .badge-info {
     -fx-background-color: rgba(59, 130, 246, 0.15);
-    background-color: rgba(59, 130, 246, 0.15);
     -fx-border-color: rgba(59, 130, 246, 0.3);
-    border-color: rgba(59, 130, 246, 0.3);
     -fx-text-fill: #3b82f6;
 }
 
@@ -217,72 +161,54 @@
 
 .section-title {
     -fx-font-size: 16px;
-    font-size: 16px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 /* --- Equipment Cards --- */
 .equipment-card {
     -fx-background-radius: 12;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .equipment-name {
     -fx-font-size: 15px;
-    font-size: 15px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .equipment-id {
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-opacity: 0.6;
-    opacity: 0.6;
 }
 
 .equipment-location {
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-opacity: 0.75;
-    opacity: 0.75;
 }
 
 .equipment-usage {
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-opacity: 0.6;
-    opacity: 0.6;
 }
 
 .usage-ring-label {
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 /* --- Session Timetable --- */
 .timetable-grid {
     -fx-padding: 5;
-    padding: 5;
 }
 
 .timetable-day-header {
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-font-size: 13px;
-    font-size: 13px;
     -fx-alignment: center;
 }
 
 .timetable-time-label {
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-opacity: 0.6;
-    opacity: 0.6;
 }
 
 .timetable-cell {
@@ -292,7 +218,6 @@
 .session-block {
     -fx-background-radius: 6;
     -fx-cursor: hand;
-    cursor: pointer;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 1);
 }
 
@@ -303,34 +228,28 @@
 .session-block-name {
     -fx-text-fill: white;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .session-block-instructor {
     -fx-text-fill: rgba(255,255,255,0.85);
     -fx-font-size: 11px;
-    font-size: 11px;
 }
 
 .session-block-location {
     -fx-text-fill: rgba(255,255,255,0.7);
     -fx-font-size: 10px;
-    font-size: 10px;
 }
 
 /* --- Detail Panel --- */
 .detail-panel-premium {
     -fx-background-color: rgba(17, 24, 39, 0.85);
-    background-color: rgba(17, 24, 39, 0.85); /* Frosted glass look */
     -fx-background-radius: 16 0 0 16;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, -5, 0);
 }
 
 .detail-session-card {
     -fx-background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(255, 255, 255, 0.05);
     -fx-background-radius: 8;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0, 0, 2);
 }
@@ -341,68 +260,49 @@
 
 .detail-title {
     -fx-font-size: 20px;
-    font-size: 20px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .detail-type {
     -fx-text-fill: white;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .detail-info {
     -fx-font-size: 13px;
-    font-size: 13px;
 }
 
 .detail-label {
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-opacity: 0.7;
-    opacity: 0.7;
 }
 
 .detail-close-btn {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-font-size: 16px;
-    font-size: 16px;
     -fx-cursor: hand;
-    cursor: pointer;
     -fx-padding: 2 8;
-    padding: 2 8;
 }
 
 .detail-close-btn:hover {
     -fx-background-color: rgba(128,128,128,0.2);
-    background-color: rgba(128,128,128,0.2);
     -fx-background-radius: 12;
 }
 
 .book-button {
     -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
-    background-color: linear-gradient(to right, #6366f1, #8b5cf6);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-background-radius: 8;
     -fx-padding: 10 20;
-    padding: 10 20;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .book-button:hover {
     -fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
-    background-color: linear-gradient(to right, #4f46e5, #7c3aed);
 }
 
 .capacity-bar {
@@ -413,262 +313,250 @@
 .maintenance-card {
     -fx-background-radius: 10;
     -fx-padding: 16;
-    padding: 16;
 }
 
 .maintenance-equipment-name {
     -fx-font-size: 15px;
-    font-size: 15px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .maintenance-id {
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-opacity: 0.5;
-    opacity: 0.5;
 }
 
 .maintenance-description {
     -fx-font-size: 13px;
-    font-size: 13px;
     -fx-opacity: 0.8;
-    opacity: 0.8;
 }
 
 .maintenance-meta {
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-opacity: 0.5;
-    opacity: 0.5;
 }
 
 .dot-active {
     -fx-text-fill: #6366f1;
     -fx-font-size: 14px;
-    font-size: 14px;
 }
 
 .dot-inactive {
     -fx-text-fill: rgba(128,128,128,0.3);
     -fx-font-size: 14px;
-    font-size: 14px;
 }
 
 .dot-arrow {
     -fx-font-size: 10px;
-    font-size: 10px;
     -fx-opacity: 0.4;
-    opacity: 0.4;
 }
 
 /* --- Filter Toggles --- */
 .filter-toggle {
     -fx-background-radius: 16;
     -fx-padding: 6 16;
-    padding: 6 16;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 /* --- Buttons --- */
 .add-button {
     -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
-    background-color: linear-gradient(to right, #6366f1, #8b5cf6);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-background-radius: 8;
     -fx-padding: 8 18;
-    padding: 8 18;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .add-button:hover {
     -fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
-    background-color: linear-gradient(to right, #4f46e5, #7c3aed);
 }
 
 .action-button {
     -fx-background-color: rgba(59, 130, 246, 0.2);
-    background-color: rgba(59, 130, 246, 0.2);
     -fx-text-fill: #3b82f6;
     -fx-background-radius: 6;
     -fx-padding: 5 12;
-    padding: 5 12;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .action-button:hover {
     -fx-background-color: rgba(59, 130, 246, 0.35);
-    background-color: rgba(59, 130, 246, 0.35);
 }
 
 .action-button-success {
     -fx-background-color: rgba(34, 197, 94, 0.2);
-    background-color: rgba(34, 197, 94, 0.2);
     -fx-text-fill: #22c55e;
     -fx-background-radius: 6;
     -fx-padding: 5 12;
-    padding: 5 12;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .action-button-success:hover {
     -fx-background-color: rgba(34, 197, 94, 0.35);
-    background-color: rgba(34, 197, 94, 0.35);
 }
 
 /* --- Login --- */
-.login-split-container {
-    -fx-background-color: transparent;
-    background-color: transparent;
-}
-
-.login-split-left {
-    -fx-background-image: url('../images/login-bg.jpg');
-    background-image: url('../images/login-bg.jpg');
-    -fx-background-size: cover;
-    background-size: cover;
-    -fx-background-position: center center;
-    background-position: center center;
+.login-background {
     -fx-alignment: center;
-    -fx-padding: 40;
-    padding: 40;
 }
 
-.login-split-right {
-    -fx-alignment: center;
-    -fx-padding: 40;
-    padding: 40;
-    -fx-min-width: 450px;
-    min-width: 450px;
-    -fx-max-width: 450px;
-    max-width: 450px;
+.login-hero-card {
+    -fx-background-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 40, 0.2, 0, 15);
 }
 
-.login-card {
+.login-brand-pane {
+    -fx-background-radius: 24 0 0 24;
+}
+
+.login-form-pane {
+    -fx-background-radius: 0 24 24 0;
+}
+
+.login-platform-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 12;
     -fx-background-radius: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 30, 0, 0, 10);
-    -fx-background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(255, 255, 255, 0.05); /* Slight transparency for dark mode */
+    -fx-background-color: rgba(99, 102, 241, 0.25);
+    -fx-text-fill: #a5b4fc;
 }
 
 .login-logo {
-    -fx-font-size: 42px;
-    font-size: 42px;
+    -fx-font-size: 44px;
     -fx-font-weight: bold;
-    font-weight: bold;
-    -fx-text-fill: linear-gradient(to right, #6366f1, #a855f7);
+    -fx-text-fill: linear-gradient(to right, #818cf8, #c084fc);
 }
 
 .login-subtitle {
     -fx-font-size: 14px;
-    font-size: 14px;
+    -fx-opacity: 0.85;
+}
+
+.login-feature-text {
+    -fx-font-size: 13px;
+    -fx-opacity: 0.9;
+}
+
+.login-system-status {
+    -fx-font-size: 11px;
+    -fx-opacity: 0.6;
+}
+
+.login-card-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.login-card-subtitle {
+    -fx-font-size: 13px;
     -fx-opacity: 0.7;
-    opacity: 0.7;
 }
 
 .form-label {
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-opacity: 0.7;
-    opacity: 0.7;
 }
 
 .login-input {
     -fx-background-radius: 10;
     -fx-padding: 12 15;
-    padding: 12 15;
     -fx-font-size: 14px;
-    font-size: 14px;
-    -fx-border-color: rgba(128,128,128,0.2);
-    border-color: rgba(128,128,128,0.2);
+    -fx-border-color: rgba(128,128,128,0.25);
     -fx-border-radius: 10;
-    border-radius: 10;
     -fx-background-color: rgba(255,255,255,0.05);
-    background-color: rgba(255,255,255,0.05);
 }
 
 .login-input:focused {
     -fx-border-color: #6366f1;
-    border-color: #6366f1;
 }
 
-.login-button {
+.login-primary-button {
     -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6, #d946ef);
-    background-color: linear-gradient(to right, #6366f1, #8b5cf6, #d946ef);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-font-size: 15px;
-    font-size: 15px;
-    -fx-background-radius: 10;
-    -fx-padding: 12 30;
-    padding: 12 30;
+    -fx-background-radius: 12;
     -fx-cursor: hand;
-    cursor: pointer;
-    -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.4), 15, 0, 0, 5);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.45), 20, 0, 0, 6);
 }
 
-.login-button:hover {
+.login-primary-button:hover {
     -fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed, #c026d3);
-    background-color: linear-gradient(to right, #4f46e5, #7c3aed, #c026d3);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.65), 25, 0, 0, 8);
 }
 
 .login-error {
     -fx-text-fill: #ef4444;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
-.quick-login-btn {
+.quick-login-chip {
     -fx-background-radius: 20;
     -fx-padding: 8 16;
-    padding: 8 16;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-cursor: hand;
-    cursor: pointer;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
 }
 
-.quick-admin {
+.chip-admin {
     -fx-background-color: rgba(239, 68, 68, 0.15);
-    background-color: rgba(239, 68, 68, 0.15);
-    -fx-text-fill: #ef4444;
+    -fx-border-color: rgba(239, 68, 68, 0.35);
+    -fx-text-fill: #f87171;
 }
 
-.quick-instructor {
+.chip-admin:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.25);
+}
+
+.chip-instructor {
     -fx-background-color: rgba(59, 130, 246, 0.15);
-    background-color: rgba(59, 130, 246, 0.15);
-    -fx-text-fill: #3b82f6;
+    -fx-border-color: rgba(59, 130, 246, 0.35);
+    -fx-text-fill: #60a5fa;
 }
 
-.quick-member {
+.chip-instructor:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.25);
+}
+
+.chip-member {
     -fx-background-color: rgba(34, 197, 94, 0.15);
-    background-color: rgba(34, 197, 94, 0.15);
-    -fx-text-fill: #22c55e;
+    -fx-border-color: rgba(34, 197, 94, 0.35);
+    -fx-text-fill: #4ade80;
 }
 
-.quick-login-btn:hover {
-    -fx-opacity: 0.8;
-    opacity: 0.8;
+.chip-member:hover {
+    -fx-background-color: rgba(34, 197, 94, 0.25);
+}
+
+.login-hint-text {
+    -fx-font-size: 11px;
+    -fx-opacity: 0.65;
+}
+
+.theme-toggle-floating {
+    -fx-background-radius: 50;
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+    -fx-max-width: 42;
+    -fx-max-height: 42;
+    -fx-font-size: 18px;
+    -fx-cursor: hand;
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 50;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 10, 0, 0, 3);
+}
+
+.theme-toggle-floating:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
 }
 
 /* --- Toast Notifications --- */
@@ -679,22 +567,18 @@
 
 .toast-text {
     -fx-font-size: 12px;
-    font-size: 12px;
 }
 
 .toast-success {
     -fx-background-color: rgba(34, 197, 94, 0.95);
-    background-color: rgba(34, 197, 94, 0.95);
 }
 
 .toast-info {
     -fx-background-color: rgba(59, 130, 246, 0.95);
-    background-color: rgba(59, 130, 246, 0.95);
 }
 
 .toast-warning {
     -fx-background-color: rgba(245, 158, 11, 0.95);
-    background-color: rgba(245, 158, 11, 0.95);
 }
 
 .toast-success .toast-text,
@@ -707,28 +591,22 @@
 .search-field {
     -fx-background-radius: 20;
     -fx-padding: 8 15;
-    padding: 8 15;
 }
 
 /* --- Scrollbars --- */
 .scroll-pane {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 .scroll-pane > .viewport {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 /* --- Empty Placeholder --- */
 .empty-placeholder {
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-opacity: 0.5;
-    opacity: 0.5;
     -fx-padding: 30;
-    padding: 30;
     -fx-alignment: center;
 }
 
@@ -736,177 +614,127 @@
 .alert-card {
     -fx-background-radius: 8;
     -fx-padding: 12;
-    padding: 12;
 }
 
 .alert-equipment-name {
     -fx-font-size: 13px;
-    font-size: 13px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .alert-description {
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-opacity: 0.7;
-    opacity: 0.7;
 }
 
 /* --- Calendar --- */
 .calendar-grid {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 .calendar-header {
     -fx-font-size: 20px;
-    font-size: 20px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .calendar-nav-btn {
     -fx-background-color: rgba(255, 255, 255, 0.1);
-    background-color: rgba(255, 255, 255, 0.1);
     -fx-background-radius: 15;
     -fx-padding: 5 12;
-    padding: 5 12;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .calendar-nav-btn:hover {
     -fx-background-color: rgba(255, 255, 255, 0.2);
-    background-color: rgba(255, 255, 255, 0.2);
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
 }
 
 .calendar-today-btn {
     -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
-    background-color: linear-gradient(to right, #6366f1, #8b5cf6);
     -fx-text-fill: white;
     -fx-background-radius: 15;
     -fx-padding: 5 15;
-    padding: 5 15;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .calendar-today-btn:hover {
     -fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
-    background-color: linear-gradient(to right, #4f46e5, #7c3aed);
 }
 
 .calendar-day-header {
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-opacity: 0.6;
-    opacity: 0.6;
     -fx-text-transform: uppercase;
-    text-transform: uppercase;
 }
 
 .calendar-day-cell {
     -fx-background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(255, 255, 255, 0.05);
     -fx-border-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.1);
     -fx-border-width: 1;
-    border-width: 1;
     -fx-border-radius: 10;
-    border-radius: 10;
     -fx-background-radius: 10;
     -fx-cursor: hand;
-    cursor: pointer;
     -fx-min-height: 80px;
-    min-height: 80px;
 }
 
 .calendar-day-past {
     -fx-cursor: default;
-    cursor: default;
 }
 
 .calendar-day-today {
     -fx-border-color: #6366f1;
-    border-color: #6366f1;
     -fx-border-width: 2;
-    border-width: 2;
 }
 
 .calendar-day-booked {
     -fx-border-color: #a855f7;
-    border-color: #a855f7;
     -fx-border-width: 2;
-    border-width: 2;
 }
 
 .calendar-day-number {
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-opacity: 0.8;
-    opacity: 0.8;
 }
 
 .calendar-session-chip {
     -fx-text-fill: white;
     -fx-font-size: 9px;
-    font-size: 9px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-padding: 2 6;
-    padding: 2 6;
     -fx-background-radius: 8;
 }
 
 .calendar-overflow-label {
     -fx-font-size: 9px;
-    font-size: 9px;
     -fx-opacity: 0.6;
-    opacity: 0.6;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 /* --- View Toggle --- */
 .view-toggle {
     -fx-background-color: rgba(255, 255, 255, 0.08);
-    background-color: rgba(255, 255, 255, 0.08);
     -fx-background-radius: 20;
     -fx-padding: 4;
-    padding: 4;
 }
 
 .view-toggle-active {
     -fx-background-color: #6366f1;
-    background-color: #6366f1;
     -fx-text-fill: white;
     -fx-background-radius: 16;
     -fx-padding: 6 15;
-    padding: 6 15;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .view-toggle-inactive {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-text-fill: rgba(255, 255, 255, 0.6);
     -fx-background-radius: 16;
     -fx-padding: 6 15;
-    padding: 6 15;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .view-toggle-inactive:hover {
@@ -916,38 +744,26 @@
 /* --- Premium Equipment Cards --- */
 .equipment-card-premium {
     -fx-background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(255, 255, 255, 0.05);
     -fx-background-radius: 16;
     -fx-border-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.1);
     -fx-border-width: 1;
-    border-width: 1;
     -fx-border-radius: 16;
-    border-radius: 16;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 /* --- Premium Maintenance Cards --- */
 .maintenance-card-premium {
     -fx-background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(255, 255, 255, 0.05);
     -fx-background-radius: 12;
     -fx-border-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.1);
     -fx-border-width: 1;
-    border-width: 1;
     -fx-border-radius: 12;
-    border-radius: 12;
 }
 
 .glowing-border-danger {
     -fx-border-color: rgba(239, 68, 68, 0.8);
-    border-color: rgba(239, 68, 68, 0.8);
     -fx-border-width: 2;
-    border-width: 2;
     -fx-background-color: rgba(239, 68, 68, 0.1);
-    background-color: rgba(239, 68, 68, 0.1);
     -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.4), 10, 0, 0, 0);
 }
 
@@ -959,26 +775,20 @@
 .workflow-dot-active {
     -fx-text-fill: #6366f1;
     -fx-font-size: 16px;
-    font-size: 16px;
     -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.6), 8, 0, 0, 0);
 }
 
 .workflow-dot-inactive {
     -fx-text-fill: rgba(255, 255, 255, 0.2);
     -fx-font-size: 16px;
-    font-size: 16px;
 }
 
 /* --- Premium Dialogs --- */
 .premium-dialog {
     -fx-background-color: rgba(17, 24, 39, 0.95);
-    background-color: rgba(17, 24, 39, 0.95);
     -fx-border-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.1);
     -fx-border-width: 1;
-    border-width: 1;
     -fx-border-radius: 12;
-    border-radius: 12;
     -fx-background-radius: 12;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, 0, 10);
 }
@@ -986,207 +796,148 @@
 /* --- Notifications UI --- */
 .notification-card-premium {
     -fx-background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(255, 255, 255, 0.05);
     -fx-background-radius: 8;
     -fx-border-style: solid;
-    border-style: solid;
     -fx-border-width: 0 0 0 4;
-    border-width: 0 0 0 4;
     -fx-border-radius: 8;
-    border-radius: 8;
-    cursor: pointer;
 }
 
 .notification-unread {
     -fx-background-color: rgba(255, 255, 255, 0.08);
-    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .notification-read {
     -fx-opacity: 0.6;
-    opacity: 0.6;
 }
 
 .category-chip {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-border-color: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.2);
     -fx-border-radius: 15;
-    border-radius: 15;
     -fx-background-radius: 15;
     -fx-text-fill: white;
     -fx-padding: 5 12 5 12;
-    padding: 5 12 5 12;
-    cursor: pointer;
 }
 
 .category-chip:hover {
     -fx-background-color: rgba(255, 255, 255, 0.1);
-    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .category-chip-active {
     -fx-background-color: rgba(255, 255, 255, 0.2);
-    background-color: rgba(255, 255, 255, 0.2);
     -fx-border-color: rgba(255, 255, 255, 0.4);
-    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* --- User Management View --- */
 .user-management-view {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 .glass-card {
     -fx-background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(255, 255, 255, 0.05);
     -fx-background-radius: 16;
     -fx-border-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.1);
     -fx-border-width: 1;
-    border-width: 1;
     -fx-border-radius: 16;
-    border-radius: 16;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 5);
 }
 
 .chip-btn {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-border-color: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.2);
     -fx-border-radius: 15;
-    border-radius: 15;
     -fx-background-radius: 15;
     -fx-text-fill: white;
     -fx-padding: 6 15;
-    padding: 6 15;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .chip-btn:hover {
     -fx-background-color: rgba(255, 255, 255, 0.1);
-    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .chip-btn-active {
     -fx-background-color: rgba(99, 102, 241, 0.2);
-    background-color: rgba(99, 102, 241, 0.2);
     -fx-border-color: #6366f1;
-    border-color: #6366f1;
     -fx-text-fill: #6366f1;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .user-list-item {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-background-radius: 8;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .user-list-item:hover {
     -fx-background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .user-list-item-active {
     -fx-background-color: rgba(255, 255, 255, 0.1);
-    background-color: rgba(255, 255, 255, 0.1);
     -fx-border-color: #6366f1;
-    border-color: #6366f1;
     -fx-border-width: 0 0 0 4;
-    border-width: 0 0 0 4;
 }
 
 .tag-chip {
     -fx-background-color: rgba(59, 130, 246, 0.15);
-    background-color: rgba(59, 130, 246, 0.15);
     -fx-text-fill: #3b82f6;
     -fx-padding: 4 10;
-    padding: 4 10;
     -fx-background-radius: 12;
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 /* User Management Text Elements */
 .user-name-label {
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .user-role-label {
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-opacity: 0.6;
-    opacity: 0.6;
 }
 
 .detail-label-title {
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-opacity: 0.8;
-    opacity: 0.8;
 }
 
 /* --- Premium Instructor Analytics --- */
 .trainee-mini-card {
     -fx-background-color: rgba(255, 255, 255, 0.08);
-    background-color: rgba(255, 255, 255, 0.08);
     -fx-background-radius: 20;
     -fx-padding: 5 15 5 5;
-    padding: 5 15 5 5;
     -fx-border-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.1);
     -fx-border-width: 1;
-    border-width: 1;
     -fx-border-radius: 20;
-    border-radius: 20;
 }
 
 .trainee-mini-card:hover {
     -fx-background-color: rgba(255, 255, 255, 0.15);
-    background-color: rgba(255, 255, 255, 0.15);
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .feedback-quote {
     -fx-background-color: rgba(99, 102, 241, 0.1);
-    background-color: rgba(99, 102, 241, 0.1);
     -fx-border-color: rgba(99, 102, 241, 0.3);
-    border-color: rgba(99, 102, 241, 0.3);
     -fx-border-width: 0 0 0 4;
-    border-width: 0 0 0 4;
     -fx-border-radius: 4;
-    border-radius: 4;
     -fx-padding: 10 15;
-    padding: 10 15;
     -fx-font-style: italic;
     font-style: italic;
     -fx-opacity: 0.9;
-    opacity: 0.9;
 }
 
 /* --- Premium Charts --- */
 .premium-bar-chart .chart-bar {
     -fx-background-color: linear-gradient(to top, #3b82f6, #60a5fa);
-    background-color: linear-gradient(to top, #3b82f6, #60a5fa);
     -fx-background-radius: 6 6 0 0;
     -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.3), 10, 0, 0, 4);
 }
 
 .premium-bar-chart .chart-plot-background {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 .premium-bar-chart .axis-tick-mark, .premium-bar-chart .axis-minor-tick-mark {
@@ -1208,16 +959,13 @@
 
 .premium-line-chart .chart-line-symbol {
     -fx-background-color: #8b5cf6, white;
-    background-color: #8b5cf6, white;
     -fx-background-radius: 5px;
     -fx-padding: 5px;
-    padding: 5px;
     -fx-effect: dropshadow(gaussian, rgba(139, 92, 246, 0.5), 10, 0, 0, 4);
 }
 
 .premium-line-chart .chart-plot-background {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 .premium-line-chart .axis {
@@ -1227,30 +975,488 @@
 /* --- Payment Status Badges --- */
 .payment-status-badge {
     -fx-padding: 4px 10px;
-    padding: 4px 10px;
     -fx-background-radius: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-font-size: 11px;
-    font-size: 11px;
 }
 .status-completed {
     -fx-background-color: #d1fae5;
-    background-color: #d1fae5;
     -fx-text-fill: #059669;
 }
 .status-pending {
     -fx-background-color: #fef3c7;
-    background-color: #fef3c7;
     -fx-text-fill: #d97706;
 }
 .status-failed {
     -fx-background-color: #fee2e2;
-    background-color: #fee2e2;
     -fx-text-fill: #dc2626;
 }
 .status-refunded {
     -fx-background-color: #e0e7ff;
-    background-color: #e0e7ff;
     -fx-text-fill: #4338ca;
+}
+
+/* ============================================================
+   PREMIUM REPORTS â€” Common Styles
+   Glassmorphism cards, gradient stats, premium tables
+   ============================================================ */
+
+/* --- Report Sidebar --- */
+.report-sidebar {
+    -fx-border-width: 0 1 0 0;
+}
+
+.report-sidebar-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+}
+
+.report-sidebar-divider {
+    -fx-background-radius: 1;
+}
+
+.report-nav-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-padding: 10 14;
+    -fx-cursor: hand;
+    -fx-content-display: graphic-only;
+}
+
+.report-nav-btn:hover {
+    -fx-background-radius: 10;
+}
+
+.report-nav-btn-text {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.report-nav-btn-active {
+    -fx-background-radius: 10;
+    -fx-font-weight: 800;
+}
+
+.report-nav-indicator {
+    -fx-fill: #6366f1;
+    fill: #6366f1;
+}
+
+/* --- Report Header --- */
+.report-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+}
+
+.report-subtitle {
+    -fx-font-size: 13px;
+    -fx-opacity: 0.6;
+}
+
+/* --- Premium Stat Cards --- */
+.report-stat-card {
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 4);
+    -fx-cursor: hand;
+}
+
+.report-stat-icon {
+    -fx-font-size: 18px;
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 10;
+    -fx-padding: 6 8;
+}
+
+.report-stat-value {
+    -fx-text-fill: white;
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 1);
+}
+
+.report-stat-title {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+/* --- Premium Filter Bar --- */
+.report-filter-bar {
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+}
+
+.report-date-combo {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 6 12;
+    -fx-font-size: 13px;
+}
+
+.report-search-box {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 6 12;
+}
+
+.report-search-field {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-font-size: 13px;
+}
+
+.report-export-btn {
+    -fx-background-radius: 10;
+    -fx-padding: 8 18;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+/* --- Premium Table Card --- */
+.report-table-card {
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+}
+
+.report-table {
+    -fx-background-radius: 14;
+}
+
+.report-table .column-header .label {
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+    -fx-padding: 10 14;
+}
+
+.report-table .table-row-cell {
+    -fx-border-width: 0 0 1 0;
+}
+
+.report-table .table-cell {
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+}
+
+/* --- Status Pills --- */
+.report-status-pill {
+    -fx-background-radius: 20;
+    -fx-padding: 4 14;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+/* --- Method Badges --- */
+.report-method-badge {
+    -fx-background-radius: 8;
+    -fx-padding: 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+/* --- Member Report Cards --- */
+.report-member-card {
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.report-avatar-text {
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+}
+
+.report-member-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-alignment: center;
+}
+
+.report-member-id {
+    -fx-font-size: 10px;
+    -fx-opacity: 0.5;
+}
+
+/* --- Report Scroll --- */
+.report-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.report-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* --- Back Button --- */
+.report-back-btn {
+    -fx-background-radius: 10;
+    -fx-padding: 8 16;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+/* --- Attendance & PT Specialized Report Styles --- */
+.session-type-pill {
+    -fx-background-radius: 8;
+    -fx-padding: 3 9;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+.pill-hiit {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+    -fx-text-fill: #f87171;
+    -fx-border-color: rgba(239, 68, 68, 0.35);
+}
+.pill-yoga {
+    -fx-background-color: rgba(168, 85, 247, 0.15);
+    -fx-text-fill: #c084fc;
+    -fx-border-color: rgba(168, 85, 247, 0.35);
+}
+.pill-spin {
+    -fx-background-color: rgba(16, 185, 129, 0.15);
+    -fx-text-fill: #34d399;
+    -fx-border-color: rgba(16, 185, 129, 0.35);
+}
+.pill-crossfit {
+    -fx-background-color: rgba(245, 158, 11, 0.15);
+    -fx-text-fill: #fbbf24;
+    -fx-border-color: rgba(245, 158, 11, 0.35);
+}
+.pill-pilates {
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+    -fx-text-fill: #60a5fa;
+    -fx-border-color: rgba(59, 130, 246, 0.35);
+}
+.pill-pt {
+    -fx-background-color: rgba(236, 72, 153, 0.15);
+    -fx-text-fill: #f472b6;
+    -fx-border-color: rgba(236, 72, 153, 0.35);
+}
+.pill-zumba {
+    -fx-background-color: rgba(234, 179, 8, 0.15);
+    -fx-text-fill: #facc15;
+    -fx-border-color: rgba(234, 179, 8, 0.35);
+}
+.pill-recovery {
+    -fx-background-color: rgba(20, 184, 166, 0.15);
+    -fx-text-fill: #2dd4bf;
+    -fx-border-color: rgba(20, 184, 166, 0.35);
+}
+
+.report-location-tag {
+    -fx-background-color: rgba(148, 163, 184, 0.12);
+    -fx-text-fill: #94a3b8;
+    -fx-background-radius: 6;
+    -fx-padding: 2 6;
+    -fx-font-size: 11px;
+}
+.report-instructor-tag {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.report-avatar-mini {
+    -fx-background-radius: 16;
+    -fx-pref-width: 32px;
+    -fx-pref-height: 32px;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+    -fx-alignment: center;
+}
+.report-avatar-mini-text {
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.report-view-toggle-bar {
+    -fx-background-color: rgba(30, 41, 59, 0.6);
+    -fx-background-radius: 12;
+    -fx-padding: 4;
+}
+.report-view-toggle-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-background-radius: 8;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+.report-view-toggle-btn:hover {
+    -fx-text-fill: white;
+}
+.report-view-toggle-btn-active {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+}
+
+.report-action-btn-sm {
+    -fx-background-color: rgba(99, 102, 241, 0.15);
+    -fx-text-fill: #818cf8;
+    -fx-border-color: rgba(99, 102, 241, 0.3);
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+.report-action-btn-sm:hover {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: white;
+}
+
+.report-count-badge {
+    -fx-background-color: rgba(99, 102, 241, 0.12);
+    -fx-text-fill: #818cf8;
+    -fx-background-radius: 12;
+    -fx-padding: 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+/* ============================================================
+   PREMIUM MAINTENANCE â€” Common Styles
+   Glassmorphism cards, neon urgency accents, dynamic analytics
+   ============================================================ */
+
+.maintenance-view {
+    -fx-padding: 24 28 20 28;
+}
+
+.maintenance-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+}
+
+.maintenance-subtitle {
+    -fx-font-size: 13px;
+    -fx-opacity: 0.65;
+}
+
+.fleet-health-pill {
+    -fx-background-radius: 20;
+    -fx-padding: 4 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.maintenance-primary-btn {
+    -fx-background-color: linear-gradient(to bottom right, #6366f1, #8b5cf6);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+    -fx-padding: 9 18;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.4), 10, 0, 0, 3);
+}
+
+.maintenance-refresh-btn {
+    -fx-background-radius: 10;
+    -fx-padding: 8 14;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+/* --- KPI Cards --- */
+.maintenance-kpi-card {
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 4);
+    -fx-cursor: hand;
+}
+
+.kpi-count-text {
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 1);
+}
+
+.kpi-title-text {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+}
+
+/* --- Critical Alert Banner --- */
+.maintenance-alert-banner {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-width: 1.5;
+    -fx-padding: 12 18;
+}
+
+/* --- Request Cards --- */
+.maintenance-request-card {
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 18 20;
+}
+
+.request-card-high {
+    -fx-border-color: rgba(239, 68, 68, 0.5);
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.25), 14, 0, 0, 3);
+}
+
+.request-card-medium {
+    -fx-border-color: rgba(245, 158, 11, 0.4);
+    -fx-border-width: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(245, 158, 11, 0.18), 10, 0, 0, 2);
+}
+
+.request-card-completed {
+    -fx-border-color: rgba(16, 185, 129, 0.3);
+    -fx-opacity: 0.9;
+}
+
+/* --- Analytics Sidebar --- */
+.maintenance-analytics-sidebar {
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 20;
+}
+
+/* --- Interactive Tool Pills --- */
+.link-tool-pill {
+    -fx-background-radius: 8;
+    -fx-padding: 4 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+.equipment-badge-id {
+    -fx-background-radius: 6;
+    -fx-padding: 2 7;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
 }

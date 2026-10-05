@@ -1,0 +1,20 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.iwfc:iwfc-system >------------------------
+[INFO] Building IWFC - Intelligent Wellness and Fitness Center 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> javafx:0.0.8:run (default-cli) > process-classes @ iwfc-system >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ iwfc-system ---
+[INFO] Copying 27 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.12.1:compile (default-compile) @ iwfc-system ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< javafx:0.0.8:run (default-cli) < process-classes @ iwfc-system <<<
+[INFO] 
+[INFO] 
+[INFO] --- javafx:0.0.8:run (default-cli) @ iwfc-system ---
+[WARNING] Module name not found in <mainClass>. Module name will be assumed from module-info.java

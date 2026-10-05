@@ -93,7 +93,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.iwfc.IWFCApp</mainClass>
+                    <mainClass>com.iwfc/com.iwfc.IWFCApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>

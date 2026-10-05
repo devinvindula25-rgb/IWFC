@@ -101,4 +101,12 @@ public class UserService {
     public void addUser(User user) throws com.iwfc.exception.DuplicateDataException {
         dataStore.getUsers().save(user);
     }
+
+    /**
+     * Updates an existing user in the system.
+     * @param user the user to update
+     */
+    public void updateUser(User user) {
+        dataStore.getUsers().update(user);
+    }
 }

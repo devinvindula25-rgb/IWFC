@@ -1,0 +1,471 @@
+/* ==========================================================================
+   IWFC - Member Report Card & Biometrics Telemetry Matrix
+   Cyber-Dark Glassmorphic UI/UX Design System
+   ========================================================================== */
+
+/* --- Main Report Scroll Container --- */
+.report-main-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+
+.report-main-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.report-main-scroll .scroll-bar:vertical {
+    -fx-background-color: rgba(15, 23, 42, 0.6);
+    -fx-pref-width: 8px;
+    -fx-background-radius: 4px;
+}
+
+.report-main-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(99, 102, 241, 0.4);
+    -fx-background-radius: 4px;
+}
+
+.report-main-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(99, 102, 241, 0.7);
+}
+
+.report-main-scroll .scroll-bar:vertical .track,
+.report-main-scroll .scroll-bar:vertical .increment-button,
+.report-main-scroll .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+}
+
+/* --- Member Analytics Header & Badges --- */
+.member-analytics-header {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(99, 102, 241, 0.2);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 18px 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 15, 0.1, 0, 5);
+}
+
+.member-header-avatar {
+    -fx-fill: linear-gradient(to bottom right, #6366f1, #a855f7);
+    -fx-stroke: rgba(255, 255, 255, 0.25);
+    -fx-stroke-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.5), 10, 0.3, 0, 0);
+}
+
+.member-header-initials {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+}
+
+.member-badge-id {
+    -fx-background-color: rgba(99, 102, 241, 0.18);
+    -fx-text-fill: #818cf8;
+    -fx-border-color: rgba(99, 102, 241, 0.35);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.member-badge-active {
+    -fx-background-color: rgba(16, 185, 129, 0.18);
+    -fx-text-fill: #34d399;
+    -fx-border-color: rgba(16, 185, 129, 0.35);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.member-badge-plan {
+    -fx-background-color: rgba(245, 158, 11, 0.18);
+    -fx-text-fill: #fbbf24;
+    -fx-border-color: rgba(245, 158, 11, 0.35);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+/* --- Action Buttons in Analytics Header --- */
+.quick-log-btn {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #6366f1);
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 10px;
+    -fx-padding: 9px 18px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.5), 12, 0.2, 0, 3);
+}
+
+.quick-log-btn:hover {
+    -fx-background-color: linear-gradient(to right, #60a5fa, #818cf8);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.8), 16, 0.3, 0, 4);
+}
+
+.header-action-glass {
+    -fx-background-color: rgba(255, 255, 255, 0.07);
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.header-action-glass:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.14);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-text-fill: #ffffff;
+}
+
+/* --- Anatomical Telemetry 3D Display --- */
+.anatomy-viewport-card {
+    -fx-background-color: rgba(15, 23, 42, 0.7);
+    -fx-background-radius: 20px;
+    -fx-border-color: rgba(99, 102, 241, 0.2);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+    -fx-padding: 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 20, 0.1, 0, 8);
+}
+
+.gender-toggle-container {
+    -fx-background-color: rgba(15, 23, 42, 0.9);
+    -fx-background-radius: 24px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 24px;
+    -fx-border-width: 1px;
+    -fx-padding: 4px;
+}
+
+.gender-pill-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 20px;
+    -fx-padding: 6px 18px;
+    -fx-cursor: hand;
+}
+
+.gender-pill-btn-active-male {
+    -fx-background-color: linear-gradient(to right, #2563eb, #3b82f6);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 700;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.6), 10, 0.2, 0, 2);
+}
+
+.gender-pill-btn-active-female {
+    -fx-background-color: linear-gradient(to right, #db2777, #ec4899);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 700;
+    -fx-effect: dropshadow(gaussian, rgba(219, 39, 119, 0.6), 10, 0.2, 0, 2);
+}
+
+/* --- Anatomical Callout Badges --- */
+.anatomy-callout-box {
+    -fx-background-color: rgba(15, 23, 42, 0.85);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(59, 130, 246, 0.45);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.1, 0, 3);
+}
+
+.anatomy-callout-box:hover {
+    -fx-background-color: rgba(30, 41, 59, 0.95);
+    -fx-border-color: #38bdf8;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.5), 14, 0.3, 0, 0);
+}
+
+.anatomy-callout-title {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.anatomy-callout-val {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+}
+
+.anatomy-callout-unit {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.anatomy-callout-delta {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-padding: 1px 4px;
+    -fx-background-radius: 4px;
+}
+
+/* --- Advance Comparison Matrix (Dark Obsidian Glass) --- */
+.biometric-matrix-card {
+    -fx-background-color: rgba(15, 23, 42, 0.85);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(99, 102, 241, 0.3);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 22px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 20, 0.1, 0, 8);
+}
+
+.biometric-matrix-title {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+}
+
+.biometric-matrix-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.biometric-matrix-header-row {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+
+.biometric-th-col {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.biometric-th-then {
+    -fx-text-fill: #38bdf8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.biometric-th-now {
+    -fx-text-fill: #fb923c;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.biometric-matrix-row {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 14px;
+    -fx-border-color: rgba(255, 255, 255, 0.04);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+
+.biometric-matrix-row:hover {
+    -fx-background-color: rgba(99, 102, 241, 0.08);
+    -fx-border-color: rgba(99, 102, 241, 0.25);
+}
+
+.biometric-metric-label {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.biometric-metric-icon {
+    -fx-font-size: 14px;
+}
+
+.biometric-val-then {
+    -fx-background-color: rgba(56, 189, 248, 0.1);
+    -fx-text-fill: #38bdf8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 6px;
+    -fx-padding: 4px 8px;
+    -fx-alignment: center;
+}
+
+.biometric-val-now {
+    -fx-background-color: rgba(251, 146, 60, 0.12);
+    -fx-text-fill: #fb923c;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-background-radius: 6px;
+    -fx-padding: 4px 8px;
+    -fx-alignment: center;
+}
+
+.biometric-trend-pill-gain {
+    -fx-background-color: rgba(16, 185, 129, 0.15);
+    -fx-text-fill: #34d399;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(16, 185, 129, 0.3);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 3px 8px;
+}
+
+.biometric-trend-pill-loss {
+    -fx-background-color: rgba(56, 189, 248, 0.15);
+    -fx-text-fill: #38bdf8;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(56, 189, 248, 0.3);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 3px 8px;
+}
+
+.biometric-trend-pill-neutral {
+    -fx-background-color: rgba(148, 163, 184, 0.15);
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(148, 163, 184, 0.3);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 3px 8px;
+}
+
+/* --- Historical Chart Glass Container --- */
+.chart-glass-card {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(99, 102, 241, 0.2);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 16, 0.1, 0, 6);
+}
+
+.chart-metric-combo {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(99, 102, 241, 0.3);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 4px 10px;
+    -fx-text-fill: #f1f5f9;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.chart-metric-combo .list-cell {
+    -fx-text-fill: #f1f5f9;
+}
+
+/* --- AI Trend Insights Container --- */
+.insights-glass-card {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(99, 102, 241, 0.2);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 16, 0.1, 0, 6);
+}
+
+.insight-trend-card {
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 10, 0, 0, 3);
+}
+
+.insight-trend-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.3), 15, 0.2, 0, 4);
+}
+
+/* --- Directory Grid: Member Cards & Chips --- */
+.filter-chip-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 20px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+    -fx-padding: 6px 14px;
+    -fx-cursor: hand;
+}
+
+.filter-chip-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: #ffffff;
+}
+
+.filter-chip-btn-active {
+    -fx-background-color: rgba(99, 102, 241, 0.2);
+    -fx-text-fill: #a5b4fc;
+    -fx-border-color: rgba(99, 102, 241, 0.45);
+    -fx-font-weight: 700;
+}
+
+.member-report-grid-card {
+    -fx-background-color: rgba(15, 23, 42, 0.7);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 18px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 12, 0.1, 0, 4);
+}
+
+.member-report-grid-card:hover {
+    -fx-background-color: rgba(30, 41, 59, 0.85);
+    -fx-border-color: rgba(99, 102, 241, 0.4);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.35), 18, 0.2, 0, 6);
+}
+
+.member-card-glance-strip {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-background-radius: 8px;
+    -fx-padding: 6px 10px;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+}
+
+.member-card-inspect-btn {
+    -fx-background-color: rgba(99, 102, 241, 0.15);
+    -fx-text-fill: #a5b4fc;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(99, 102, 241, 0.3);
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 5px 12px;
+}
+
+.member-report-grid-card:hover .member-card-inspect-btn {
+    -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: transparent;
+}

@@ -114,4 +114,16 @@ public class PaymentService {
                 .sorted((a, b) -> b.getPaidAt().compareTo(a.getPaidAt()))
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Refunds a payment and updates the repository.
+     */
+    public void refundPayment(String paymentId, String reason) {
+        Payment payment = dataStore.getPayments().findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found with ID: " + paymentId));
+        payment.setStatus(PaymentStatus.REFUNDED);
+        dataStore.getPayments().update(payment);
+        notificationService.notifyListeners("PAYMENT_REFUNDED",
+                String.format("Payment %s refunded (LKR %.2f). Reason: %s", paymentId, payment.getTotalCharged(), reason));
+    }
 }

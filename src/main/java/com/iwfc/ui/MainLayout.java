@@ -1,7 +1,9 @@
 package com.iwfc.ui;
 
 import com.iwfc.facade.IWFCSystemFacade;
+import com.iwfc.model.Role;
 import com.iwfc.model.User;
+import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -9,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.animation.FadeTransition;
 import javafx.util.Duration;
 
 /**
@@ -29,6 +30,7 @@ public class MainLayout extends BorderPane {
         this.facade = facade;
         this.onLogout = onLogout;
         this.contentArea = toastContainer;
+        this.contentArea.setAlignment(Pos.TOP_LEFT);
 
         getStyleClass().add("main-layout");
 
@@ -244,7 +246,7 @@ public class MainLayout extends BorderPane {
             case "Notifications" -> new NotificationView(facade);
             case "Follow Ups" -> new FollowUpView(facade);
             case "Payments" -> new PaymentView(facade);
-            case "Reports" -> facade.getCurrentUser().getRole() == com.iwfc.model.Role.ADMIN ? new AdminReportsView(facade) : new AnalysisView(facade);
+            case "Reports" -> facade.getCurrentUser().getRole() == Role.ADMIN ? new AdminReportsView(facade) : new AnalysisView(facade);
             case "Team" -> new UserManagementView(facade); // Updated mapping from Users to Team
             case "Members" -> new MembersManagementView(facade);
             case "Workout Plans" -> new WorkoutPlansView(facade);
@@ -252,6 +254,7 @@ public class MainLayout extends BorderPane {
         };
 
         // Insert content behind any existing toasts
+        StackPane.setAlignment(content, Pos.TOP_LEFT);
         contentArea.getChildren().add(0, content);
 
         // Add premium fade-in animation

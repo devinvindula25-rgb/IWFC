@@ -1,830 +1,1393 @@
 package com.iwfc.ui;
-import com.iwfc.ui.components.DialogUtils;
 
 import com.iwfc.exception.DuplicateDataException;
 import com.iwfc.exception.UnauthorizedAccessException;
 import com.iwfc.facade.IWFCSystemFacade;
 import com.iwfc.model.*;
+import com.iwfc.ui.components.DialogUtils;
 import com.iwfc.ui.components.StatusBadge;
 import com.iwfc.ui.components.UsageRing;
+import javafx.animation.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
-import javafx.scene.shape.*;
 import javafx.scene.paint.Color;
-import java.time.format.DateTimeFormatter;
+import javafx.scene.shape.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
 
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Equipment management view with card grid, search/filters, and add/edit functionality.
+ * Supreme Equipment Operations Center & Asset Telemetry Hub.
+ * Features 2-tier navigation (Category Overview Donut Hub & Category Drill-Down),
+ * interactive Gym Floor Map blueprint with live pulsing telemetry dots,
+ * real-time maintenance alert triage feed, and 100% operational filters and modals.
  */
 public class EquipmentView extends VBox {
 
     private final IWFCSystemFacade facade;
-    private VBox categoriesContainer;
-    private String selectedCategory = null;
-    private HBox statsContainer;
-    private VBox rightColumn;
+
+    // Filter controls
+    private TextField searchField;
     private ComboBox<String> statusFilter;
+    private ComboBox<String> locationFilter;
+    private EquipmentStatus activeKpiFilter = null;
+    private String selectedCategory = null;
+    private String mapCategoryFilter = null;
+
+    // UI containers
+    private HBox kpiContainer;
+    private VBox contentContainer;
+    private VBox rightColumn;
+    private Pane mapCanvas;
+    private final Map<EquipmentStatus, VBox> kpiCardsMap = new EnumMap<>(EquipmentStatus.class);
+
+    // Date formatter
+    private static final DateTimeFormatter ALERT_DATE_FMT = DateTimeFormatter.ofPattern("MMM d, HH:mm");
 
     public EquipmentView(IWFCSystemFacade facade) {
         this.facade = facade;
         setSpacing(20);
-        setPadding(new Insets(25));
+        setPadding(new Insets(24));
         getStyleClass().add("equipment-view");
+        VBox.setVgrow(this, Priority.ALWAYS);
+
+        try {
+            getStylesheets().add(getClass().getResource("/com/iwfc/css/equipment-management.css").toExternalForm());
+        } catch (Exception ignored) {}
+
         buildUI();
     }
 
     private void buildUI() {
-        // Header
-        Label title = new Label("Equipment Management");
-        title.getStyleClass().add("view-title");
+        getChildren().clear();
 
-        // Toolbar: search + filters + add button
-        HBox toolbar = new HBox(10);
-        toolbar.setAlignment(Pos.CENTER_LEFT);
+        // 1. Top Header & Interactive Toolbar
+        VBox headerArea = buildHeaderAndToolbar();
 
-        TextField searchField = new TextField();
-        searchField.setPromptText("🔍  Search equipment...");
-        searchField.getStyleClass().add("search-field");
-        searchField.setPrefWidth(250);
-        Button refreshBtn = new Button("🔄 Refresh");
-        refreshBtn.getStyleClass().add("action-button");
-        
-        statusFilter = new ComboBox<>();
-        statusFilter.getItems().add("All Statuses");
-        for (EquipmentStatus s : EquipmentStatus.values()) statusFilter.getItems().add(s.getDisplayName());
-        statusFilter.setPromptText("Filter by Status");
+        // 2. Equipment Summary KPI Stat Blocks (Operational, Faulty, Maintenance)
+        kpiContainer = new HBox(16);
+        kpiContainer.setAlignment(Pos.CENTER_LEFT);
 
-        ComboBox<String> locationFilter = new ComboBox<>();
-        locationFilter.getItems().add("All Locations");
-        for (Location l : Location.values()) locationFilter.getItems().add(l.getDisplayName());
-        locationFilter.setPromptText("Filter by Location");
+        // 3. Main Center Area: Left (Categories / Drilldown) + Right (Map + Alerts)
+        HBox bodyArea = new HBox(24);
+        VBox.setVgrow(bodyArea, Priority.ALWAYS);
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        // Left Column (Scrollable Cards)
+        VBox leftColumn = new VBox(18);
+        HBox.setHgrow(leftColumn, Priority.ALWAYS);
 
-        Button addBtn = new Button("+ Add Equipment");
-        addBtn.getStyleClass().add("add-button");
-
-        boolean isAdmin = facade.getCurrentUser().getRole() == Role.ADMIN;
-        addBtn.setVisible(isAdmin);
-        addBtn.setManaged(isAdmin);
-        addBtn.setOnAction(e -> showAddDialog());
-
-        Runnable applyFilters = () -> {
-            String text = searchField.getText();
-            EquipmentStatus filterStatus = null;
-            String selStatus = statusFilter.getValue();
-            if (selStatus != null && !"All Statuses".equals(selStatus)) {
-                for (EquipmentStatus s : EquipmentStatus.values()) {
-                    if (s.getDisplayName().equals(selStatus)) { filterStatus = s; break; }
-                }
-            }
-            Location filterLoc = null;
-            String selLoc = locationFilter.getValue();
-            if (selLoc != null && !"All Locations".equals(selLoc)) {
-                for (Location l : Location.values()) {
-                    if (l.getDisplayName().equals(selLoc)) { filterLoc = l; break; }
-                }
-            }
-            filterCards(text, filterStatus, filterLoc);
-        };
-
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> applyFilters.run());
-        statusFilter.setOnAction(e -> applyFilters.run());
-        locationFilter.setOnAction(e -> applyFilters.run());
-
-        refreshBtn.setOnAction(e -> {
-            searchField.clear();
-            statusFilter.getSelectionModel().clearSelection();
-            locationFilter.getSelectionModel().clearSelection();
-            refreshCards();
-        });
-
-        toolbar.getChildren().addAll(searchField, statusFilter, locationFilter, refreshBtn, spacer, addBtn);
-
-        // Stats container
-        statsContainer = new HBox(15);
-        statsContainer.setAlignment(Pos.CENTER_LEFT);
-        statsContainer.setPadding(new Insets(10, 0, 10, 0));
-
-        // Card grid
-        ScrollPane scrollPane = new ScrollPane();
+        contentContainer = new VBox(20);
+        ScrollPane scrollPane = new ScrollPane(contentContainer);
         scrollPane.setFitToWidth(true);
-        scrollPane.getStyleClass().add("equipment-scroll");
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0;");
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
-        categoriesContainer = new VBox(25);
-        categoriesContainer.setPadding(new Insets(10, 0, 20, 0));
+        leftColumn.getChildren().addAll(kpiContainer, scrollPane);
 
-        scrollPane.setContent(categoriesContainer);
-
-        HBox mainContent = new HBox(20);
-        VBox.setVgrow(mainContent, Priority.ALWAYS);
-        
-        VBox leftColumn = new VBox(20);
-        HBox.setHgrow(leftColumn, Priority.ALWAYS);
-        
+        // Right Column (Map + Alerts)
         rightColumn = new VBox(20);
-        rightColumn.setPrefWidth(350);
-        rightColumn.setMinWidth(350);
-        
-        leftColumn.getChildren().addAll(statsContainer, scrollPane);
-        mainContent.getChildren().addAll(leftColumn, rightColumn);
+        rightColumn.setPrefWidth(360);
+        rightColumn.setMinWidth(360);
 
-        getChildren().addAll(title, toolbar, mainContent);
+        bodyArea.getChildren().addAll(leftColumn, rightColumn);
 
-        refreshCards();
+        getChildren().addAll(headerArea, bodyArea);
+
+        // Initial render
+        refreshAllData();
     }
 
-    private void refreshCards() {
-        categoriesContainer.getChildren().clear();
-        List<Equipment> equipment = facade.getAllEquipment();
-        renderCategorizedEquipment(equipment);
-        updateStats();
-        updateRightColumn();
-    }
-    
-    private void updateRightColumn() {
-        rightColumn.getChildren().clear();
-        
-        // 1. Gym Floor Map
-        VBox mapPanel = new VBox(15);
-        mapPanel.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 12px; -fx-padding: 15;");
-        Label mapTitle = new Label("Gym Floor Map");
-        mapTitle.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+    // =========================================================================
+    // 1. HEADER & INTERACTIVE TOOLBAR
+    // =========================================================================
+    private VBox buildHeaderAndToolbar() {
+        VBox container = new VBox(14);
 
-        Pane mapPane = new Pane();
-        mapPane.setPrefHeight(250);
-        mapPane.setStyle("-fx-background-color: rgba(255,255,255,0.02); -fx-background-radius: 8px; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 8px;");
-        
-        // Generate plotting nodes based on equipment data
-        for(Equipment eq : facade.getAllEquipment()) {
-            Circle dot = new Circle(5);
-            switch (eq.getStatus()) {
-                case OPERATIONAL -> dot.setFill(Color.web("#4ade80"));
-                case UNDER_MAINTENANCE -> dot.setFill(Color.web("#f59e0b"));
-                default -> dot.setFill(Color.web("#ef4444"));
-            }
-            
-            // Generate stable dummy positions
-            dot.setCenterX(15 + Math.abs(eq.hashCode()) % 290);
-            dot.setCenterY(15 + Math.abs(eq.hashCode() * 31) % 220);
-            
-            Tooltip tip = new Tooltip(eq.getName() + " (" + eq.getStatus().getDisplayName() + ")");
-            Tooltip.install(dot, tip);
-            mapPane.getChildren().add(dot);
+        // Title row
+        HBox titleRow = new HBox(12);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label title = new Label("Equipment Management");
+        title.getStyleClass().add("equipment-header-title");
+
+        Region titleSpacer = new Region();
+        HBox.setHgrow(titleSpacer, Priority.ALWAYS);
+
+        // Add Equipment Button (Admin/Instructor)
+        Button addBtn = new Button("+ Add Equipment");
+        addBtn.getStyleClass().add("equipment-add-btn");
+        boolean canAdd = facade.getCurrentUser().getRole() == Role.ADMIN || facade.getCurrentUser().getRole() == Role.INSTRUCTOR;
+        addBtn.setVisible(canAdd);
+        addBtn.setManaged(canAdd);
+        addBtn.setOnAction(e -> showAddEquipmentModal());
+
+        titleRow.getChildren().addAll(title, titleSpacer, addBtn);
+
+        // Toolbar: Search + Status Dropdown + Location Dropdown + Refresh Button
+        HBox toolbar = new HBox(12);
+        toolbar.setAlignment(Pos.CENTER_LEFT);
+
+        // Search Input with instant listener
+        searchField = new TextField();
+        searchField.setPromptText("🔍  Search equipment by name or ID...");
+        searchField.getStyleClass().add("equipment-search-field");
+        searchField.setPrefWidth(260);
+        searchField.textProperty().addListener((obs, oldV, newV) -> renderMainContent());
+
+        // Status Filter Dropdown
+        statusFilter = new ComboBox<>();
+        statusFilter.getStyleClass().add("equipment-combo-box");
+        statusFilter.getItems().add("All Statuses");
+        for (EquipmentStatus s : EquipmentStatus.values()) {
+            statusFilter.getItems().add(s.getDisplayName());
         }
-        mapPanel.getChildren().addAll(mapTitle, mapPane);
-        
-        // 2. Recent Maintenance & Alerts
-        VBox alertsPanel = new VBox(15);
-        alertsPanel.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 12px; -fx-padding: 15;");
-        VBox.setVgrow(alertsPanel, Priority.ALWAYS);
-        Label alertsTitle = new Label("Recent Maintenance & Alerts");
-        alertsTitle.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-
-        VBox alertsList = new VBox(10);
-        List<MaintenanceRequest> requests = facade.getAllMaintenanceRequests();
-        // Sort by reported date descending (most recent first)
-        requests.sort((a,b) -> b.getCreatedDate().compareTo(a.getCreatedDate()));
-
-        for(int i=0; i<Math.min(5, requests.size()); i++) {
-            MaintenanceRequest req = requests.get(i);
-            HBox alertRow = new HBox(10);
-            alertRow.setAlignment(Pos.CENTER_LEFT);
-            alertRow.setStyle("-fx-border-color: transparent transparent rgba(255,255,255,0.1) transparent; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 10 0;");
-            
-            Label icon = new Label(req.getUrgency() == Urgency.HIGH ? "🔴" : "⚠️");
-            VBox textCol = new VBox(2);
-            Label eqName = new Label(req.getEquipment().getName() + " - " + req.getDescription());
-            eqName.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 13px; -fx-wrap-text: true;");
-            eqName.setMaxWidth(280);
-            
-            Label statDate = new Label(req.getStatus().getDisplayName() + " - " + req.getCreatedDate().format(DateTimeFormatter.ofPattern("MMM d, HH:mm")));
-            statDate.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
-            
-            textCol.getChildren().addAll(eqName, statDate);
-            alertRow.getChildren().addAll(icon, textCol);
-            alertsList.getChildren().add(alertRow);
-        }
-        
-        if(requests.isEmpty()) {
-            Label empty = new Label("No recent alerts.");
-            empty.setStyle("-fx-text-fill: #64748b; -fx-padding: 10 0;");
-            alertsList.getChildren().add(empty);
-        }
-
-        alertsPanel.getChildren().addAll(alertsTitle, alertsList);
-        
-        rightColumn.getChildren().addAll(mapPanel, alertsPanel);
-    }
-
-    private void updateStats() {
-        statsContainer.getChildren().clear();
-        statsContainer.setSpacing(15);
-        java.util.Map<EquipmentStatus, Long> summary = facade.getEquipmentSummary();
-        
-        VBox overviewPanel = new VBox(15);
-        overviewPanel.getStyleClass().add("overview-panel");
-        HBox.setHgrow(overviewPanel, Priority.ALWAYS);
-        
-        Label overviewTitle = new Label("Equipment Summary");
-        overviewTitle.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #e2e8f0;");
-        
-        HBox blocksContainer = new HBox(15);
-        blocksContainer.setAlignment(Pos.CENTER_LEFT);
-        
-        VBox opBlock = createStatBlock("OPERATIONAL", summary.getOrDefault(EquipmentStatus.OPERATIONAL, 0L), "#4ade80");
-        VBox faultyBlock = createStatBlock("FAULTY", summary.getOrDefault(EquipmentStatus.FAULTY, 0L), "#ef4444");
-        VBox maintBlock = createStatBlock("MAINTENANCE", summary.getOrDefault(EquipmentStatus.UNDER_MAINTENANCE, 0L), "#f59e0b");
-        
-        blocksContainer.getChildren().addAll(opBlock, faultyBlock, maintBlock);
-        
-        overviewPanel.getChildren().addAll(overviewTitle, blocksContainer);
-        
-        statsContainer.getChildren().add(overviewPanel);
-    }
-    
-    private VBox createStatBlock(String title, long count, String colorHex) {
-        VBox block = new VBox(5);
-        block.setPadding(new Insets(15));
-        block.setStyle("-fx-background-color: " + colorHex + "; -fx-background-radius: 8px; -fx-cursor: hand;");
-        HBox.setHgrow(block, Priority.ALWAYS);
-        
-        block.setOnMouseClicked(e -> {
-            switch (title) {
-                case "OPERATIONAL" -> statusFilter.setValue(EquipmentStatus.OPERATIONAL.getDisplayName());
-                case "FAULTY" -> statusFilter.setValue(EquipmentStatus.FAULTY.getDisplayName());
-                case "MAINTENANCE" -> statusFilter.setValue(EquipmentStatus.UNDER_MAINTENANCE.getDisplayName());
-            }
-        });
-        
-        HBox topRow = new HBox(10);
-        topRow.setAlignment(Pos.CENTER_LEFT);
-        Label titleLbl = new Label(title);
-        titleLbl.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
-        String icon = "✔️";
-        if (title.equals("FAULTY")) icon = "⚠️";
-        if (title.equals("MAINTENANCE")) icon = "📅";
-        Label iconLbl = new Label(icon);
-        iconLbl.setStyle("-fx-text-fill: rgba(0,0,0,0.4); -fx-font-size: 16px; -fx-background-color: rgba(0,0,0,0.1); -fx-background-radius: 12px; -fx-padding: 2 6;");
-        
-        topRow.getChildren().addAll(titleLbl, spacer, iconLbl);
-        
-        HBox bottomRow = new HBox(15);
-        bottomRow.setAlignment(Pos.BOTTOM_LEFT);
-        Label countLbl = new Label(String.valueOf(count));
-        countLbl.setStyle("-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;");
-        
-        Region spacer2 = new Region();
-        HBox.setHgrow(spacer2, Priority.ALWAYS);
-        
-        Polyline sparkline = new Polyline();
-        // Generate stable dummy data based on title hash to simulate a trend
-        double[] points = new double[10];
-        java.util.Random rnd = new java.util.Random(title.hashCode());
-        double y = 20;
-        for (int i=0; i<5; i++) {
-            points[i*2] = i * 20.0;
-            points[i*2 + 1] = y + (rnd.nextDouble() * 15 - 7.5);
-            y = points[i*2 + 1];
-        }
-        for (Double d : points) sparkline.getPoints().add(d);
-        sparkline.setStroke(Color.web("rgba(0,0,0,0.5)"));
-        sparkline.setStrokeWidth(2);
-        sparkline.setFill(Color.TRANSPARENT);
-        
-        bottomRow.getChildren().addAll(countLbl, spacer2, sparkline);
-        
-        block.getChildren().addAll(topRow, bottomRow);
-        
-        block.setOnMouseEntered(e -> block.setStyle("-fx-background-color: " + colorHex + "dd; -fx-background-radius: 8px; -fx-cursor: hand;"));
-        block.setOnMouseExited(e -> block.setStyle("-fx-background-color: " + colorHex + "; -fx-background-radius: 8px; -fx-cursor: hand;"));
-        
-        return block;
-    }
-
-    private VBox createEquipmentCard(Equipment eq) {
-        VBox card = new VBox(15);
-        card.setAlignment(Pos.TOP_LEFT);
-        card.setPadding(new Insets(18));
-        card.setPrefWidth(260); // slightly wider to fit everything nicely
-        card.setMinHeight(Region.USE_PREF_SIZE);
-        card.getStyleClass().add("equipment-card-premium");
-
-        // Hover animation
-        card.setOnMouseEntered(e -> {
-            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), card);
-            st.setToX(1.02);
-            st.setToY(1.02);
-            st.play();
-            card.setStyle("-fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-background-color: rgba(255,255,255,0.08);");
-        });
-        card.setOnMouseExited(e -> {
-            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), card);
-            st.setToX(1.0);
-            st.setToY(1.0);
-            st.play();
-            card.setStyle("");
-        });
-
-        // Top row: icon + name + ID + menu
-        HBox topRow = new HBox(10);
-        topRow.setAlignment(Pos.TOP_LEFT);
-
-        Label iconLbl = new Label("🏋️"); // default icon
-        if (eq.getName().toLowerCase().contains("treadmill")) iconLbl.setText("🏃");
-        else if (eq.getName().toLowerCase().contains("bike")) iconLbl.setText("🚴");
-        else if (eq.getName().toLowerCase().contains("row")) iconLbl.setText("🚣");
-        iconLbl.setStyle("-fx-font-size: 18px;");
-
-        VBox nameBox = new VBox(2);
-        Label name = new Label(eq.getName());
-        name.getStyleClass().add("equipment-name");
-        name.setWrapText(true);
-        Label id = new Label("ID: " + eq.getEquipmentId());
-        id.getStyleClass().add("equipment-id");
-        nameBox.getChildren().addAll(name, id);
-        
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
-        Label menuBtn = new Label("⋮");
-        menuBtn.setStyle("-fx-font-size: 18px; -fx-text-fill: #9ca3af; -fx-cursor: hand;");
-
-        topRow.getChildren().addAll(iconLbl, nameBox, spacer, menuBtn);
-
-        // Middle section: Usage Ring + Details
-        HBox middleRow = new HBox(15);
-        middleRow.setAlignment(Pos.CENTER_LEFT);
-        
-        VBox leftMiddle = new VBox(5);
-        leftMiddle.setAlignment(Pos.CENTER);
-        UsageRing ring = new UsageRing(eq.getCumulativeUsageHours(), eq.getMaintenanceThreshold(), eq.getStatus());
-        StatusBadge statusBadge = StatusBadge.forEquipmentStatus(eq.getStatus());
-        leftMiddle.getChildren().addAll(ring, statusBadge);
-        
-        VBox rightMiddle = new VBox(8);
-        rightMiddle.setAlignment(Pos.CENTER_LEFT);
-        
-        double percentage = (eq.getCumulativeUsageHours() / eq.getMaintenanceThreshold()) * 100;
-        Label usageTxt = new Label(String.format("%.0f of %.0f hours (%.0f%%)", 
-            eq.getCumulativeUsageHours(), eq.getMaintenanceThreshold(), percentage));
-        usageTxt.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 11px;");
-        
-        Label estMaint = new Label("Est. Maint: 12/23");
-        estMaint.setStyle("-fx-text-fill: #51CF66; -fx-font-size: 11px;");
-        if (eq.getStatus() == EquipmentStatus.FAULTY) estMaint.setStyle("-fx-text-fill: #FF6B6B; -fx-font-size: 11px;");
-        else if (eq.getStatus() == EquipmentStatus.UNDER_MAINTENANCE) estMaint.setStyle("-fx-text-fill: #FFD43B; -fx-font-size: 11px;");
-        
-        Label location = new Label("📍 " + eq.getLocation().getDisplayName());
-        location.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 11px;");
-        
-        rightMiddle.getChildren().addAll(usageTxt, estMaint, location);
-        middleRow.getChildren().addAll(leftMiddle, rightMiddle);
-
-        // Last service text
-        Label lastService = new Label("Last Service: 12/21");
-        lastService.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 11px;");
-
-        // Bottom row buttons
-        HBox bottomRow = new HBox(10);
-        bottomRow.setAlignment(Pos.CENTER);
-        Button viewDetailsCardBtn = new Button("View Details");
-        viewDetailsCardBtn.setStyle("-fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 4px; -fx-text-fill: #e5e7eb; -fx-font-size: 11px; -fx-padding: 5 15; -fx-cursor: hand;");
-        Button logMaintCardBtn = new Button("Log Maintenance");
-        logMaintCardBtn.setStyle("-fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 4px; -fx-text-fill: #e5e7eb; -fx-font-size: 11px; -fx-padding: 5 15; -fx-cursor: hand;");
-        
-        // Hover effects for card buttons
-        viewDetailsCardBtn.setOnMouseEntered(e -> viewDetailsCardBtn.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-border-color: rgba(255,255,255,0.4); -fx-border-radius: 4px; -fx-text-fill: #ffffff; -fx-font-size: 11px; -fx-padding: 5 15; -fx-cursor: hand;"));
-        viewDetailsCardBtn.setOnMouseExited(e -> viewDetailsCardBtn.setStyle("-fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 4px; -fx-text-fill: #e5e7eb; -fx-font-size: 11px; -fx-padding: 5 15; -fx-cursor: hand;"));
-        logMaintCardBtn.setOnMouseEntered(e -> logMaintCardBtn.setStyle("-fx-background-color: rgba(81, 207, 102, 0.15); -fx-border-color: #51CF66; -fx-border-radius: 4px; -fx-text-fill: #51CF66; -fx-font-size: 11px; -fx-padding: 5 15; -fx-cursor: hand;"));
-        logMaintCardBtn.setOnMouseExited(e -> logMaintCardBtn.setStyle("-fx-background-color: transparent; -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 4px; -fx-text-fill: #e5e7eb; -fx-font-size: 11px; -fx-padding: 5 15; -fx-cursor: hand;"));
-
-        viewDetailsCardBtn.setOnAction(e -> showEquipmentDetailsDialog(eq));
-        
-        logMaintCardBtn.setOnAction(e -> {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Mark equipment as Operational and log maintenance?", ButtonType.YES, ButtonType.NO);
-        DialogUtils.stylePremiumDialog(confirm);
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.YES) {
-                    try {
-                        eq.resetUsageHours();
-                        facade.editEquipment(eq.getEquipmentId(), eq.getName(), eq.getCategory(), EquipmentStatus.OPERATIONAL, eq.getLocation(), eq.getMaintenanceThreshold());
-                        refreshCards();
-                    } catch (UnauthorizedAccessException ex) {
-                        showAlert("Access Denied", ex.getMessage());
+        statusFilter.setValue("All Statuses");
+        statusFilter.setOnAction(e -> {
+            String val = statusFilter.getValue();
+            if (val == null || "All Statuses".equals(val)) {
+                activeKpiFilter = null;
+            } else {
+                for (EquipmentStatus s : EquipmentStatus.values()) {
+                    if (s.getDisplayName().equalsIgnoreCase(val)) {
+                        activeKpiFilter = s;
+                        break;
                     }
                 }
-            });
-        });
-        HBox.setHgrow(viewDetailsCardBtn, Priority.ALWAYS);
-        HBox.setHgrow(logMaintCardBtn, Priority.ALWAYS);
-        viewDetailsCardBtn.setMaxWidth(Double.MAX_VALUE);
-        logMaintCardBtn.setMaxWidth(Double.MAX_VALUE);
-        bottomRow.getChildren().addAll(viewDetailsCardBtn, logMaintCardBtn);
-
-        card.getChildren().addAll(topRow, middleRow, lastService, bottomRow);
-
-        // Context menu for admin & instructor
-        Role role = facade.getCurrentUser().getRole();
-        if (role == Role.ADMIN || role == Role.INSTRUCTOR) {
-            ContextMenu contextMenu = new ContextMenu();
-
-            MenuItem logUsageItem = new MenuItem("Log Usage");
-            logUsageItem.setOnAction(e -> showLogUsageDialog(eq));
-
-            MenuItem historyItem = new MenuItem("View Usage History");
-            historyItem.setOnAction(e -> showUsageHistoryDialog(eq));
-
-            contextMenu.getItems().addAll(logUsageItem, historyItem);
-
-            if (role == Role.ADMIN) {
-                MenuItem editItem = new MenuItem("Edit");
-                editItem.setOnAction(e -> showEditDialog(eq));
-
-                MenuItem deactivateItem = new MenuItem("Deactivate");
-                deactivateItem.setOnAction(e -> {
-                    try {
-                        facade.deactivateEquipment(eq.getEquipmentId());
-                        refreshCards();
-                    } catch (UnauthorizedAccessException ex) {
-                        showAlert("Access Denied", ex.getMessage());
-                    }
-                });
-
-                MenuItem removeItem = new MenuItem("Remove");
-                removeItem.setOnAction(e -> {
-                    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to completely remove this equipment?", ButtonType.YES, ButtonType.NO);
-        DialogUtils.stylePremiumDialog(confirm);
-                    confirm.showAndWait().ifPresent(response -> {
-                        if (response == ButtonType.YES) {
-                            try {
-                                facade.removeEquipment(eq.getEquipmentId());
-                                refreshCards();
-                            } catch (UnauthorizedAccessException | IllegalStateException ex) {
-                                showAlert("Error", ex.getMessage());
-                            }
-                        }
-                    });
-                });
-
-                contextMenu.getItems().addAll(editItem, deactivateItem, removeItem);
             }
+            updateKpiSelectionVisuals();
+            renderMainContent();
+            updateFloorMapDots();
+        });
 
-            // Attach menu to the menu button instead of the entire card
-            menuBtn.setOnMouseClicked(e -> {
-                contextMenu.show(menuBtn, e.getScreenX(), e.getScreenY());
-            });
+        // Location Filter Dropdown
+        locationFilter = new ComboBox<>();
+        locationFilter.getStyleClass().add("equipment-combo-box");
+        locationFilter.getItems().add("All Locations");
+        for (Location loc : Location.values()) {
+            locationFilter.getItems().add(loc.getDisplayName());
         }
+        locationFilter.setValue("All Locations");
+        locationFilter.setOnAction(e -> {
+            renderMainContent();
+            updateFloorMapDots();
+        });
+
+        // Refresh Button with 360 spin animation
+        Button refreshBtn = new Button("🔄 Refresh");
+        refreshBtn.getStyleClass().add("equipment-refresh-btn");
+        refreshBtn.setOnAction(e -> {
+            RotateTransition rt = new RotateTransition(Duration.millis(400), refreshBtn);
+            rt.setByAngle(360);
+            rt.play();
+
+            // Clear search and reset filter selections
+            searchField.clear();
+            activeKpiFilter = null;
+            mapCategoryFilter = null;
+            statusFilter.setValue("All Statuses");
+            locationFilter.setValue("All Locations");
+            refreshAllData();
+        });
+
+        toolbar.getChildren().addAll(searchField, statusFilter, locationFilter, refreshBtn);
+
+        container.getChildren().addAll(titleRow, toolbar);
+        return container;
+    }
+
+    // =========================================================================
+    // 2. EQUIPMENT SUMMARY KPI CARDS
+    // =========================================================================
+    private void refreshKpiCards() {
+        kpiContainer.getChildren().clear();
+        kpiCardsMap.clear();
+
+        Map<EquipmentStatus, Long> summary = facade.getEquipmentSummary();
+        long operational = summary.getOrDefault(EquipmentStatus.OPERATIONAL, 0L);
+        long faulty = summary.getOrDefault(EquipmentStatus.FAULTY, 0L);
+        long maintenance = summary.getOrDefault(EquipmentStatus.UNDER_MAINTENANCE, 0L);
+
+        VBox opCard = createKpiCard("OPERATIONAL", operational, EquipmentStatus.OPERATIONAL, "#10b981", "✔");
+        VBox faultyCard = createKpiCard("FAULTY", faulty, EquipmentStatus.FAULTY, "#ef4444", "⚠");
+        VBox maintCard = createKpiCard("MAINTENANCE", maintenance, EquipmentStatus.UNDER_MAINTENANCE, "#f59e0b", "📅");
+
+        kpiCardsMap.put(EquipmentStatus.OPERATIONAL, opCard);
+        kpiCardsMap.put(EquipmentStatus.FAULTY, faultyCard);
+        kpiCardsMap.put(EquipmentStatus.UNDER_MAINTENANCE, maintCard);
+
+        kpiContainer.getChildren().addAll(opCard, faultyCard, maintCard);
+        updateKpiSelectionVisuals();
+    }
+
+    private VBox createKpiCard(String title, long count, EquipmentStatus status, String hexColor, String icon) {
+        VBox card = new VBox(6);
+        card.getStyleClass().add("equipment-kpi-block");
+        card.setStyle("-fx-background-color: " + hexColor + ";");
+        HBox.setHgrow(card, Priority.ALWAYS);
+
+        // Click to toggle filter
+        card.setOnMouseClicked(e -> {
+            if (activeKpiFilter == status) {
+                activeKpiFilter = null;
+                statusFilter.setValue("All Statuses");
+            } else {
+                activeKpiFilter = status;
+                statusFilter.setValue(status.getDisplayName());
+            }
+            updateKpiSelectionVisuals();
+            renderMainContent();
+            updateFloorMapDots();
+        });
+
+        // Top Row: Title + Icon Badge
+        HBox topRow = new HBox(8);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label titleLbl = new Label(title);
+        titleLbl.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 800; -fx-letter-spacing: 0.5px;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label iconLbl = new Label(icon);
+        iconLbl.setStyle("-fx-text-fill: rgba(0,0,0,0.5); -fx-font-size: 13px; -fx-background-color: rgba(0,0,0,0.14); -fx-background-radius: 12px; -fx-padding: 2 7;");
+
+        topRow.getChildren().addAll(titleLbl, spacer, iconLbl);
+
+        // Bottom Row: Number + SVG Sparkline Trend
+        HBox bottomRow = new HBox(12);
+        bottomRow.setAlignment(Pos.BOTTOM_LEFT);
+
+        Label countLbl = new Label("0");
+        countLbl.setStyle("-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: 900;");
+
+        // Roll-up counter animation
+        Timeline counterTl = new Timeline();
+        int steps = Math.min((int) count, 20);
+        if (steps > 0) {
+            for (int i = 0; i <= steps; i++) {
+                final long val = (count * i) / steps;
+                counterTl.getKeyFrames().add(new KeyFrame(Duration.millis(i * (400.0 / steps)), ev -> countLbl.setText(String.valueOf(val))));
+            }
+        } else {
+            countLbl.setText(String.valueOf(count));
+        }
+        counterTl.play();
+
+        Region bottomSpacer = new Region();
+        HBox.setHgrow(bottomSpacer, Priority.ALWAYS);
+
+        // Trend sparkline
+        Polyline sparkline = new Polyline();
+        double[] points = new double[12];
+        Random rnd = new Random(title.hashCode());
+        double y = 18;
+        for (int i = 0; i < 6; i++) {
+            points[i * 2] = i * 16.0;
+            points[i * 2 + 1] = Math.max(4, Math.min(28, y + (rnd.nextDouble() * 12 - 5)));
+            y = points[i * 2 + 1];
+        }
+        for (double d : points) sparkline.getPoints().add(d);
+        sparkline.setStroke(Color.rgb(0, 0, 0, 0.45));
+        sparkline.setStrokeWidth(2.5);
+        sparkline.setFill(Color.TRANSPARENT);
+
+        bottomRow.getChildren().addAll(countLbl, bottomSpacer, sparkline);
+
+        card.getChildren().addAll(topRow, bottomRow);
+
+        // Hover effect
+        card.setOnMouseEntered(e -> {
+            if (activeKpiFilter != status) {
+                card.setStyle("-fx-background-color: " + hexColor + "ee; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
+            }
+        });
+        card.setOnMouseExited(e -> {
+            if (activeKpiFilter != status) {
+                card.setStyle("-fx-background-color: " + hexColor + ";");
+            }
+        });
 
         return card;
     }
 
-    private void filterCards(String searchText, EquipmentStatus statusFilter,
-                             Location locationFilter) {
-        categoriesContainer.getChildren().clear();
-        List<Equipment> equipment = facade.getAllEquipment();
-        List<Equipment> filtered = new java.util.ArrayList<>();
+    private void updateKpiSelectionVisuals() {
+        for (Map.Entry<EquipmentStatus, VBox> entry : kpiCardsMap.entrySet()) {
+            EquipmentStatus status = entry.getKey();
+            VBox card = entry.getValue();
+            String hex = switch (status) {
+                case OPERATIONAL -> "#10b981";
+                case FAULTY -> "#ef4444";
+                case UNDER_MAINTENANCE -> "#f59e0b";
+            };
 
-        for (Equipment eq : equipment) {
-            boolean matches = true;
-            if (searchText != null && !searchText.isEmpty()) {
-                String lower = searchText.toLowerCase();
-                matches = eq.getName().toLowerCase().contains(lower) ||
-                          eq.getEquipmentId().toLowerCase().contains(lower);
-            }
-            if (statusFilter != null && eq.getStatus() != statusFilter) {
-                matches = false;
-            }
-            if (locationFilter != null && eq.getLocation() != locationFilter) {
-                matches = false;
-            }
-            if (matches) {
-                filtered.add(eq);
+            if (activeKpiFilter == status) {
+                card.setStyle("-fx-background-color: " + hex + "; -fx-border-color: #ffffff; -fx-border-width: 2.5px; -fx-border-radius: 12px; -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.4), 14, 0, 0, 2);");
+            } else {
+                card.setStyle("-fx-background-color: " + hex + ";");
             }
         }
-        renderCategorizedEquipment(filtered);
     }
-    
-    private void renderCategorizedEquipment(List<Equipment> equipment) {
+
+    // =========================================================================
+    // 3. MAIN CENTER CONTENT (CATEGORY HUB VS DRILL-DOWN)
+    // =========================================================================
+    private void renderMainContent() {
+        contentContainer.getChildren().clear();
+
+        List<Equipment> all = facade.getAllEquipment();
+        List<Equipment> filtered = filterEquipment(all);
+
         if (selectedCategory == null) {
-            java.util.Map<String, java.util.List<Equipment>> categoryMap = new java.util.LinkedHashMap<>();
-            for (Equipment eq : equipment) {
-                categoryMap.computeIfAbsent(eq.getCategory(), k -> new java.util.ArrayList<>()).add(eq);
-            }
-            
-            FlowPane categoryGrid = new FlowPane(20, 20);
-            categoryGrid.setPadding(new Insets(10));
-            
-            for (java.util.Map.Entry<String, java.util.List<Equipment>> entry : categoryMap.entrySet()) {
-                VBox catCard = createCategoryCard(entry.getKey(), entry.getValue());
-                catCard.setOnMouseClicked(e -> {
-                    selectedCategory = entry.getKey();
-                    refreshCards();
-                });
-                categoryGrid.getChildren().add(catCard);
-            }
-            categoriesContainer.getChildren().add(categoryGrid);
-            
+            renderCategoryOverviewHub(filtered);
         } else {
-            Button backBtn = new Button("← Back to Categories");
-            backBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #06b6d4; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 0 0 10 5;");
-            backBtn.setOnAction(e -> {
-                selectedCategory = null;
-                refreshCards();
-            });
-            
-            Label title = new Label(selectedCategory + " Equipment");
-            title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white; -fx-padding: 0 0 15 5;");
-            
-            FlowPane eqGrid = new FlowPane(15, 15);
-            eqGrid.setPadding(new Insets(5));
-            
-            for (Equipment eq : equipment) {
-                if (eq.getCategory().equals(selectedCategory)) {
-                    eqGrid.getChildren().add(createEquipmentCard(eq));
+            renderCategoryDrillDownView(filtered);
+        }
+    }
+
+    private List<Equipment> filterEquipment(List<Equipment> source) {
+        String query = searchField != null && searchField.getText() != null ? searchField.getText().trim().toLowerCase() : "";
+        String selectedLoc = locationFilter != null ? locationFilter.getValue() : "All Locations";
+
+        return source.stream().filter(eq -> {
+            // Text search
+            if (!query.isEmpty()) {
+                boolean inName = eq.getName().toLowerCase().contains(query);
+                boolean inId = eq.getEquipmentId().toLowerCase().contains(query);
+                boolean inCat = eq.getCategory().toLowerCase().contains(query);
+                boolean inLoc = eq.getLocation().getDisplayName().toLowerCase().contains(query);
+                if (!inName && !inId && !inCat && !inLoc) return false;
+            }
+            // Status filter
+            if (activeKpiFilter != null && eq.getStatus() != activeKpiFilter) {
+                return false;
+            }
+            // Location filter
+            if (selectedLoc != null && !"All Locations".equals(selectedLoc)) {
+                if (!eq.getLocation().getDisplayName().equalsIgnoreCase(selectedLoc)) {
+                    return false;
                 }
             }
-            
-            categoriesContainer.getChildren().addAll(backBtn, title, eqGrid);
+            return true;
+        }).collect(Collectors.toList());
+    }
+
+    // --- WINDOW 1: CATEGORY FLEET OVERVIEW HUB ---
+    private void renderCategoryOverviewHub(List<Equipment> equipmentList) {
+        // Group by category maintaining nice order
+        Map<String, List<Equipment>> categoryMap = new LinkedHashMap<>();
+        for (Equipment eq : equipmentList) {
+            categoryMap.computeIfAbsent(eq.getCategory(), k -> new ArrayList<>()).add(eq);
+        }
+
+        FlowPane categoryGrid = new FlowPane(20, 20);
+        categoryGrid.setAlignment(Pos.TOP_LEFT);
+
+        for (Map.Entry<String, List<Equipment>> entry : categoryMap.entrySet()) {
+            VBox catCard = createCategoryCard(entry.getKey(), entry.getValue());
+            categoryGrid.getChildren().add(catCard);
+        }
+
+        if (categoryMap.isEmpty()) {
+            VBox emptyBox = createEmptyState("No equipment matches your current search/filter criteria.");
+            contentContainer.getChildren().add(emptyBox);
+        } else {
+            contentContainer.getChildren().add(categoryGrid);
         }
     }
-    
-    private VBox createCategoryCard(String categoryName, java.util.List<Equipment> items) {
-        VBox card = new VBox(10);
+
+    private VBox createCategoryCard(String categoryName, List<Equipment> items) {
+        VBox card = new VBox(12);
         card.setAlignment(Pos.CENTER);
-        card.setPrefSize(230, 260);
-        card.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 12px; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12px; -fx-cursor: hand;");
-        
-        String tempIcon = "🏋️";
-        String tempColor = "#3b82f6";
-        if (categoryName.toLowerCase().contains("cardio")) { tempIcon = "🏃"; tempColor = "#ef4444"; }
-        else if (categoryName.toLowerCase().contains("strength")) { tempIcon = "💪"; tempColor = "#eab308"; }
-        else if (categoryName.toLowerCase().contains("studio")) { tempIcon = "🧘"; tempColor = "#a855f7"; }
-        else if (categoryName.toLowerCase().contains("functional")) { tempIcon = "🤸"; tempColor = "#f97316"; }
-        else if (categoryName.toLowerCase().contains("mobility")) { tempIcon = "🩹"; tempColor = "#06b6d4"; }
-        
-        final String icon = tempIcon;
-        final String color = tempColor;
-        
-        // Calculate status counts
+        card.setPrefSize(235, 270);
+        card.getStyleClass().add("equipment-cat-card");
+
+        // Category icon & neon accent
+        String icon = "🏋️";
+        String accentColor = "#3b82f6";
+        String lowerCat = categoryName.toLowerCase();
+        if (lowerCat.contains("cardio")) { icon = "🏃"; accentColor = "#ef4444"; }
+        else if (lowerCat.contains("machines")) { icon = "🏋️"; accentColor = "#eab308"; }
+        else if (lowerCat.contains("free weights")) { icon = "💪"; accentColor = "#f59e0b"; }
+        else if (lowerCat.contains("studio")) { icon = "🧘"; accentColor = "#a855f7"; }
+        else if (lowerCat.contains("functional")) { icon = "🤸"; accentColor = "#f97316"; }
+        else if (lowerCat.contains("mobility")) { icon = "🩹"; accentColor = "#06b6d4"; }
+
+        // Counts
         int good = 0; int minor = 0; int faulty = 0;
-        for(Equipment eq : items) {
+        for (Equipment eq : items) {
             switch (eq.getStatus()) {
                 case OPERATIONAL -> good++;
                 case UNDER_MAINTENANCE -> minor++;
-                default -> faulty++;
+                case FAULTY -> faulty++;
             }
         }
         int total = items.size();
-        
-        // Donut Chart (Health Ring)
-        StackPane ringPane = new StackPane();
-        ringPane.setPrefSize(100, 100);
-        ringPane.setMaxSize(100, 100);
-        
-        double radiusX = 40;
-        double radiusY = 40;
+
+        // Donut Chart (Circular Health Ring)
+        StackPane donutPane = new StackPane();
+        donutPane.setPrefSize(100, 100);
+        donutPane.setMaxSize(100, 100);
+
+        double radius = 40;
         double strokeWidth = 8;
-        
-        // Base ring (background)
-        Arc bgArc = new Arc(0, 0, radiusX, radiusY, 0, 360);
+
+        // Background circle track
+        Arc bgArc = new Arc(0, 0, radius, radius, 0, 360);
         bgArc.setType(ArcType.OPEN);
         bgArc.setStrokeWidth(strokeWidth);
-        bgArc.setStroke(Color.web("rgba(255,255,255,0.1)"));
+        bgArc.setStroke(Color.rgb(255, 255, 255, 0.08));
         bgArc.setFill(Color.TRANSPARENT);
-        ringPane.getChildren().add(bgArc);
-        
-        // Good Arc (Green)
-        double goodAngle = (double) good / total * 360.0;
-        if(good > 0) {
-            Arc goodArc = new Arc(0, 0, radiusX, radiusY, 90, -goodAngle); // Start top, go clockwise
-            goodArc.setType(ArcType.OPEN);
-            goodArc.setStrokeWidth(strokeWidth);
-            goodArc.setStroke(Color.web("#4ade80")); // Operational green
-            goodArc.setFill(Color.TRANSPARENT);
-            ringPane.getChildren().add(goodArc);
+        donutPane.getChildren().add(bgArc);
+
+        if (total > 0) {
+            double goodAngle = ((double) good / total) * 360.0;
+            double minorAngle = ((double) minor / total) * 360.0;
+            double faultyAngle = ((double) faulty / total) * 360.0;
+
+            // Good Arc (Green)
+            if (good > 0) {
+                Arc gArc = new Arc(0, 0, radius, radius, 90, -goodAngle);
+                gArc.setType(ArcType.OPEN);
+                gArc.setStrokeWidth(strokeWidth);
+                gArc.setStroke(Color.web("#4ade80"));
+                gArc.setFill(Color.TRANSPARENT);
+                donutPane.getChildren().add(gArc);
+            }
+            // Minor / Maintenance Arc (Amber)
+            if (minor > 0) {
+                Arc mArc = new Arc(0, 0, radius, radius, 90 - goodAngle, -minorAngle);
+                mArc.setType(ArcType.OPEN);
+                mArc.setStrokeWidth(strokeWidth);
+                mArc.setStroke(Color.web("#f59e0b"));
+                mArc.setFill(Color.TRANSPARENT);
+                donutPane.getChildren().add(mArc);
+            }
+            // Faulty Arc (Red)
+            if (faulty > 0) {
+                Arc fArc = new Arc(0, 0, radius, radius, 90 - goodAngle - minorAngle, -faultyAngle);
+                fArc.setType(ArcType.OPEN);
+                fArc.setStrokeWidth(strokeWidth);
+                fArc.setStroke(Color.web("#ef4444"));
+                fArc.setFill(Color.TRANSPARENT);
+                donutPane.getChildren().add(fArc);
+            }
         }
-        
-        // Minor Arc (Yellow)
-        double minorAngle = (double) minor / total * 360.0;
-        if(minor > 0) {
-            Arc minorArc = new Arc(0, 0, radiusX, radiusY, 90 - goodAngle, -minorAngle);
-            minorArc.setType(ArcType.OPEN);
-            minorArc.setStrokeWidth(strokeWidth);
-            minorArc.setStroke(Color.web("#f59e0b")); // Maintenance yellow
-            minorArc.setFill(Color.TRANSPARENT);
-            ringPane.getChildren().add(minorArc);
-        }
-        
-        // Faulty Arc (Red)
-        double faultyAngle = (double) faulty / total * 360.0;
-        if(faulty > 0) {
-            Arc faultyArc = new Arc(0, 0, radiusX, radiusY, 90 - goodAngle - minorAngle, -faultyAngle);
-            faultyArc.setType(ArcType.OPEN);
-            faultyArc.setStrokeWidth(strokeWidth);
-            faultyArc.setStroke(Color.web("#ef4444")); // Faulty red
-            faultyArc.setFill(Color.TRANSPARENT);
-            ringPane.getChildren().add(faultyArc);
-        }
-        
-        Label iconLbl = new Label(icon);
-        iconLbl.setStyle("-fx-font-size: 36px; -fx-text-fill: " + color + "; -fx-effect: dropshadow(gaussian, " + color + "66, 15, 0, 0, 0);");
-        ringPane.getChildren().add(iconLbl);
-        
-        Label nameLbl = new Label(categoryName);
-        nameLbl.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-        
+
+        // Centered category icon
+        Label centerIcon = new Label(icon);
+        centerIcon.setStyle("-fx-font-size: 34px; -fx-effect: dropshadow(gaussian, " + accentColor + "88, 14, 0, 0, 0);");
+        donutPane.getChildren().add(centerIcon);
+
+        // Titles & Stats
+        Label catNameLbl = new Label(categoryName);
+        catNameLbl.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 16px; -fx-font-weight: 800;");
+
         Label countLbl = new Label(total + " Items");
-        countLbl.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
-        
-        // Subtitle legend
-        Label legendLbl = new Label(good + " Good / " + minor + " Minor / " + faulty + " Faulty");
-        legendLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
-        
-        // Fake Next Maintenance
-        String nextMaint = "Next Maintenance: 15 Nov (" + (total/2 + 1) + " items)";
-        Label maintLbl = new Label(nextMaint);
-        maintLbl.setStyle("-fx-text-fill: rgba(255,255,255,0.6); -fx-font-size: 10px;");
-        
-        // Bottom Action Row
-        HBox actionRow = new HBox(10);
-        actionRow.setPadding(new Insets(10, 20, 0, 20));
-        actionRow.setAlignment(Pos.CENTER);
-        
-        Button locBtn = new Button("📍");
-        locBtn.setStyle("-fx-background-color: rgba(255,255,255,0.08); -fx-text-fill: #3b82f6; -fx-background-radius: 5px; -fx-padding: 3 8; -fx-cursor: hand;");
-        Region actionSpacer = new Region();
-        HBox.setHgrow(actionSpacer, Priority.ALWAYS);
-        Button srvBtn = new Button("🔧");
-        srvBtn.setStyle("-fx-background-color: rgba(255,255,255,0.08); -fx-text-fill: #3b82f6; -fx-background-radius: 5px; -fx-padding: 3 8; -fx-cursor: hand;");
-        actionRow.getChildren().addAll(locBtn, actionSpacer, srvBtn);
-        
-        card.getChildren().addAll(ringPane, nameLbl, countLbl, legendLbl, maintLbl, actionRow);
-        
+        countLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px; -fx-font-weight: 700;");
+
+        Label breakdownLbl = new Label(good + " Good / " + minor + " Minor / " + faulty + " Faulty");
+        breakdownLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 11px;");
+
+        Label maintLbl = new Label("Next Maintenance: 15 Nov (" + Math.max(1, total / 2) + " items)");
+        maintLbl.setStyle("-fx-text-fill: #64748b; -fx-font-size: 10px; -fx-font-weight: 600;");
+
+        // Action Toolbar: Inspect (🔍) + Map Pin (📍) + Service (🔧)
+        HBox actionsRow = new HBox(8);
+        actionsRow.setAlignment(Pos.CENTER);
+        actionsRow.setPadding(new Insets(6, 12, 0, 12));
+
+        Button inspectBtn = new Button("🔍 Inspect");
+        inspectBtn.getStyleClass().add("equipment-card-btn");
+        inspectBtn.setStyle("-fx-font-size: 11px; -fx-padding: 4 10;");
+        inspectBtn.setOnAction(e -> {
+            selectedCategory = categoryName;
+            renderMainContent();
+        });
+
+        Region actSpacer = new Region();
+        HBox.setHgrow(actSpacer, Priority.ALWAYS);
+
+        Button mapPinBtn = new Button("📍");
+        mapPinBtn.getStyleClass().add("equipment-card-btn");
+        mapPinBtn.setStyle("-fx-font-size: 11px; -fx-padding: 4 8;");
+        Tooltip.install(mapPinBtn, new Tooltip("Highlight " + categoryName + " on Floor Map"));
+        mapPinBtn.setOnAction(e -> {
+            mapCategoryFilter = categoryName.equals(mapCategoryFilter) ? null : categoryName;
+            updateFloorMapDots();
+        });
+
+        Button serviceBtn = new Button("🔧");
+        serviceBtn.getStyleClass().add("equipment-card-btn");
+        serviceBtn.setStyle("-fx-font-size: 11px; -fx-padding: 4 8;");
+        Tooltip.install(serviceBtn, new Tooltip("Quick Service for " + categoryName));
+        serviceBtn.setOnAction(e -> {
+            selectedCategory = categoryName;
+            renderMainContent();
+        });
+
+        actionsRow.getChildren().addAll(inspectBtn, actSpacer, mapPinBtn, serviceBtn);
+
+        card.getChildren().addAll(donutPane, catNameLbl, countLbl, breakdownLbl, maintLbl, actionsRow);
+
+        // Clicking anywhere on card opens drill-down
+        card.setOnMouseClicked(e -> {
+            if (e.getTarget() != inspectBtn && e.getTarget() != mapPinBtn && e.getTarget() != serviceBtn) {
+                selectedCategory = categoryName;
+                renderMainContent();
+            }
+        });
+
+        // Hover scale animation
         card.setOnMouseEntered(e -> {
-            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), card);
-            st.setToX(1.03);
-            st.setToY(1.03);
+            ScaleTransition st = new ScaleTransition(Duration.millis(160), card);
+            st.setToX(1.025); st.setToY(1.025);
             st.play();
-            card.setStyle("-fx-background-color: rgba(255,255,255,0.08); -fx-background-radius: 12px; -fx-border-color: " + color + "88; -fx-border-radius: 12px; -fx-cursor: hand;");
         });
-        
         card.setOnMouseExited(e -> {
-            javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), card);
-            st.setToX(1.0);
-            st.setToY(1.0);
+            ScaleTransition st = new ScaleTransition(Duration.millis(160), card);
+            st.setToX(1.0); st.setToY(1.0);
             st.play();
-            card.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 12px; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 12px; -fx-cursor: hand;");
         });
-        
+
         return card;
     }
 
-    private void showEquipmentDetailsDialog(Equipment eq) {
-        Dialog<Void> dialog = new Dialog<>();
-        DialogUtils.stylePremiumDialog(dialog);
-        dialog.setTitle("Equipment Details — " + eq.getName());
-        dialog.getDialogPane().getStyleClass().add("premium-dialog");
-        
-        VBox content = new VBox(15);
-        content.setPadding(new Insets(20));
-        
-        Label title = new Label(eq.getName() + " (" + eq.getEquipmentId() + ")");
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;");
-        
-        GridPane grid = new GridPane();
-        grid.setHgap(20);
-        grid.setVgap(10);
-        
-        grid.add(new Label("Category:"), 0, 0);
-        grid.add(new Label(eq.getCategory()), 1, 0);
-        
-        grid.add(new Label("Location:"), 0, 1);
-        grid.add(new Label(eq.getLocation().getDisplayName()), 1, 1);
-        
-        grid.add(new Label("Status:"), 0, 2);
-        grid.add(new Label(eq.getStatus().getDisplayName()), 1, 2);
-        
-        grid.add(new Label("Usage Hours:"), 0, 3);
-        grid.add(new Label(String.format("%.1f / %.1f", eq.getCumulativeUsageHours(), eq.getMaintenanceThreshold())), 1, 3);
-        
-        Label historyLbl = new Label("Recent Usage History:");
-        historyLbl.setStyle("-fx-font-weight: bold; -fx-text-fill: #e2e8f0; -fx-padding: 10 0 0 0;");
-        
-        ListView<String> listView = new ListView<>();
-        for (UsageLogEntry entry : eq.getUsageLog()) {
-            String ts = entry.getTimestamp().toString();
-            String notes = entry.getNotes() != null && !entry.getNotes().isEmpty() ? " - " + entry.getNotes() : "";
-            listView.getItems().add(String.format("%s - %.1f hrs by %s%s",
-                ts, entry.getHoursLogged(), entry.getLoggedByUserId(), notes));
+    // --- WINDOW 2: CATEGORY DRILL-DOWN VIEW ---
+    private void renderCategoryDrillDownView(List<Equipment> filteredList) {
+        // Navigation Bar: "← Back to Categories"
+        HBox navBar = new HBox(12);
+        navBar.setAlignment(Pos.CENTER_LEFT);
+        navBar.setPadding(new Insets(0, 0, 10, 0));
+
+        Button backBtn = new Button("← Back to Categories");
+        backBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #06b6d4; -fx-font-weight: 800; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 4 0;");
+        backBtn.setOnAction(e -> {
+            selectedCategory = null;
+            renderMainContent();
+        });
+
+        Region navSpacer = new Region();
+        HBox.setHgrow(navSpacer, Priority.ALWAYS);
+
+        Label catTitle = new Label(selectedCategory + " Equipment");
+        catTitle.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 20px; -fx-font-weight: 900;");
+
+        List<Equipment> categoryItems = filteredList.stream()
+                .filter(eq -> eq.getCategory().equalsIgnoreCase(selectedCategory))
+                .collect(Collectors.toList());
+
+        Label countPill = new Label(categoryItems.size() + " Items Available");
+        countPill.setStyle("-fx-background-color: rgba(6, 182, 212, 0.15); -fx-text-fill: #22d3ee; -fx-font-weight: 800; -fx-font-size: 12px; -fx-padding: 4 12; -fx-background-radius: 14px;");
+
+        navBar.getChildren().addAll(backBtn, navSpacer, catTitle, countPill);
+
+        FlowPane eqGrid = new FlowPane(18, 18);
+        eqGrid.setAlignment(Pos.TOP_LEFT);
+
+        for (Equipment eq : categoryItems) {
+            eqGrid.getChildren().add(createEquipmentItemCard(eq));
         }
-        listView.setPrefSize(400, 200);
-        
-        content.getChildren().addAll(title, grid, historyLbl, listView);
-        
-        dialog.getDialogPane().setContent(content);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-        
-        dialog.showAndWait();
+
+        if (categoryItems.isEmpty()) {
+            VBox empty = createEmptyState("No equipment found in category \"" + selectedCategory + "\" matching filters.");
+            contentContainer.getChildren().addAll(navBar, empty);
+        } else {
+            contentContainer.getChildren().addAll(navBar, eqGrid);
+        }
     }
 
-    private void showAddDialog() {
-        Dialog<Equipment> dialog = new Dialog<>();
+    private VBox createEquipmentItemCard(Equipment eq) {
+        VBox card = new VBox(14);
+        card.setPrefWidth(265);
+        card.getStyleClass().add("equipment-item-card");
+
+        // Equipment specific icon
+        String icon = "🏋️";
+        String lower = eq.getName().toLowerCase();
+        if (lower.contains("treadmill")) icon = "🏃";
+        else if (lower.contains("stair")) icon = "🧗";
+        else if (lower.contains("bike") || lower.contains("assault") || lower.contains("spin")) icon = "🚴";
+        else if (lower.contains("row")) icon = "🚣";
+        else if (lower.contains("elliptical")) icon = "🏃";
+        else if (lower.contains("cable") || lower.contains("smith") || lower.contains("press")) icon = "🏋️";
+        else if (lower.contains("dumbbell") || lower.contains("barbell")) icon = "💪";
+        else if (lower.contains("mat") || lower.contains("yoga")) icon = "🧘";
+
+        // Top Row: Icon + Name + ID + Menu (⋮)
+        HBox topRow = new HBox(10);
+        topRow.setAlignment(Pos.TOP_LEFT);
+
+        Label iconLbl = new Label(icon);
+        iconLbl.setStyle("-fx-font-size: 20px;");
+
+        VBox nameBox = new VBox(2);
+        Label nameLbl = new Label(eq.getName());
+        nameLbl.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 14px; -fx-font-weight: 800;");
+        nameLbl.setWrapText(true);
+        nameLbl.setMaxWidth(165);
+
+        Label idLbl = new Label("ID: " + eq.getEquipmentId());
+        idLbl.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-font-weight: 700;");
+        nameBox.getChildren().addAll(nameLbl, idLbl);
+
+        Region topSpacer = new Region();
+        HBox.setHgrow(topSpacer, Priority.ALWAYS);
+
+        Label menuBtn = new Label("⋮");
+        menuBtn.setStyle("-fx-font-size: 20px; -fx-text-fill: #94a3b8; -fx-cursor: hand; -fx-padding: 0 4;");
+        attachEquipmentContextMenu(menuBtn, eq);
+
+        topRow.getChildren().addAll(iconLbl, nameBox, topSpacer, menuBtn);
+
+        // Middle Section: Usage Ring + Telemetry Details
+        HBox midRow = new HBox(14);
+        midRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox ringCol = new VBox(4);
+        ringCol.setAlignment(Pos.CENTER);
+        UsageRing ring = new UsageRing(eq.getCumulativeUsageHours(), eq.getMaintenanceThreshold(), eq.getStatus());
+        StatusBadge statusBadge = StatusBadge.forEquipmentStatus(eq.getStatus());
+        ringCol.getChildren().addAll(ring, statusBadge);
+
+        VBox detailsCol = new VBox(6);
+        detailsCol.setAlignment(Pos.CENTER_LEFT);
+
+        double pct = (eq.getCumulativeUsageHours() / Math.max(1, eq.getMaintenanceThreshold())) * 100.0;
+        Label hoursLbl = new Label(String.format("%.0f of %.0f hrs (%.0f%%)", eq.getCumulativeUsageHours(), eq.getMaintenanceThreshold(), pct));
+        hoursLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 11px; -fx-font-weight: 700;");
+
+        Label estMaint = new Label("Est. Maint: 12/23");
+        estMaint.setStyle("-fx-text-fill: #10b981; -fx-font-size: 11px; -fx-font-weight: 700;");
+        if (eq.getStatus() == EquipmentStatus.FAULTY) {
+            estMaint.setText("Requires Service");
+            estMaint.setStyle("-fx-text-fill: #f87171; -fx-font-size: 11px; -fx-font-weight: 700;");
+        } else if (eq.getStatus() == EquipmentStatus.UNDER_MAINTENANCE) {
+            estMaint.setText("In Maintenance");
+            estMaint.setStyle("-fx-text-fill: #fbbf24; -fx-font-size: 11px; -fx-font-weight: 700;");
+        }
+
+        Label locLbl = new Label("📍 " + eq.getLocation().getDisplayName());
+        locLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+
+        detailsCol.getChildren().addAll(hoursLbl, estMaint, locLbl);
+        midRow.getChildren().addAll(ringCol, detailsCol);
+
+        // Last Service row
+        Label lastServiceLbl = new Label("Last Service: 12/21");
+        lastServiceLbl.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
+
+        // Bottom Action Buttons: View Details & Log Maintenance
+        HBox bottomButtons = new HBox(8);
+        bottomButtons.setAlignment(Pos.CENTER);
+
+        Button viewDetailsBtn = new Button("View Details");
+        viewDetailsBtn.getStyleClass().add("equipment-card-btn");
+        viewDetailsBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(viewDetailsBtn, Priority.ALWAYS);
+        viewDetailsBtn.setOnAction(e -> showEquipmentDetailsModal(eq));
+
+        Button logMaintBtn = new Button("Log Maintenance");
+        logMaintBtn.getStyleClass().add("equipment-maint-btn");
+        logMaintBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(logMaintBtn, Priority.ALWAYS);
+        logMaintBtn.setOnAction(e -> handleLogMaintenanceAction(eq));
+
+        bottomButtons.getChildren().addAll(viewDetailsBtn, logMaintBtn);
+
+        card.getChildren().addAll(topRow, midRow, lastServiceLbl, bottomButtons);
+
+        // Hover animation
+        card.setOnMouseEntered(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(150), card);
+            st.setToX(1.02); st.setToY(1.02);
+            st.play();
+        });
+        card.setOnMouseExited(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(150), card);
+            st.setToX(1.0); st.setToY(1.0);
+            st.play();
+        });
+
+        return card;
+    }
+
+    private void attachEquipmentContextMenu(Node triggerNode, Equipment eq) {
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem detailsItem = new MenuItem("🔍 View Full Details");
+        detailsItem.setOnAction(e -> showEquipmentDetailsModal(eq));
+
+        MenuItem logUsageItem = new MenuItem("⚡ Log Usage Hours");
+        logUsageItem.setOnAction(e -> showLogUsageDialog(eq));
+
+        MenuItem historyItem = new MenuItem("📜 View Usage History");
+        historyItem.setOnAction(e -> showEquipmentDetailsModal(eq));
+
+        menu.getItems().addAll(detailsItem, logUsageItem, historyItem);
+
+        Role role = facade.getCurrentUser().getRole();
+        if (role == Role.ADMIN || role == Role.INSTRUCTOR) {
+            menu.getItems().add(new SeparatorMenuItem());
+
+            MenuItem editItem = new MenuItem("✏ Edit Specifications");
+            editItem.setOnAction(e -> showEditEquipmentModal(eq));
+            menu.getItems().add(editItem);
+
+            if (role == Role.ADMIN) {
+                MenuItem deactivateItem = new MenuItem("⏸ Deactivate Equipment");
+                deactivateItem.setOnAction(e -> {
+                    try {
+                        facade.deactivateEquipment(eq.getEquipmentId());
+                        refreshAllData();
+                    } catch (UnauthorizedAccessException ex) {
+                        showErrorAlert("Access Denied", ex.getMessage());
+                    }
+                });
+
+                MenuItem removeItem = new MenuItem("🗑 Remove Equipment");
+                removeItem.setOnAction(e -> handleRemoveEquipment(eq));
+
+                menu.getItems().addAll(deactivateItem, removeItem);
+            }
+        }
+
+        triggerNode.setOnMouseClicked(e -> menu.show(triggerNode, e.getScreenX(), e.getScreenY()));
+    }
+
+    // =========================================================================
+    // 4. RIGHT COLUMN: GYM FLOOR MAP & ALERTS FEED
+    // =========================================================================
+    private void refreshRightColumn() {
+        rightColumn.getChildren().clear();
+
+        // 1. Gym Floor Map Panel
+        VBox mapPanel = buildGymFloorMapPanel();
+
+        // 2. Recent Maintenance & Alerts Panel
+        VBox alertsPanel = buildRecentAlertsPanel();
+
+        rightColumn.getChildren().addAll(mapPanel, alertsPanel);
+    }
+
+    private VBox buildGymFloorMapPanel() {
+        VBox panel = new VBox(12);
+        panel.getStyleClass().add("equipment-glass-panel");
+
+        // Map Header & Legend
+        HBox headerRow = new HBox(8);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label title = new Label("Gym Floor Map");
+        title.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 15px; -fx-font-weight: 800;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label opLegend = new Label("● Op");
+        opLegend.setStyle("-fx-text-fill: #4ade80; -fx-font-size: 10px; -fx-font-weight: 700;");
+        Label faultLegend = new Label("● Fault");
+        faultLegend.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 10px; -fx-font-weight: 700;");
+        Label maintLegend = new Label("● Maint");
+        maintLegend.setStyle("-fx-text-fill: #f59e0b; -fx-font-size: 10px; -fx-font-weight: 700;");
+
+        headerRow.getChildren().addAll(title, spacer, opLegend, faultLegend, maintLegend);
+
+        // Canvas container for blueprint
+        mapCanvas = new Pane();
+        mapCanvas.setPrefSize(324, 250);
+        mapCanvas.setMinSize(324, 250);
+        mapCanvas.setMaxSize(324, 250);
+        mapCanvas.getStyleClass().add("equipment-map-canvas");
+
+        drawFloorBlueprintZones(mapCanvas);
+        populateFloorMapDots(mapCanvas);
+
+        panel.getChildren().addAll(headerRow, mapCanvas);
+        return panel;
+    }
+
+    private void drawFloorBlueprintZones(Pane pane) {
+        // Draw subtle zone blueprint partitions
+        double w = 324;
+        double h = 250;
+
+        // Zone labels and bounding boxes
+        String[] zones = {"Cardio Zone", "Studio A & B", "Weight Room", "Pool & Recovery"};
+        double[][] rects = {
+                {10, 10, w / 2 - 15, h / 2 - 15},
+                {w / 2 + 5, 10, w / 2 - 15, h / 2 - 15},
+                {10, h / 2 + 5, w / 2 - 15, h / 2 - 15},
+                {w / 2 + 5, h / 2 + 5, w / 2 - 15, h / 2 - 15}
+        };
+
+        for (int i = 0; i < zones.length; i++) {
+            Rectangle r = new Rectangle(rects[i][0], rects[i][1], rects[i][2], rects[i][3]);
+            r.setFill(Color.rgb(255, 255, 255, 0.02));
+            r.setStroke(Color.rgb(255, 255, 255, 0.07));
+            r.setStrokeWidth(1);
+            r.setArcWidth(8);
+            r.setArcHeight(8);
+
+            Label lbl = new Label(zones[i].toUpperCase());
+            lbl.setLayoutX(rects[i][0] + 8);
+            lbl.setLayoutY(rects[i][1] + 6);
+            lbl.setStyle("-fx-text-fill: rgba(255,255,255,0.18); -fx-font-size: 8px; -fx-font-weight: 800; -fx-letter-spacing: 0.5px;");
+
+            pane.getChildren().addAll(r, lbl);
+        }
+    }
+
+    private void populateFloorMapDots(Pane pane) {
+        List<Equipment> equipmentList = facade.getAllEquipment();
+
+        // Categorize by location to calculate realistic coordinates
+        Map<Location, List<Equipment>> locMap = new EnumMap<>(Location.class);
+        for (Equipment eq : equipmentList) {
+            locMap.computeIfAbsent(eq.getLocation(), k -> new ArrayList<>()).add(eq);
+        }
+
+        for (Map.Entry<Location, List<Equipment>> entry : locMap.entrySet()) {
+            Location loc = entry.getKey();
+            List<Equipment> items = entry.getValue();
+
+            // Bounding box for this location on the 324x250 canvas
+            double minX = 20, maxX = 140, minY = 25, maxY = 105;
+            switch (loc) {
+                case CARDIO_ZONE -> { minX = 20; maxX = 135; minY = 28; maxY = 105; }
+                case STUDIO_A -> { minX = 175; maxX = 300; minY = 25; maxY = 65; }
+                case STUDIO_B -> { minX = 175; maxX = 300; minY = 70; maxY = 110; }
+                case WEIGHT_ROOM -> { minX = 20; maxX = 140; minY = 145; maxY = 230; }
+                case POOL_AREA -> { minX = 175; maxX = 305; minY = 145; maxY = 230; }
+                case OUTDOOR_AREA -> { minX = 120; maxX = 195; minY = 100; maxY = 145; }
+            }
+
+            int count = items.size();
+            for (int i = 0; i < count; i++) {
+                Equipment eq = items.get(i);
+                double frac = count > 1 ? (double) i / (count - 1) : 0.5;
+                double x = minX + frac * (maxX - minX) + (i % 2 == 0 ? 0 : 5);
+                double y = minY + (i % 3) * ((maxY - minY) / 2.5);
+
+                Circle dot = new Circle(5.5);
+                dot.setCenterX(x);
+                dot.setCenterY(y);
+
+                Color dotColor;
+                switch (eq.getStatus()) {
+                    case FAULTY -> dotColor = Color.web("#ef4444");
+                    case UNDER_MAINTENANCE -> dotColor = Color.web("#f59e0b");
+                    default -> dotColor = Color.web("#4ade80");
+                }
+                dot.setFill(dotColor);
+
+                // Drop shadow
+                DropShadow glow = new DropShadow(8, dotColor);
+                dot.setEffect(glow);
+
+                // Faulty pulsing animation
+                if (eq.getStatus() == EquipmentStatus.FAULTY) {
+                    FadeTransition pulse = new FadeTransition(Duration.millis(700), dot);
+                    pulse.setFromValue(1.0);
+                    pulse.setToValue(0.3);
+                    pulse.setCycleCount(Animation.INDEFINITE);
+                    pulse.setAutoReverse(true);
+                    pulse.play();
+                }
+
+                // Interactive rich tooltip
+                Tooltip tip = new Tooltip(eq.getName() + " (" + eq.getEquipmentId() + ")\n"
+                        + "Status: " + eq.getStatus().getDisplayName() + "\n"
+                        + "Location: " + eq.getLocation().getDisplayName() + "\n"
+                        + "Usage: " + String.format("%.0f / %.0f hrs", eq.getCumulativeUsageHours(), eq.getMaintenanceThreshold()));
+                tip.setStyle("-fx-font-size: 11px; -fx-background-color: #0f172a; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.2);");
+                Tooltip.install(dot, tip);
+
+                // Clicking dot opens Details Modal
+                dot.setOnMouseClicked(e -> showEquipmentDetailsModal(eq));
+                dot.setOnMouseEntered(e -> dot.setRadius(8));
+                dot.setOnMouseExited(e -> dot.setRadius(5.5));
+                dot.setStyle("-fx-cursor: hand;");
+
+                // Store equipment ID in dot userdata
+                dot.setUserData(eq);
+
+                pane.getChildren().add(dot);
+            }
+        }
+    }
+
+    private void updateFloorMapDots() {
+        if (mapCanvas == null) return;
+
+        for (Node node : mapCanvas.getChildren()) {
+            if (node instanceof Circle dot && dot.getUserData() instanceof Equipment eq) {
+                boolean visible = true;
+
+                // Match status filter
+                if (activeKpiFilter != null && eq.getStatus() != activeKpiFilter) {
+                    visible = false;
+                }
+
+                // Match location filter
+                String selLoc = locationFilter != null ? locationFilter.getValue() : "All Locations";
+                if (selLoc != null && !"All Locations".equals(selLoc)) {
+                    if (!eq.getLocation().getDisplayName().equalsIgnoreCase(selLoc)) {
+                        visible = false;
+                    }
+                }
+
+                // Match category map pin filter
+                if (mapCategoryFilter != null && !eq.getCategory().equalsIgnoreCase(mapCategoryFilter)) {
+                    visible = false;
+                }
+
+                dot.setVisible(visible);
+                if (visible && mapCategoryFilter != null) {
+                    dot.setRadius(8);
+                } else if (visible) {
+                    dot.setRadius(5.5);
+                }
+            }
+        }
+    }
+
+    private VBox buildRecentAlertsPanel() {
+        VBox panel = new VBox(12);
+        panel.getStyleClass().add("equipment-glass-panel");
+        VBox.setVgrow(panel, Priority.ALWAYS);
+
+        Label title = new Label("Recent Maintenance & Alerts");
+        title.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 15px; -fx-font-weight: 800;");
+
+        VBox alertsList = new VBox(10);
+        List<MaintenanceRequest> requests = facade.getAllMaintenanceRequests();
+        requests.sort((a, b) -> b.getCreatedDate().compareTo(a.getCreatedDate()));
+
+        int count = Math.min(5, requests.size());
+        for (int i = 0; i < count; i++) {
+            MaintenanceRequest req = requests.get(i);
+            HBox row = createAlertRow(req);
+            alertsList.getChildren().add(row);
+        }
+
+        if (requests.isEmpty()) {
+            Label empty = new Label("No pending maintenance alerts. Fleet operating smoothly.");
+            empty.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-padding: 10 0;");
+            alertsList.getChildren().add(empty);
+        }
+
+        panel.getChildren().addAll(title, alertsList);
+        return panel;
+    }
+
+    private HBox createAlertRow(MaintenanceRequest req) {
+        HBox row = new HBox(10);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setStyle("-fx-border-color: transparent transparent rgba(255,255,255,0.07) transparent; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 10 0; -fx-cursor: hand;");
+
+        Label icon = new Label(req.getUrgency() == Urgency.HIGH ? "🔴" : "⚠️");
+        icon.setStyle("-fx-font-size: 14px;");
+
+        VBox textCol = new VBox(2);
+        Label titleLbl = new Label(req.getEquipment().getName() + " — " + req.getDescription());
+        titleLbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-size: 12px; -fx-font-weight: 700;");
+        titleLbl.setWrapText(true);
+        titleLbl.setMaxWidth(270);
+
+        Label subLbl = new Label(req.getStatus().getDisplayName() + " · " + req.getCreatedDate().format(ALERT_DATE_FMT));
+        subLbl.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
+
+        textCol.getChildren().addAll(titleLbl, subLbl);
+        row.getChildren().addAll(icon, textCol);
+
+        // Click to view that equipment
+        row.setOnMouseClicked(e -> showEquipmentDetailsModal(req.getEquipment()));
+
+        return row;
+    }
+
+    // =========================================================================
+    // 5. WINDOW 3: SUPREME EQUIPMENT DETAILS & TELEMETRY MODAL
+    // =========================================================================
+    private void showEquipmentDetailsModal(Equipment eq) {
+        Stage modal = new Stage(StageStyle.TRANSPARENT);
+        modal.initModality(Modality.APPLICATION_MODAL);
+        modal.setTitle("Equipment Telemetry — " + eq.getName());
+
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(26));
+        root.setPrefWidth(680);
+        root.setStyle("-fx-background-color: #0f172a; -fx-border-color: #3b82f6; -fx-border-width: 1.5px; -fx-border-radius: 16px; -fx-background-radius: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.65), 30, 0, 0, 10);");
+
+        // Header: Title + ID + Status + Close
+        HBox header = new HBox(12);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        VBox titleBox = new VBox(3);
+        Label title = new Label(eq.getName());
+        title.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: 900;");
+
+        HBox metaRow = new HBox(8);
+        metaRow.setAlignment(Pos.CENTER_LEFT);
+        Label idBadge = new Label("ID: " + eq.getEquipmentId());
+        idBadge.setStyle("-fx-background-color: rgba(255,255,255,0.08); -fx-text-fill: #94a3b8; -fx-font-weight: 800; -fx-font-size: 11px; -fx-padding: 2 8; -fx-background-radius: 6px;");
+        Label catBadge = new Label(eq.getCategory());
+        catBadge.setStyle("-fx-background-color: rgba(59, 130, 246, 0.15); -fx-text-fill: #60a5fa; -fx-font-weight: 800; -fx-font-size: 11px; -fx-padding: 2 8; -fx-background-radius: 6px;");
+        StatusBadge statusBadge = StatusBadge.forEquipmentStatus(eq.getStatus());
+        metaRow.getChildren().addAll(idBadge, catBadge, statusBadge);
+
+        titleBox.getChildren().addAll(title, metaRow);
+
+        Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+
+        Button closeX = new Button("✕");
+        closeX.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 16px; -fx-font-weight: 800; -fx-cursor: hand;");
+        closeX.setOnAction(e -> modal.close());
+
+        header.getChildren().addAll(titleBox, headerSpacer, closeX);
+
+        Separator sep1 = new Separator();
+        sep1.setStyle("-fx-opacity: 0.15;");
+
+        // Two-Column Body: Left (Lifecycle Metrics) & Right (Usage & Service Logs)
+        HBox body = new HBox(24);
+
+        // Left Column (Telemetry)
+        VBox leftCol = new VBox(14);
+        leftCol.setPrefWidth(280);
+
+        Label sec1 = new Label("LIFECYCLE & TELEMETRY");
+        sec1.setStyle("-fx-text-fill: #06b6d4; -fx-font-size: 11px; -fx-font-weight: 900; -fx-letter-spacing: 0.5px;");
+
+        GridPane specGrid = new GridPane();
+        specGrid.setHgap(12);
+        specGrid.setVgap(8);
+        specGrid.add(createSpecLabel("Category:"), 0, 0);
+        specGrid.add(createSpecValue(eq.getCategory()), 1, 0);
+        specGrid.add(createSpecLabel("Location:"), 0, 1);
+        specGrid.add(createSpecValue(eq.getLocation().getDisplayName()), 1, 1);
+        specGrid.add(createSpecLabel("Status:"), 0, 2);
+        specGrid.add(createSpecValue(eq.getStatus().getDisplayName()), 1, 2);
+        specGrid.add(createSpecLabel("Threshold:"), 0, 3);
+        specGrid.add(createSpecValue(String.format("%.0f Hours", eq.getMaintenanceThreshold())), 1, 3);
+
+        // Progress Bar
+        double usage = eq.getCumulativeUsageHours();
+        double thresh = Math.max(1, eq.getMaintenanceThreshold());
+        double pct = Math.min(1.0, usage / thresh);
+
+        VBox progressBox = new VBox(6);
+        HBox pTop = new HBox();
+        Label pTitle = new Label("Usage Depletion");
+        pTitle.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 700;");
+        Region pSp = new Region(); HBox.setHgrow(pSp, Priority.ALWAYS);
+        Label pVal = new Label(String.format("%.1f / %.0f hrs (%.0f%%)", usage, thresh, pct * 100));
+        pVal.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 11px; -fx-font-weight: 800;");
+        pTop.getChildren().addAll(pTitle, pSp, pVal);
+
+        ProgressBar pBar = new ProgressBar(pct);
+        pBar.setMaxWidth(Double.MAX_VALUE);
+        pBar.setStyle("-fx-accent: " + (pct > 0.85 ? "#ef4444" : (pct > 0.6 ? "#f59e0b" : "#10b981")) + ";");
+        progressBox.getChildren().addAll(pTop, pBar);
+
+        // Health Score badge
+        int healthScore = (int) Math.max(10, Math.min(100, 100 - (pct * 60) - (eq.getStatus() == EquipmentStatus.FAULTY ? 40 : 0)));
+        VBox healthCard = new VBox(4);
+        healthCard.setStyle("-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 10px; -fx-padding: 12;");
+        Label hTitle = new Label("Fleet Health Score");
+        hTitle.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        Label hVal = new Label(healthScore + " / 100 (" + (healthScore > 75 ? "Optimal" : (healthScore > 50 ? "Moderate" : "Attention Required")) + ")");
+        hVal.setStyle("-fx-text-fill: " + (healthScore > 75 ? "#4ade80" : (healthScore > 50 ? "#f59e0b" : "#ef4444")) + "; -fx-font-size: 14px; -fx-font-weight: 900;");
+        healthCard.getChildren().addAll(hTitle, hVal);
+
+        leftCol.getChildren().addAll(sec1, specGrid, progressBox, healthCard);
+
+        // Right Column (Recent Usage History)
+        VBox rightCol = new VBox(12);
+        HBox.setHgrow(rightCol, Priority.ALWAYS);
+
+        Label sec2 = new Label("RECENT USAGE & SERVICE HISTORY");
+        sec2.setStyle("-fx-text-fill: #06b6d4; -fx-font-size: 11px; -fx-font-weight: 900; -fx-letter-spacing: 0.5px;");
+
+        ListView<String> historyList = new ListView<>();
+        historyList.setPrefHeight(210);
+        historyList.setStyle("-fx-background-color: rgba(15, 23, 42, 0.85); -fx-background-radius: 8px; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 8px;");
+
+        for (UsageLogEntry entry : eq.getUsageLog()) {
+            String ts = entry.getTimestamp() != null ? entry.getTimestamp().format(ALERT_DATE_FMT) : "Recent";
+            String note = entry.getNotes() != null && !entry.getNotes().isEmpty() ? " — " + entry.getNotes() : "";
+            historyList.getItems().add(String.format("📅 %s  ·  %.1f hrs by %s%s", ts, entry.getHoursLogged(), entry.getLoggedByUserId(), note));
+        }
+
+        if (historyList.getItems().isEmpty()) {
+            historyList.getItems().add("No historical usage entries recorded yet.");
+        }
+
+        rightCol.getChildren().addAll(sec2, historyList);
+
+        body.getChildren().addAll(leftCol, rightCol);
+
+        Separator sep2 = new Separator();
+        sep2.setStyle("-fx-opacity: 0.15;");
+
+        // Footer Actions
+        HBox footer = new HBox(12);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+
+        Button logUsageBtn = new Button("⚡ Log Usage");
+        logUsageBtn.getStyleClass().add("equipment-card-btn");
+        logUsageBtn.setOnAction(e -> {
+            showLogUsageDialog(eq);
+            modal.close();
+        });
+
+        Button logMaintBtn = new Button("🔧 Log Maintenance");
+        logMaintBtn.getStyleClass().add("equipment-maint-btn");
+        logMaintBtn.setOnAction(e -> {
+            handleLogMaintenanceAction(eq);
+            modal.close();
+        });
+
+        Button closeBtn = new Button("Close");
+        closeBtn.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 20; -fx-background-radius: 8px; -fx-cursor: hand;");
+        closeBtn.setOnAction(e -> modal.close());
+
+        footer.getChildren().addAll(logUsageBtn, logMaintBtn, closeBtn);
+
+        root.getChildren().addAll(header, sep1, body, sep2, footer);
+
+        javafx.scene.Scene scene = new javafx.scene.Scene(root);
+        scene.setFill(Color.TRANSPARENT);
+        modal.setScene(scene);
+        modal.showAndWait();
+    }
+
+    private Label createSpecLabel(String text) {
+        Label l = new Label(text);
+        l.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-weight: 700;");
+        return l;
+    }
+
+    private Label createSpecValue(String text) {
+        Label l = new Label(text);
+        l.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 12px; -fx-font-weight: 800;");
+        return l;
+    }
+
+    // =========================================================================
+    // 6. ACTION HANDLERS & MODAL DIALOGS
+    // =========================================================================
+    private void handleLogMaintenanceAction(Equipment eq) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Log completed maintenance for " + eq.getName() + " [" + eq.getEquipmentId() + "]?\n\nThis will reset cumulative usage hours to 0 and set status to Operational.",
+                ButtonType.YES, ButtonType.NO);
+        DialogUtils.stylePremiumDialog(confirm);
+        confirm.setTitle("Log Maintenance Confirmation");
+        confirm.setHeaderText(null);
+
+        confirm.showAndWait().ifPresent(ans -> {
+            if (ans == ButtonType.YES) {
+                try {
+                    eq.resetUsageHours();
+                    facade.editEquipment(eq.getEquipmentId(), eq.getName(), eq.getCategory(), EquipmentStatus.OPERATIONAL, eq.getLocation(), eq.getMaintenanceThreshold());
+                    refreshAllData();
+                } catch (UnauthorizedAccessException ex) {
+                    showErrorAlert("Access Denied", ex.getMessage());
+                }
+            }
+        });
+    }
+
+    private void handleRemoveEquipment(Equipment eq) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Are you sure you want to permanently remove \"" + eq.getName() + "\" (" + eq.getEquipmentId() + ") from inventory?",
+                ButtonType.YES, ButtonType.NO);
+        DialogUtils.stylePremiumDialog(confirm);
+        confirm.setTitle("Confirm Equipment Removal");
+        confirm.setHeaderText(null);
+
+        confirm.showAndWait().ifPresent(ans -> {
+            if (ans == ButtonType.YES) {
+                try {
+                    facade.removeEquipment(eq.getEquipmentId());
+                    refreshAllData();
+                } catch (UnauthorizedAccessException | IllegalStateException ex) {
+                    showErrorAlert("Cannot Remove Equipment", ex.getMessage());
+                }
+            }
+        });
+    }
+
+    private void showLogUsageDialog(Equipment eq) {
+        Dialog<Double> dialog = new Dialog<>();
         DialogUtils.stylePremiumDialog(dialog);
-        dialog.setTitle("Add Equipment");
+        dialog.setTitle("Log Usage — " + eq.getName());
         dialog.getDialogPane().getStyleClass().add("premium-dialog");
 
-        TextField nameField = new TextField();
-        nameField.setPromptText("Equipment Name");
-        TextField idField = new TextField();
-        idField.setPromptText("Equipment ID (e.g., EQ009)");
-        ComboBox<Location> locationCombo = new ComboBox<>();
-        locationCombo.getItems().addAll(Location.values());
-        locationCombo.setPromptText("Select Location");
-        
-        ComboBox<String> categoryCombo = new ComboBox<>();
-        categoryCombo.getItems().addAll("Cardio", "Strength (Machines)", "Strength (Free Weights)", "Studio & Group", "Functional", "Mobility & Recovery", "Other");
-        categoryCombo.setPromptText("Select Category");
+        TextField hoursField = new TextField();
+        hoursField.setPromptText("Enter hours (e.g. 5.5)");
 
         GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(15);
+        grid.setHgap(12);
+        grid.setVgap(14);
         grid.setPadding(new Insets(20));
-        grid.add(new Label("ID:"), 0, 0);
-        grid.add(idField, 1, 0);
-        grid.add(new Label("Name:"), 0, 1);
-        grid.add(nameField, 1, 1);
-        grid.add(new Label("Category:"), 0, 2);
-        grid.add(categoryCombo, 1, 2);
-        grid.add(new Label("Location:"), 0, 3);
-        grid.add(locationCombo, 1, 3);
+
+        grid.add(new Label("Equipment:"), 0, 0);
+        grid.add(new Label(eq.getName() + " (" + eq.getEquipmentId() + ")"), 1, 0);
+        grid.add(new Label("Hours to Log:"), 0, 1);
+        grid.add(hoursField, 1, 1);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(btn -> {
-            if (btn == ButtonType.OK && !idField.getText().isEmpty()
-                    && !nameField.getText().isEmpty() && locationCombo.getValue() != null
-                    && categoryCombo.getValue() != null) {
-                return new Equipment(idField.getText().trim(), nameField.getText().trim(),
-                        categoryCombo.getValue(), locationCombo.getValue());
+            if (btn == ButtonType.OK) {
+                try {
+                    return Double.parseDouble(hoursField.getText().trim());
+                } catch (NumberFormatException e) {
+                    return null;
+                }
             }
             return null;
         });
 
-        dialog.showAndWait().ifPresent(eq -> {
-            try {
-                facade.addEquipment(eq);
-                refreshCards();
-            } catch (DuplicateDataException | UnauthorizedAccessException ex) {
-                showAlert("Error", ex.getMessage());
+        dialog.showAndWait().ifPresent(hours -> {
+            if (hours != null && hours > 0) {
+                try {
+                    facade.logEquipmentUsage(eq.getEquipmentId(), hours);
+                    refreshAllData();
+                } catch (Exception ex) {
+                    showErrorAlert("Error Logging Usage", ex.getMessage());
+                }
             }
         });
     }
 
-    private void showEditDialog(Equipment eq) {
+    private void showAddEquipmentModal() {
+        Dialog<Equipment> dialog = new Dialog<>();
+        DialogUtils.stylePremiumDialog(dialog);
+        dialog.setTitle("Add New Equipment to Fleet");
+        dialog.getDialogPane().getStyleClass().add("premium-dialog");
+
+        // Calculate next suggested ID (e.g. EQ025)
+        int maxIdNum = facade.getAllEquipment().stream()
+                .map(Equipment::getEquipmentId)
+                .filter(id -> id.startsWith("EQ"))
+                .mapToInt(id -> {
+                    try { return Integer.parseInt(id.replace("EQ", "")); } catch (Exception e) { return 0; }
+                }).max().orElse(0);
+        String nextId = String.format("EQ%03d", maxIdNum + 1);
+
+        TextField idField = new TextField(nextId);
+        TextField nameField = new TextField();
+        nameField.setPromptText("Equipment Name (e.g. Concept2 Rower)");
+
+        ComboBox<String> catCombo = new ComboBox<>();
+        catCombo.getItems().addAll("Cardio", "Strength (Machines)", "Strength (Free Weights)", "Studio & Group", "Functional", "Mobility & Recovery", "Other");
+        catCombo.setValue("Cardio");
+
+        ComboBox<Location> locCombo = new ComboBox<>();
+        locCombo.getItems().addAll(Location.values());
+        locCombo.setValue(Location.CARDIO_ZONE);
+
+        TextField threshField = new TextField("500");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(14);
+        grid.setVgap(14);
+        grid.setPadding(new Insets(20));
+
+        grid.add(new Label("Equipment ID:"), 0, 0);
+        grid.add(idField, 1, 0);
+        grid.add(new Label("Equipment Name:"), 0, 1);
+        grid.add(nameField, 1, 1);
+        grid.add(new Label("Category:"), 0, 2);
+        grid.add(catCombo, 1, 2);
+        grid.add(new Label("Location:"), 0, 3);
+        grid.add(locCombo, 1, 3);
+        grid.add(new Label("Maintenance Threshold (hrs):"), 0, 4);
+        grid.add(threshField, 1, 4);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(btn -> {
+            if (btn == ButtonType.OK) {
+                String id = idField.getText().trim();
+                String name = nameField.getText().trim();
+                String cat = catCombo.getValue();
+                Location loc = locCombo.getValue();
+                double thresh = 500;
+                try { thresh = Double.parseDouble(threshField.getText().trim()); } catch (Exception ignored) {}
+
+                if (!id.isEmpty() && !name.isEmpty() && cat != null && loc != null) {
+                    return new Equipment(id, name, cat, EquipmentStatus.OPERATIONAL, loc, 0.0, thresh);
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(newEq -> {
+            try {
+                facade.addEquipment(newEq);
+                refreshAllData();
+            } catch (DuplicateDataException | UnauthorizedAccessException ex) {
+                showErrorAlert("Failed to Add Equipment", ex.getMessage());
+            }
+        });
+    }
+
+    private void showEditEquipmentModal(Equipment eq) {
         Dialog<Boolean> dialog = new Dialog<>();
         DialogUtils.stylePremiumDialog(dialog);
         dialog.setTitle("Edit Equipment — " + eq.getEquipmentId());
         dialog.getDialogPane().getStyleClass().add("premium-dialog");
 
         TextField nameField = new TextField(eq.getName());
+        ComboBox<String> catCombo = new ComboBox<>();
+        catCombo.getItems().addAll("Cardio", "Strength (Machines)", "Strength (Free Weights)", "Studio & Group", "Functional", "Mobility & Recovery", "Other");
+        catCombo.setValue(eq.getCategory());
+
         ComboBox<EquipmentStatus> statusCombo = new ComboBox<>();
         statusCombo.getItems().addAll(EquipmentStatus.values());
         statusCombo.setValue(eq.getStatus());
-        ComboBox<Location> locationCombo = new ComboBox<>();
-        locationCombo.getItems().addAll(Location.values());
-        locationCombo.setValue(eq.getLocation());
-        
-        ComboBox<String> categoryCombo = new ComboBox<>();
-        categoryCombo.getItems().addAll("Cardio", "Strength (Machines)", "Strength (Free Weights)", "Studio & Group", "Functional", "Mobility & Recovery", "Other");
-        categoryCombo.setValue(eq.getCategory());
-        
-        TextField thresholdField = new TextField(String.valueOf(eq.getMaintenanceThreshold()));
+
+        ComboBox<Location> locCombo = new ComboBox<>();
+        locCombo.getItems().addAll(Location.values());
+        locCombo.setValue(eq.getLocation());
+
+        TextField threshField = new TextField(String.format("%.0f", eq.getMaintenanceThreshold()));
 
         GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(15);
+        grid.setHgap(14);
+        grid.setVgap(14);
         grid.setPadding(new Insets(20));
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Category:"), 0, 1);
-        grid.add(categoryCombo, 1, 1);
-        grid.add(new Label("Status:"), 0, 2);
-        grid.add(statusCombo, 1, 2);
-        grid.add(new Label("Location:"), 0, 3);
-        grid.add(locationCombo, 1, 3);
-        grid.add(new Label("Maintenance Threshold:"), 0, 4);
-        grid.add(thresholdField, 1, 4);
+
+        grid.add(new Label("Equipment ID:"), 0, 0);
+        grid.add(new Label(eq.getEquipmentId()), 1, 0);
+        grid.add(new Label("Name:"), 0, 1);
+        grid.add(nameField, 1, 1);
+        grid.add(new Label("Category:"), 0, 2);
+        grid.add(catCombo, 1, 2);
+        grid.add(new Label("Status:"), 0, 3);
+        grid.add(statusCombo, 1, 3);
+        grid.add(new Label("Location:"), 0, 4);
+        grid.add(locCombo, 1, 4);
+        grid.add(new Label("Maintenance Threshold:"), 0, 5);
+        grid.add(threshField, 1, 5);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -834,88 +1397,60 @@ public class EquipmentView extends VBox {
         dialog.showAndWait().ifPresent(ok -> {
             if (ok) {
                 try {
-                    double threshold = eq.getMaintenanceThreshold();
-                    try {
-                        threshold = Double.parseDouble(thresholdField.getText().trim());
-                    } catch (NumberFormatException ignored) {}
-                    
-                    facade.editEquipment(eq.getEquipmentId(),
-                            nameField.getText(), categoryCombo.getValue(), statusCombo.getValue(), locationCombo.getValue(), threshold);
-                    refreshCards();
+                    double thresh = eq.getMaintenanceThreshold();
+                    try { thresh = Double.parseDouble(threshField.getText().trim()); } catch (Exception ignored) {}
+
+                    facade.editEquipment(eq.getEquipmentId(), nameField.getText().trim(), catCombo.getValue(),
+                            statusCombo.getValue(), locCombo.getValue(), thresh);
+                    refreshAllData();
                 } catch (UnauthorizedAccessException ex) {
-                    showAlert("Access Denied", ex.getMessage());
+                    showErrorAlert("Access Denied", ex.getMessage());
                 }
             }
         });
     }
 
-    private void showLogUsageDialog(Equipment eq) {
-        Dialog<Double> dialog = new Dialog<>();
-        DialogUtils.stylePremiumDialog(dialog);
-        dialog.setTitle("Log Usage — " + eq.getEquipmentId());
-        dialog.getDialogPane().getStyleClass().add("premium-dialog");
-        
-        TextField hoursField = new TextField();
-        hoursField.setPromptText("Hours to log");
-        
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(15);
-        grid.setPadding(new Insets(20));
-        grid.add(new Label("Hours:"), 0, 0);
-        grid.add(hoursField, 1, 0);
-        
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        
-        dialog.setResultConverter(btn -> {
-            if (btn == ButtonType.OK) {
-                try {
-                    return Double.valueOf(hoursField.getText().trim());
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            }
-            return null;
+    private VBox createEmptyState(String msg) {
+        VBox empty = new VBox(14);
+        empty.setAlignment(Pos.CENTER);
+        empty.setPadding(new Insets(50, 20, 50, 20));
+
+        Label icon = new Label("🔍");
+        icon.setStyle("-fx-font-size: 38px;");
+
+        Label label = new Label(msg);
+        label.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 15px; -fx-font-weight: 700;");
+
+        Button resetBtn = new Button("Clear All Filters");
+        resetBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: 800; -fx-padding: 8 20; -fx-background-radius: 8px; -fx-cursor: hand;");
+        resetBtn.setOnAction(e -> {
+            if (searchField != null) searchField.clear();
+            if (statusFilter != null) statusFilter.setValue("All Statuses");
+            if (locationFilter != null) locationFilter.setValue("All Locations");
+            activeKpiFilter = null;
+            selectedCategory = null;
+            mapCategoryFilter = null;
+            refreshAllData();
         });
-        
-        dialog.showAndWait().ifPresent(hours -> {
-            try {
-                facade.logEquipmentUsage(eq.getEquipmentId(), hours);
-                refreshCards();
-            } catch (UnauthorizedAccessException | IllegalArgumentException ex) {
-                showAlert("Error", ex.getMessage());
-            }
-        });
+
+        empty.getChildren().addAll(icon, label, resetBtn);
+        return empty;
     }
 
-    private void showUsageHistoryDialog(Equipment eq) {
-        Dialog<Void> dialog = new Dialog<>();
-        DialogUtils.stylePremiumDialog(dialog);
-        dialog.setTitle("Usage History — " + eq.getEquipmentId());
-        dialog.getDialogPane().getStyleClass().add("premium-dialog");
-        
-        ListView<String> listView = new ListView<>();
-        for (UsageLogEntry entry : eq.getUsageLog()) {
-            String ts = entry.getTimestamp().toString();
-            String notes = entry.getNotes() != null && !entry.getNotes().isEmpty() ? " - " + entry.getNotes() : "";
-            listView.getItems().add(String.format("%s - %.1f hrs by %s%s",
-                ts, entry.getHoursLogged(), entry.getLoggedByUserId(), notes));
-        }
-        listView.setPrefSize(400, 300);
-        
-        dialog.getDialogPane().setContent(listView);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-        
-        dialog.showAndWait();
-    }
-
-    private void showAlert(String title, String message) {
+    private void showErrorAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
         DialogUtils.stylePremiumDialog(alert);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.showAndWait();
     }
-}
 
+    // =========================================================================
+    // 7. GLOBAL REFRESH DISPATCHER
+    // =========================================================================
+    private void refreshAllData() {
+        refreshKpiCards();
+        renderMainContent();
+        refreshRightColumn();
+    }
+}

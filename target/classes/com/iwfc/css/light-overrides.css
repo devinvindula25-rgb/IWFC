@@ -1,5 +1,5 @@
 /* ============================================================
-   IWFC — Light Theme Overrides
+   IWFC â€” Light Theme Overrides
    Clean white with soft shadows and vibrant accents
    ============================================================ */
 
@@ -204,32 +204,58 @@
 
 /* --- Login --- */
 .login-background {
-    -fx-background-color: linear-gradient(to bottom right, #ede9fe, #e0e7ff, #dbeafe);
+    -fx-background-color: linear-gradient(to bottom right, #f8fafc, #f1f5f9, #e2e8f0);
 }
 
-.login-card {
+.login-hero-card {
     -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
     -fx-border-width: 1;
-    -fx-border-radius: 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 4);
+    -fx-border-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 35, 0.15, 0, 10);
 }
 
-.login-logo {
-    -fx-text-fill: #4f46e5;
+.login-brand-pane {
+    -fx-background-color: linear-gradient(to bottom right, #eef2ff, #f3e8ff);
+    -fx-border-color: transparent rgba(0, 0, 0, 0.06) transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.login-form-pane {
+    -fx-background-color: #ffffff;
+}
+
+.login-card-title {
+    -fx-text-fill: #0f172a;
+}
+
+.login-card-subtitle {
+    -fx-text-fill: #64748b;
 }
 
 .login-subtitle {
-    -fx-text-fill: #6b7280;
+    -fx-text-fill: #475569;
+}
+
+.login-feature-text {
+    -fx-text-fill: #334155;
+}
+
+.login-system-status {
+    -fx-text-fill: #94a3b8;
+}
+
+.login-hint-text {
+    -fx-text-fill: #64748b;
 }
 
 .login-input {
-    -fx-background-color: #f9fafb;
-    -fx-text-fill: #1f2937;
-    -fx-prompt-text-fill: #9ca3af;
-    -fx-border-color: #d1d5db;
+    -fx-background-color: #f8fafc;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-border-color: #cbd5e1;
     -fx-border-width: 1;
-    -fx-border-radius: 8;
+    -fx-border-radius: 10;
 }
 
 .login-input:focused {
@@ -275,4 +301,381 @@
 
 .alerts-scroll > .viewport {
     -fx-background-color: transparent;
+}
+
+/* ============================================================
+   PREMIUM REPORTS â€” Light Theme Overrides
+   Clean, white, soft shadows
+   ============================================================ */
+
+.report-sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 2, 0);
+}
+
+.report-sidebar-title {
+    -fx-text-fill: #1f2937;
+}
+
+.report-sidebar-divider {
+    -fx-background-color: linear-gradient(to right, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.2), transparent);
+}
+
+.report-nav-btn-text {
+    -fx-text-fill: #6b7280;
+}
+
+.report-nav-btn:hover {
+    -fx-background-color: rgba(99, 102, 241, 0.06);
+}
+
+.report-nav-btn-active {
+    -fx-background-color: rgba(99, 102, 241, 0.1);
+}
+
+.report-nav-btn-active .report-nav-btn-text {
+    -fx-text-fill: #4f46e5;
+}
+
+.report-title {
+    -fx-text-fill: #1f2937;
+}
+
+.report-subtitle {
+    -fx-text-fill: #6b7280;
+}
+
+.report-filter-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 4, 0, 0, 1);
+}
+
+.report-date-combo {
+    -fx-background-color: #f9fafb;
+    -fx-border-color: #d1d5db;
+    -fx-text-fill: #374151;
+}
+
+.report-search-box {
+    -fx-background-color: #f9fafb;
+    -fx-border-color: #d1d5db;
+}
+
+.report-search-field {
+    -fx-text-fill: #1f2937;
+    -fx-prompt-text-fill: #9ca3af;
+}
+
+.report-export-btn {
+    -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.3), 8, 0, 0, 2);
+}
+
+.report-table-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
+}
+
+.report-table {
+    -fx-background-color: transparent;
+}
+
+.report-table .column-header {
+    -fx-background-color: #f9fafb;
+}
+
+.report-table .column-header .label {
+    -fx-text-fill: #6b7280;
+}
+
+.report-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: #f3f4f6;
+}
+
+.report-table .table-row-cell:hover {
+    -fx-background-color: rgba(99, 102, 241, 0.04);
+}
+
+.report-table .table-cell {
+    -fx-text-fill: #374151;
+}
+
+.pill-success {
+    -fx-background-color: #d1fae5;
+    -fx-text-fill: #059669;
+    -fx-border-color: #a7f3d0;
+}
+
+.pill-warning {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #d97706;
+    -fx-border-color: #fde68a;
+}
+
+.pill-danger {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #dc2626;
+    -fx-border-color: #fecaca;
+}
+
+.pill-info {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #4338ca;
+    -fx-border-color: #c7d2fe;
+}
+
+.method-card {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #4338ca;
+    -fx-border-color: #c7d2fe;
+}
+
+.method-wallet {
+    -fx-background-color: #d1fae5;
+    -fx-text-fill: #059669;
+    -fx-border-color: #a7f3d0;
+}
+
+.method-cash {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #d97706;
+    -fx-border-color: #fde68a;
+}
+
+.report-member-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);
+}
+
+.report-member-card:hover {
+    -fx-border-color: #a5b4fc;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.12), 10, 0, 0, 3);
+}
+
+.report-avatar-circle {
+    -fx-fill: linear-gradient(to bottom right, #6366f1, #8b5cf6);
+    fill: linear-gradient(to bottom right, #6366f1, #8b5cf6);
+    -fx-stroke: rgba(99, 102, 241, 0.3);
+    stroke: rgba(99, 102, 241, 0.3);
+}
+
+.report-avatar-text {
+    -fx-text-fill: #ffffff;
+}
+
+.report-member-name {
+    -fx-text-fill: #1f2937;
+}
+
+.report-member-id {
+    -fx-text-fill: #9ca3af;
+}
+
+.report-back-btn {
+    -fx-background-color: #f3f4f6;
+    -fx-text-fill: #6b7280;
+    -fx-border-color: #d1d5db;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+}
+
+.report-back-btn:hover {
+    -fx-background-color: #e5e7eb;
+    -fx-text-fill: #374151;
+}
+
+/* --- Light Mode Attendance & PT Styles --- */
+.report-view-toggle-bar {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.report-view-toggle-btn {
+    -fx-text-fill: #64748b;
+}
+
+.report-view-toggle-btn:hover {
+    -fx-text-fill: #0f172a;
+    -fx-background-color: #e2e8f0;
+}
+
+.report-view-toggle-btn-active {
+    -fx-background-color: #6366f1;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.25), 6, 0, 0, 2);
+}
+
+.report-location-tag {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+}
+
+/* --- Light Theme Maintenance Styles --- */
+.maintenance-view {
+    -fx-background-color: #f8fafc;
+}
+
+.maintenance-title {
+    -fx-text-fill: #0f172a;
+}
+
+.fleet-health-pill {
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #059669;
+    -fx-border-color: #a7f3d0;
+}
+
+.maintenance-refresh-btn {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #334155;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 4, 0, 0, 1);
+}
+.maintenance-refresh-btn:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
+}
+
+.maintenance-kpi-card {
+    -fx-border-color: rgba(255, 255, 255, 0.4);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);
+}
+
+.maintenance-alert-banner {
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #fca5a5;
+}
+
+.maintenance-request-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);
+}
+
+.maintenance-analytics-sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);
+}
+
+.link-tool-pill {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #2563eb;
+    -fx-border-color: #bfdbfe;
+}
+.link-tool-pill:hover {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1d4ed8;
+}
+
+.equipment-badge-id {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+}
+
+/* =========================================================================
+   WORKOUT PLANS LIGHT OVERRIDES
+   ========================================================================= */
+.workout-plans-container {
+    -fx-background-color: #f1f5f9;
+}
+.workout-sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0, 0, 2);
+}
+.workout-sidebar-title {
+    -fx-text-fill: #0f172a;
+}
+.workout-filter-title {
+    -fx-text-fill: #1e293b;
+}
+.premium-checkbox {
+    -fx-text-fill: #334155;
+}
+.premium-checkbox .box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.2);
+}
+.workout-search-field {
+    -fx-background-color: #f8fafc;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-border-color: rgba(0, 0, 0, 0.12);
+}
+.workout-plan-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 10, 0, 0, 2);
+}
+.workout-plan-card:hover {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.18), 16, 0, 0, 6);
+}
+.workout-plan-card-selected {
+    -fx-border-color: #2563eb;
+    -fx-background-color: #f8fafc;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.2), 16, 0, 0, 4);
+}
+.workout-card-banner {
+    -fx-background-color: linear-gradient(to right bottom, #e2e8f0, #cbd5e1);
+}
+
+/* =========================================================================
+   SESSION SCHEDULE LIGHT OVERRIDES
+   ========================================================================= */
+.session-schedule-container {
+    -fx-background-color: #f1f5f9;
+}
+.calendar-day-header {
+    -fx-text-fill: #475569;
+}
+.calendar-day-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.03), 6, 0, 0, 1);
+}
+.calendar-day-cell:hover {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #3b82f6;
+}
+.calendar-day-today {
+    -fx-border-color: #0284c7;
+    -fx-background-color: #f0f9ff;
+    -fx-border-width: 2px;
+}
+.calendar-date-lbl {
+    -fx-text-fill: #0f172a;
+}
+.calendar-date-lbl-muted {
+    -fx-text-fill: #94a3b8;
+}
+.calendar-date-lbl-today {
+    -fx-text-fill: #0284c7;
+}
+.calendar-session-pill {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: rgba(0, 0, 0, 0.06);
+    -fx-border-radius: 6px;
+}
+.session-glass-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(0, 0, 0, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 10, 0, 0, 2);
+}
+.session-search-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-border-color: rgba(0, 0, 0, 0.12);
 }

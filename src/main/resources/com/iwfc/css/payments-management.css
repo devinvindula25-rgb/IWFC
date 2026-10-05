@@ -1,0 +1,342 @@
+/* ==========================================================================
+   IWFC - Payments & Financial Management System
+   Cyber-Dark Glassmorphic UI/UX Design System
+   ========================================================================== */
+
+/* --- Main Layout Root --- */
+.payments-view-root {
+    -fx-background-color: transparent;
+    -fx-font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+/* --- Header & Top Actions --- */
+.payments-header-title {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+}
+
+.payments-action-btn {
+    -fx-background-color: rgba(99, 102, 241, 0.15);
+    -fx-border-color: rgba(99, 102, 241, 0.35);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #c4b5fd;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.payments-action-btn:hover {
+    -fx-background-color: rgba(99, 102, 241, 0.3);
+    -fx-border-color: rgba(168, 85, 247, 0.6);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.4), 10, 0, 0, 0);
+}
+
+.payments-primary-btn {
+    -fx-background-color: linear-gradient(to right, #0ea5e9, #6366f1);
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 18px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.35), 10, 0.2, 0, 2);
+}
+
+.payments-primary-btn:hover {
+    -fx-background-color: linear-gradient(to right, #38bdf8, #818cf8);
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.55), 14, 0.3, 0, 3);
+}
+
+.payments-combo-box {
+    -fx-background-color: rgba(30, 41, 59, 0.6);
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #e2e8f0;
+    -fx-padding: 2px 6px;
+}
+
+.payments-combo-box .list-cell {
+    -fx-text-fill: #e2e8f0;
+    -fx-background-color: #0f172a;
+}
+
+.payments-combo-box .list-cell:hover {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #38bdf8;
+}
+
+/* --- Financial Telemetry Hub Cards --- */
+.payments-kpi-card {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.07);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 18px 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 16, 0.1, 0, 6);
+}
+
+.payments-kpi-title {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-transform: uppercase;
+}
+
+.payments-kpi-value {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.payments-kpi-subtext-up {
+    -fx-text-fill: #10b981;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.payments-kpi-subtext-down {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.payments-kpi-subtext-neutral {
+    -fx-text-fill: #f59e0b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* --- Filters & Search Section --- */
+.payments-search-box {
+    -fx-background-color: rgba(30, 41, 59, 0.6);
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 2px 10px;
+}
+
+.payments-search-box:focused-within {
+    -fx-border-color: rgba(56, 189, 248, 0.6);
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.25), 10, 0, 0, 0);
+}
+
+.payments-search-input {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-border-width: 0;
+    -fx-padding: 6px 4px;
+}
+
+.payments-filter-chip {
+    -fx-background-color: rgba(30, 41, 59, 0.5);
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 18px;
+    -fx-background-radius: 18px;
+    -fx-padding: 5px 14px;
+    -fx-cursor: hand;
+}
+
+.payments-filter-chip:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.12);
+    -fx-text-fill: #7dd3fc;
+    -fx-border-color: rgba(56, 189, 248, 0.3);
+}
+
+.payments-filter-chip-active {
+    -fx-background-color: rgba(99, 102, 241, 0.25);
+    -fx-text-fill: #c4b5fd;
+    -fx-border-color: rgba(168, 85, 247, 0.6);
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.25), 8, 0, 0, 0);
+}
+
+/* --- Table Wrapper & Header --- */
+.payments-table-card {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 20, 0.1, 0, 6);
+}
+
+.payments-table-header {
+    -fx-background-color: rgba(30, 41, 59, 0.75);
+    -fx-background-radius: 16px 16px 0 0;
+    -fx-padding: 14px 20px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-width: 0 0 1px 0;
+}
+
+.payments-header-col-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-transform: uppercase;
+}
+
+.payments-row {
+    -fx-padding: 12px 20px;
+    -fx-border-color: rgba(255, 255, 255, 0.04);
+    -fx-border-width: 0 0 1px 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.payments-row:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.06);
+    -fx-border-color: rgba(56, 189, 248, 0.2);
+}
+
+/* --- Status Badges --- */
+.status-pill-completed {
+    -fx-background-color: rgba(16, 185, 129, 0.16);
+    -fx-text-fill: #34d399;
+    -fx-border-color: rgba(16, 185, 129, 0.35);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.status-pill-pending {
+    -fx-background-color: rgba(245, 158, 11, 0.16);
+    -fx-text-fill: #fbbf24;
+    -fx-border-color: rgba(245, 158, 11, 0.35);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.status-pill-failed {
+    -fx-background-color: rgba(239, 68, 68, 0.16);
+    -fx-text-fill: #f87171;
+    -fx-border-color: rgba(239, 68, 68, 0.35);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.status-pill-refunded {
+    -fx-background-color: rgba(168, 85, 247, 0.16);
+    -fx-text-fill: #c084fc;
+    -fx-border-color: rgba(168, 85, 247, 0.35);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+/* --- Action Buttons in Row --- */
+.payments-bill-btn {
+    -fx-background-color: rgba(56, 189, 248, 0.12);
+    -fx-border-color: rgba(56, 189, 248, 0.3);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #7dd3fc;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 4px 10px;
+    -fx-cursor: hand;
+}
+
+.payments-bill-btn:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.25);
+    -fx-border-color: #38bdf8;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.4), 8, 0, 0, 0);
+}
+
+.payments-kebab-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 3px 8px;
+    -fx-cursor: hand;
+}
+
+.payments-kebab-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* --- Pagination Controls --- */
+.payments-page-btn {
+    -fx-background-color: rgba(30, 41, 59, 0.6);
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 5px 10px;
+    -fx-cursor: hand;
+}
+
+.payments-page-btn:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.15);
+    -fx-text-fill: #38bdf8;
+    -fx-border-color: rgba(56, 189, 248, 0.35);
+}
+
+.payments-page-btn-active {
+    -fx-background-color: linear-gradient(to right, #0ea5e9, #6366f1);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.4), 8, 0, 0, 0);
+}
+
+/* --- ScrollBars --- */
+.payments-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.payments-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.payments-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: rgba(15, 23, 42, 0.5);
+    -fx-pref-width: 6px;
+    -fx-background-radius: 3px;
+}
+
+.payments-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(99, 102, 241, 0.4);
+    -fx-background-radius: 3px;
+}
+
+.payments-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.7);
+}
+
+.payments-scroll-pane .scroll-bar:vertical .track,
+.payments-scroll-pane .scroll-bar:vertical .increment-button,
+.payments-scroll-pane .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+}

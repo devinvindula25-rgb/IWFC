@@ -71,6 +71,7 @@ public class StatusBadge extends Label {
         }
         String colorClass = switch (status) {
             case CONFIRMED -> "badge-success";
+            case ATTENDED -> "badge-info";
             case CANCELLED -> "badge-danger";
             default -> "badge-info";
         };

@@ -1,0 +1,329 @@
+/* =========================================================================
+   IWFC SUPREME FOLLOW-UP PIPELINE & CRM OPERATIONS STYLESHEET
+   Strict JavaFX CSS (-fx- properties only for 100% warning-free rendering)
+   High-Tech Cyber-Dark Glassmorphic & Modern SaaS Aesthetic
+   ========================================================================= */
+
+.followup-view {
+    -fx-background-color: transparent;
+}
+
+/* -------------------------------------------------------------------------
+   Top Header & Titles
+   ------------------------------------------------------------------------- */
+.followup-title-main {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+}
+
+.followup-title-count {
+    -fx-text-fill: #60a5fa;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+    -fx-border-color: rgba(59, 130, 246, 0.35);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3 10;
+}
+
+.followup-title-sub {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.2px;
+}
+
+/* -------------------------------------------------------------------------
+   Search Field
+   ------------------------------------------------------------------------- */
+.followup-search-field {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-text-fill: #f8fafc;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 7 16;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.followup-search-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-background-color: rgba(59, 130, 246, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.35), 10, 0, 0, 0);
+}
+
+/* -------------------------------------------------------------------------
+   Header Action Buttons
+   ------------------------------------------------------------------------- */
+.followup-add-btn {
+    -fx-background-color: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.5), 14, 0, 0, 3);
+}
+
+.followup-add-btn:hover {
+    -fx-background-color: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%);
+    -fx-scale-x: 1.025;
+    -fx-scale-y: 1.025;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.7), 18, 0, 0, 4);
+}
+
+.followup-bell-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+    -fx-padding: 7 13;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.followup-bell-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.09);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+}
+
+.followup-refresh-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+    -fx-padding: 7 13;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.followup-refresh-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.09);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* -------------------------------------------------------------------------
+   Master Table Glass Card (100% Responsive)
+   ------------------------------------------------------------------------- */
+.followup-table-card {
+    -fx-background-color: linear-gradient(to bottom, rgba(22, 27, 46, 0.75), rgba(15, 20, 35, 0.85));
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 26, 0, 0, 8);
+}
+
+/* -------------------------------------------------------------------------
+   Filter Chips
+   ------------------------------------------------------------------------- */
+.followup-chip {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 5 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.followup-chip:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+}
+
+.followup-chip-active {
+    -fx-background-color: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(99, 102, 241, 0.22));
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #3b82f6;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 5 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.3), 10, 0, 0, 1);
+}
+
+.followup-custom-chip {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-text-fill: #64748b;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-style: dashed;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 5 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.followup-custom-chip:hover {
+    -fx-border-color: #3b82f6;
+    -fx-text-fill: #60a5fa;
+    -fx-background-color: rgba(59, 130, 246, 0.06);
+}
+
+/* -------------------------------------------------------------------------
+   Column Header Bar
+   ------------------------------------------------------------------------- */
+.followup-column-headers {
+    -fx-background-color: rgba(255, 255, 255, 0.025);
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.08) transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-padding: 10 16;
+}
+
+.followup-header-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.9px;
+}
+
+/* -------------------------------------------------------------------------
+   Lead Row (Individual High-Tech Glass Card)
+   ------------------------------------------------------------------------- */
+.followup-row {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 11 16;
+}
+
+.followup-row:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.045);
+    -fx-border-color: rgba(59, 130, 246, 0.35);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 12, 0, 0, 3);
+}
+
+/* -------------------------------------------------------------------------
+   Row Action Buttons
+   ------------------------------------------------------------------------- */
+.followup-action-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #e2e8f0;
+    -fx-border-color: rgba(255, 255, 255, 0.14);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 5 11;
+    -fx-cursor: hand;
+}
+
+.followup-action-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.35);
+    -fx-text-fill: #ffffff;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.followup-quick-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 7px;
+    -fx-background-radius: 7px;
+    -fx-padding: 5 9;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.followup-quick-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.14);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* -------------------------------------------------------------------------
+   Pagination Controls
+   ------------------------------------------------------------------------- */
+.followup-page-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-min-width: 32px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 5 10;
+    -fx-cursor: hand;
+}
+
+.followup-page-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+}
+
+.followup-page-btn-active {
+    -fx-background-color: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.25));
+    -fx-text-fill: #ef4444;
+    -fx-border-color: rgba(239, 68, 68, 0.6);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-min-width: 32px;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 5 10;
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.35), 8, 0, 0, 1);
+}
+
+/* -------------------------------------------------------------------------
+   Scrollbar Modernization (Invisible track, sleek thumb)
+   ------------------------------------------------------------------------- */
+.followup-table-card .scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.followup-table-card .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.followup-table-card .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.followup-table-card .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-background-radius: 4px;
+}
+
+.followup-table-card .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}
+
+.followup-table-card .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.followup-table-card .scroll-bar:vertical .increment-button,
+.followup-table-card .scroll-bar:vertical .decrement-button {
+    -fx-pref-height: 0px;
+    -fx-padding: 0px;
+}

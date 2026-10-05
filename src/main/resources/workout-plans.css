@@ -1,21 +1,249 @@
+﻿/* =========================================================================
+   WORKOUT PLANS COMPONENT STYLES
+   ========================================================================= */
+
+.workout-plans-view {
+    -fx-background-color: transparent;
+}
+
+.workout-sidebar {
+    -fx-background-color: rgba(30, 41, 59, 0.55);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+}
+
+.workout-sidebar-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #f8fafc;
+}
+
+.workout-search-field {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-text-fill: #f1f5f9;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+}
+
+.workout-search-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-background-color: rgba(59, 130, 246, 0.1);
+}
+
+.workout-clear-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-padding: 4 0;
+}
+
+.workout-clear-btn:hover {
+    -fx-text-fill: #38bdf8;
+    -fx-underline: true;
+}
+
+/* Accordion sections */
+.workout-filter-header {
+    -fx-cursor: hand;
+    -fx-padding: 6 0;
+}
+
+.workout-filter-title {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+.workout-filter-caret {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+}
+
+/* Custom Checkbox */
 .premium-checkbox {
     -fx-text-fill: #cbd5e1;
-    -fx-font-size: 13px; font-size: 13px;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
 }
 
 .premium-checkbox .box {
-    -fx-background-color: rgba(255, 255, 255, 0.05); background-color: rgba(255, 255, 255, 0.05);
-    -fx-border-color: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.15);
-    -fx-border-radius: 4px; border-radius: 4px;
-    -fx-background-radius: 4px;
-    -fx-padding: 0; padding: 0;
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 1px;
 }
 
 .premium-checkbox:selected .box {
-    -fx-background-color: #3b82f6; background-color: #3b82f6;
-    -fx-border-color: #3b82f6; border-color: #3b82f6;
+    -fx-background-color: #3b82f6;
+    -fx-border-color: #3b82f6;
 }
 
 .premium-checkbox:selected .mark {
-    -fx-background-color: white; background-color: white;
+    -fx-background-color: white;
+    -fx-shape: "M 0 5 L 4 9 L 10 2 L 9 1 L 4 7 L 1 4 Z";
+}
+
+/* Custom Slider */
+.workout-slider .thumb {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 12px;
+    -fx-pref-width: 18px;
+    -fx-pref-height: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.5), 8, 0, 0, 2);
+}
+
+.workout-slider .track {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 4px;
+    -fx-pref-height: 6px;
+}
+
+/* Plan Card Styles */
+.workout-plan-card {
+    -fx-background-color: rgba(30, 41, 59, 0.65);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+}
+
+.workout-plan-card:hover {
+    -fx-background-color: rgba(30, 41, 59, 0.9);
+    -fx-border-color: rgba(59, 130, 246, 0.4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 16, 0, 0, 8);
+}
+
+.workout-plan-card-selected {
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 2px;
+    -fx-background-color: rgba(30, 41, 59, 0.95);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.35), 18, 0, 0, 6);
+}
+
+/* Card Header Banner */
+.workout-card-banner {
+    -fx-background-color: linear-gradient(to right bottom, #1e293b, #334155);
+    -fx-background-radius: 14px 14px 0 0;
+}
+
+/* Active Filter Pill / Chip */
+.workout-active-chip {
+    -fx-background-color: rgba(59, 130, 246, 0.18);
+    -fx-border-color: rgba(59, 130, 246, 0.4);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 6 14;
+    -fx-text-fill: #93c5fd;
+    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+}
+
+/* Floating Action Bar */
+.workout-floating-bar {
+    -fx-background-color: rgba(15, 23, 42, 0.92);
+    -fx-background-radius: 35px;
+    -fx-border-color: rgba(59, 130, 246, 0.35);
+    -fx-border-radius: 35px;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 25, 0, 0, 12);
+}
+
+/* View Mode Switcher */
+.workout-view-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #94a3b8;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 14px;
+    -fx-padding: 7 14;
+    -fx-cursor: hand;
+}
+
+.workout-view-btn-active {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 14px;
+    -fx-padding: 7 14;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 8, 0, 0, 2);
+}
+
+/* Pagination Buttons */
+.workout-page-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #94a3b8;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-min-width: 34px;
+    -fx-pref-height: 32px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.workout-page-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-text-fill: white;
+}
+
+.workout-page-btn-active {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-min-width: 34px;
+    -fx-pref-height: 32px;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 6, 0, 0, 2);
+}
+
+/* Collections Cards */
+.workout-collection-card {
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 18;
+    -fx-cursor: hand;
+}
+
+.workout-collection-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 16, 0, 0, 8);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Detail View Hero */
+.workout-detail-hero {
+    -fx-padding: 30 60 40 60;
+}
+
+.workout-enroll-btn {
+    -fx-background-color: linear-gradient(to right, #2563eb, #3b82f6);
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-padding: 14 24;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 12, 0, 0, 4);
+}
+
+.workout-enroll-btn:hover {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #2563eb);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.6), 16, 0, 0, 6);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }

@@ -1,0 +1,535 @@
+/* ==========================================================================
+   IWFC - Team & Staff Management System
+   Cyber-Dark Glassmorphic UI/UX Design System
+   ========================================================================== */
+
+/* --- Main Layout Root --- */
+.team-view-root {
+    -fx-background-color: transparent;
+    -fx-font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+/* --- Directory Column (Left Sidebar) --- */
+.team-directory-card {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(99, 102, 241, 0.2);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 20, 0.1, 0, 8);
+}
+
+.team-directory-title {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+}
+
+.team-invite-btn {
+    -fx-background-color: linear-gradient(to right, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3));
+    -fx-text-fill: #c4b5fd;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-border-color: rgba(168, 85, 247, 0.45);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 6px 14px;
+    -fx-cursor: hand;
+}
+
+.team-invite-btn:hover {
+    -fx-background-color: linear-gradient(to right, #6366f1, #a855f7);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #c084fc;
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.5), 12, 0.2, 0, 0);
+}
+
+/* --- Search Field & Controls --- */
+.team-search-box {
+    -fx-background-color: rgba(30, 41, 59, 0.6);
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 2px 8px;
+}
+
+.team-search-box:focused-within {
+    -fx-border-color: rgba(56, 189, 248, 0.6);
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.25), 10, 0, 0, 0);
+}
+
+.team-search-input {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #64748b;
+    -fx-font-size: 13px;
+    -fx-border-width: 0;
+    -fx-padding: 6px 4px;
+}
+
+.team-search-icon {
+    -fx-shape: "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z";
+    -fx-background-color: #64748b;
+    -fx-min-width: 14px;
+    -fx-min-height: 14px;
+    -fx-max-width: 14px;
+    -fx-max-height: 14px;
+}
+
+.team-search-clear-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 0 4px;
+}
+
+.team-search-clear-btn:hover {
+    -fx-text-fill: #38bdf8;
+}
+
+/* --- Filter Chips --- */
+.team-filter-chip {
+    -fx-background-color: rgba(30, 41, 59, 0.5);
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 4px 12px;
+    -fx-cursor: hand;
+}
+
+.team-filter-chip:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.12);
+    -fx-text-fill: #7dd3fc;
+    -fx-border-color: rgba(56, 189, 248, 0.3);
+}
+
+.team-filter-chip-active {
+    -fx-background-color: rgba(99, 102, 241, 0.25);
+    -fx-text-fill: #c4b5fd;
+    -fx-border-color: rgba(168, 85, 247, 0.6);
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.25), 8, 0, 0, 0);
+}
+
+/* --- Staff Directory List Row --- */
+.team-user-row {
+    -fx-background-color: rgba(30, 41, 59, 0.35);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.04);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px 12px;
+    -fx-cursor: hand;
+}
+
+.team-user-row:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.08);
+    -fx-border-color: rgba(56, 189, 248, 0.3);
+}
+
+.team-user-row-selected {
+    -fx-background-color: linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(56, 189, 248, 0.12));
+    -fx-border-color: rgba(99, 102, 241, 0.6);
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.3), 12, 0.1, 0, 0);
+}
+
+.team-user-name {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.team-user-role {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+}
+
+/* --- Mini Row Action Buttons --- */
+.team-mini-action-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-background-radius: 6px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 6px;
+    -fx-padding: 5px;
+    -fx-cursor: hand;
+}
+
+.team-mini-action-btn:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.2);
+    -fx-border-color: rgba(56, 189, 248, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.4), 6, 0, 0, 0);
+}
+
+.team-mini-icon {
+    -fx-background-color: #94a3b8;
+    -fx-min-width: 12px;
+    -fx-min-height: 12px;
+    -fx-max-width: 12px;
+    -fx-max-height: 12px;
+}
+
+.team-mini-action-btn:hover .team-mini-icon {
+    -fx-background-color: #38bdf8;
+}
+
+/* --- Directory Footer KPI Bar --- */
+.team-kpi-footer {
+    -fx-background-color: rgba(30, 41, 59, 0.5);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 12px;
+    -fx-padding: 10px 14px;
+}
+
+.team-kpi-value {
+    -fx-text-fill: #38bdf8;
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+}
+
+.team-kpi-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 10px;
+    -fx-font-weight: 600;
+    -fx-text-transform: uppercase;
+}
+
+/* --- Right Content Area & Cards --- */
+.team-glass-card {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(255, 255, 255, 0.07);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 22px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 20, 0.1, 0, 6);
+}
+
+.team-card-title {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+}
+
+.team-card-subtitle {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+}
+
+/* --- Profile Hero Card --- */
+.team-profile-card {
+    -fx-background-color: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.6));
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(56, 189, 248, 0.35);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 24px;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.15), 25, 0.1, 0, 8);
+}
+
+.team-avatar-halo {
+    -fx-stroke: linear-gradient(to bottom right, #38bdf8, #818cf8, #c026d3);
+    -fx-stroke-width: 3.5px;
+    -fx-fill: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.6), 16, 0.3, 0, 0);
+}
+
+.team-profile-name {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.team-role-pill-instructor {
+    -fx-background-color: rgba(56, 189, 248, 0.18);
+    -fx-text-fill: #38bdf8;
+    -fx-border-color: rgba(56, 189, 248, 0.4);
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-padding: 3px 12px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.team-role-pill-admin {
+    -fx-background-color: rgba(248, 113, 113, 0.18);
+    -fx-text-fill: #f87171;
+    -fx-border-color: rgba(248, 113, 113, 0.4);
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-padding: 3px 12px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.team-contact-item {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.team-btn-secondary {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 18px;
+    -fx-cursor: hand;
+}
+
+.team-btn-secondary:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+}
+
+.team-btn-primary {
+    -fx-background-color: linear-gradient(to right, #0ea5e9, #6366f1);
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.4), 10, 0.2, 0, 2);
+}
+
+.team-btn-primary:hover {
+    -fx-background-color: linear-gradient(to right, #38bdf8, #818cf8);
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.6), 14, 0.3, 0, 3);
+}
+
+/* --- Dual Telemetry HUD Card --- */
+.team-telemetry-card {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(99, 102, 241, 0.25);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+}
+
+.team-gauge-box {
+    -fx-background-color: rgba(30, 41, 59, 0.4);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 14px;
+    -fx-padding: 16px;
+}
+
+.team-gauge-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+.team-gauge-sub {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+}
+
+.team-gauge-val {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+}
+
+.team-gauge-unit {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.team-gauge-tier {
+    -fx-background-color: rgba(56, 189, 248, 0.15);
+    -fx-text-fill: #38bdf8;
+    -fx-border-color: rgba(56, 189, 248, 0.3);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 2px 8px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+
+/* Sub-metric Telemetry Progress */
+.team-submetric-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+}
+
+.team-submetric-val {
+    -fx-text-fill: #f1f5f9;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.team-submetric-track {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-background-radius: 3px;
+    -fx-pref-height: 5px;
+    -fx-max-height: 5px;
+}
+
+/* --- Bio & Dynamic Skills --- */
+.team-skill-chip {
+    -fx-background-color: rgba(56, 189, 248, 0.12);
+    -fx-text-fill: #7dd3fc;
+    -fx-border-color: rgba(56, 189, 248, 0.3);
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-padding: 4px 12px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.team-skill-chip-cert {
+    -fx-background-color: rgba(168, 85, 247, 0.15);
+    -fx-text-fill: #d8b4fe;
+    -fx-border-color: rgba(168, 85, 247, 0.35);
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-padding: 4px 12px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.team-add-skill-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-style: dashed;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-padding: 3px 12px;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+}
+
+.team-add-skill-btn:hover {
+    -fx-text-fill: #38bdf8;
+    -fx-border-color: #38bdf8;
+    -fx-background-color: rgba(56, 189, 248, 0.08);
+}
+
+/* --- Trainee Assignment Cards --- */
+.team-trainee-item {
+    -fx-background-color: rgba(30, 41, 59, 0.4);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 12px;
+    -fx-padding: 10px 14px;
+}
+
+.team-trainee-item:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.06);
+    -fx-border-color: rgba(56, 189, 248, 0.25);
+}
+
+.team-capacity-bar-track {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 4px;
+    -fx-pref-height: 8px;
+    -fx-max-height: 8px;
+}
+
+.team-capacity-bar-fill {
+    -fx-background-color: linear-gradient(to right, #06b6d4, #3b82f6);
+    -fx-background-radius: 4px;
+}
+
+/* --- Feedback Review Bubbles --- */
+.team-feedback-bubble {
+    -fx-background-color: rgba(30, 41, 59, 0.45);
+    -fx-background-radius: 14px 14px 14px 3px;
+    -fx-border-color: rgba(99, 102, 241, 0.2);
+    -fx-border-radius: 14px 14px 14px 3px;
+    -fx-padding: 12px 16px;
+}
+
+.team-feedback-stars {
+    -fx-text-fill: #fbbf24;
+    -fx-font-size: 12px;
+}
+
+.team-feedback-quote {
+    -fx-text-fill: #f1f5f9;
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+    -fx-line-spacing: 3px;
+}
+
+.team-feedback-author {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* --- Performance Trend Chart Range Toggle --- */
+.team-range-pill {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 4px 12px;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+
+.team-range-pill:hover {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+}
+
+.team-range-pill-active {
+    -fx-background-color: rgba(56, 189, 248, 0.2);
+    -fx-text-fill: #38bdf8;
+    -fx-border-color: rgba(56, 189, 248, 0.4);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+/* --- ScrollBars --- */
+.team-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.team-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.team-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: rgba(15, 23, 42, 0.5);
+    -fx-pref-width: 6px;
+    -fx-background-radius: 3px;
+}
+
+.team-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(99, 102, 241, 0.4);
+    -fx-background-radius: 3px;
+}
+
+.team-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.7);
+}
+
+.team-scroll-pane .scroll-bar:vertical .track,
+.team-scroll-pane .scroll-bar:vertical .increment-button,
+.team-scroll-pane .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+}

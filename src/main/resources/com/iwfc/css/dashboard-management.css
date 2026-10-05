@@ -1,0 +1,533 @@
+/* ==========================================================================
+   IWFC - Executive Command & Operational Telemetry Dashboard
+   Cyber-Dark Glassmorphic UI/UX Design System
+   ========================================================================== */
+
+/* --- Main Layout Root & ScrollPane --- */
+.dashboard-view-root {
+    -fx-background-color: transparent;
+    -fx-font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+.dashboard-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.dashboard-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.dashboard-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.dashboard-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 4px;
+}
+
+.dashboard-scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.4);
+}
+
+/* --- Executive Command Bar --- */
+.dashboard-header-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+}
+
+.dashboard-header-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.dashboard-status-pill {
+    -fx-background-color: rgba(16, 185, 129, 0.15);
+    -fx-border-color: rgba(16, 185, 129, 0.35);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-text-fill: #34d399;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 4px 12px;
+}
+
+.dashboard-timestamp {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* --- Period Timeframe Segmented Control --- */
+.timeframe-segment-box {
+    -fx-background-color: rgba(15, 23, 42, 0.8);
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 3px;
+}
+
+.timeframe-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 5px 12px;
+    -fx-background-radius: 7px;
+    -fx-cursor: hand;
+}
+
+.timeframe-btn:hover {
+    -fx-text-fill: #e2e8f0;
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+}
+
+.timeframe-btn:selected {
+    -fx-background-color: linear-gradient(to right, #0284c7, #3b82f6);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.4), 8, 0, 0, 1);
+}
+
+/* --- Executive Action Hub Buttons --- */
+.dashboard-action-btn {
+    -fx-background-color: rgba(30, 41, 59, 0.7);
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 8px 14px;
+    -fx-cursor: hand;
+}
+
+.dashboard-action-btn:hover {
+    -fx-background-color: rgba(51, 65, 85, 0.85);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-text-fill: #ffffff;
+}
+
+.dashboard-primary-btn {
+    -fx-background-color: linear-gradient(to right, #2563eb, #7c3aed);
+    -fx-border-color: rgba(147, 197, 253, 0.3);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.4), 10, 0, 0, 2);
+}
+
+.dashboard-primary-btn:hover {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #8b5cf6);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.6), 14, 0, 0, 3);
+}
+
+.dashboard-emerald-btn {
+    -fx-background-color: linear-gradient(to right, #059669, #10b981);
+    -fx-border-color: rgba(52, 211, 153, 0.3);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.35), 10, 0, 0, 2);
+}
+
+.dashboard-emerald-btn:hover {
+    -fx-background-color: linear-gradient(to right, #10b981, #34d399);
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.55), 14, 0, 0, 3);
+}
+
+.dashboard-amber-btn {
+    -fx-background-color: linear-gradient(to right, #d97706, #f59e0b);
+    -fx-border-color: rgba(251, 191, 36, 0.3);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(245, 158, 11, 0.35), 10, 0, 0, 2);
+}
+
+.dashboard-amber-btn:hover {
+    -fx-background-color: linear-gradient(to right, #f59e0b, #fbbf24);
+    -fx-effect: dropshadow(gaussian, rgba(245, 158, 11, 0.55), 14, 0, 0, 3);
+}
+
+/* --- Glass KPI Cards --- */
+.dashboard-kpi-card {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 18px 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 18, 0, 0, 6);
+    -fx-cursor: hand;
+}
+
+.dashboard-kpi-card:hover {
+    -fx-background-color: rgba(30, 41, 59, 0.85);
+    -fx-border-color: rgba(56, 189, 248, 0.35);
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.25), 20, 0, 0, 8);
+}
+
+.dashboard-kpi-header {
+    -fx-alignment: center-left;
+}
+
+.dashboard-kpi-title {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-transform: uppercase;
+}
+
+.dashboard-kpi-icon-wrap {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 10px;
+    -fx-padding: 6px 10px;
+}
+
+.dashboard-kpi-value {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.dashboard-kpi-subtext {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+}
+
+.dashboard-trend-pill-up {
+    -fx-background-color: rgba(16, 185, 129, 0.15);
+    -fx-text-fill: #34d399;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 2px 8px;
+    -fx-background-radius: 6px;
+}
+
+.dashboard-trend-pill-neutral {
+    -fx-background-color: rgba(56, 189, 248, 0.15);
+    -fx-text-fill: #38bdf8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 2px 8px;
+    -fx-background-radius: 6px;
+}
+
+/* --- Section Container Cards --- */
+.dashboard-card-section {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px 22px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 16, 0, 0, 6);
+}
+
+.dashboard-section-title {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+}
+
+.dashboard-section-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+/* --- Chart Styling --- */
+.dashboard-line-chart {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+}
+
+.dashboard-line-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.dashboard-line-chart .chart-vertical-grid-lines,
+.dashboard-line-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(255, 255, 255, 0.05);
+    -fx-stroke-dash-array: 4 4;
+}
+
+.dashboard-line-chart .axis {
+    -fx-tick-label-fill: #64748b;
+    -fx-tick-label-font-size: 10px;
+    -fx-tick-mark-visible: false;
+}
+
+.dashboard-line-chart .axis:bottom {
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.08) transparent;
+}
+
+.dashboard-line-chart .axis:left {
+    -fx-border-color: transparent rgba(255, 255, 255, 0.08) transparent transparent;
+}
+
+.dashboard-line-chart .chart-series-line {
+    -fx-stroke: #0ea5e9;
+    -fx-stroke-width: 2.5px;
+}
+
+.dashboard-line-chart .chart-line-symbol {
+    -fx-background-color: #0ea5e9, #ffffff;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 5px;
+    -fx-padding: 4px;
+}
+
+/* Telemetry stat summary box on right of chart */
+.telemetry-stat-box {
+    -fx-background-color: rgba(30, 41, 59, 0.5);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 14px;
+}
+
+.telemetry-stat-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.telemetry-stat-value {
+    -fx-text-fill: #f1f5f9;
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+}
+
+/* --- Equipment Duty Matrix --- */
+.equipment-duty-row {
+    -fx-background-color: rgba(30, 41, 59, 0.4);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 16px;
+    -fx-cursor: hand;
+}
+
+.equipment-duty-row:hover {
+    -fx-background-color: rgba(51, 65, 85, 0.6);
+    -fx-border-color: rgba(56, 189, 248, 0.25);
+}
+
+.equipment-name-label {
+    -fx-text-fill: #f1f5f9;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.equipment-duty-hours {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.equipment-progress-bar {
+    -fx-pref-height: 8px;
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 4px;
+}
+
+.equipment-progress-bar > .track {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 4px;
+}
+
+.equipment-progress-bar > .bar {
+    -fx-background-color: linear-gradient(to right, #0ea5e9, #6366f1);
+    -fx-background-radius: 4px;
+}
+
+.equipment-progress-bar.bar-amber > .bar {
+    -fx-background-color: linear-gradient(to right, #f59e0b, #ef4444);
+}
+
+.equipment-progress-bar.bar-danger > .bar {
+    -fx-background-color: linear-gradient(to right, #ef4444, #dc2626);
+}
+
+/* --- Tables & Lists --- */
+.dashboard-table {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.dashboard-table .column-header-background {
+    -fx-background-color: rgba(30, 41, 59, 0.6);
+    -fx-background-radius: 10px 10px 0 0;
+}
+
+.dashboard-table .column-header {
+    -fx-background-color: transparent;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #94a3b8;
+    -fx-padding: 10px 8px;
+}
+
+.dashboard-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.03) transparent;
+    -fx-padding: 4px 0;
+}
+
+.dashboard-table .table-row-cell:odd {
+    -fx-background-color: rgba(255, 255, 255, 0.015);
+}
+
+.dashboard-table .table-row-cell:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.08);
+}
+
+.dashboard-table .table-cell {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 12px;
+    -fx-alignment: center-left;
+}
+
+/* --- Search & Inputs --- */
+.dashboard-search-field {
+    -fx-background-color: rgba(30, 41, 59, 0.6);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #64748b;
+    -fx-padding: 7px 12px;
+    -fx-font-size: 12px;
+}
+
+.dashboard-search-field:focused {
+    -fx-border-color: #38bdf8;
+    -fx-background-color: rgba(30, 41, 59, 0.9);
+}
+
+/* --- Incident Cards --- */
+.incident-card {
+    -fx-background-color: rgba(30, 41, 59, 0.5);
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 14px;
+}
+
+.incident-card-urgent {
+    -fx-background-color: rgba(239, 68, 68, 0.08);
+    -fx-border-color: rgba(239, 68, 68, 0.3);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px 14px;
+}
+
+.incident-equipment-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.incident-desc-text {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 11px;
+}
+
+.incident-reporter-text {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 10px;
+    -fx-font-weight: 600;
+}
+
+.quick-resolve-btn {
+    -fx-background-color: rgba(16, 185, 129, 0.15);
+    -fx-border-color: rgba(16, 185, 129, 0.35);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #34d399;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 5px 10px;
+    -fx-cursor: hand;
+}
+
+.quick-resolve-btn:hover {
+    -fx-background-color: rgba(16, 185, 129, 0.3);
+    -fx-border-color: rgba(52, 211, 153, 0.6);
+    -fx-text-fill: #ffffff;
+}
+
+.quick-cancel-btn {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+    -fx-border-color: rgba(239, 68, 68, 0.35);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #f87171;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 5px 10px;
+    -fx-cursor: hand;
+}
+
+.quick-cancel-btn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.3);
+    -fx-border-color: rgba(248, 113, 113, 0.6);
+    -fx-text-fill: #ffffff;
+}
+
+.quick-checkin-btn {
+    -fx-background-color: rgba(14, 165, 233, 0.15);
+    -fx-border-color: rgba(14, 165, 233, 0.35);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #38bdf8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 5px 10px;
+    -fx-cursor: hand;
+}
+
+.quick-checkin-btn:hover {
+    -fx-background-color: rgba(14, 165, 233, 0.3);
+    -fx-border-color: rgba(56, 189, 248, 0.6);
+    -fx-text-fill: #ffffff;
+}
+
+/* --- Avatar & Member Initials --- */
+.avatar-badge-circle {
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #8b5cf6);
+    -fx-background-radius: 20px;
+    -fx-min-width: 32px;
+    -fx-max-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-height: 32px;
+    -fx-alignment: center;
+}
+
+.avatar-badge-initials {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}

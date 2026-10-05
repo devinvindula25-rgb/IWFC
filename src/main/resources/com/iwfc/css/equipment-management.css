@@ -1,0 +1,206 @@
+/* =========================================================================
+   EQUIPMENT MANAGEMENT SUPREME STYLESHEET
+   Strict JavaFX -fx- properties only (No standard CSS warnings)
+   ========================================================================= */
+
+.equipment-view {
+    -fx-background-color: transparent;
+}
+
+/* Header & Title */
+.equipment-header-title {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+}
+
+.equipment-header-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+/* Toolbar & Filters */
+.equipment-search-field {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-text-fill: #f8fafc;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 7 16;
+    -fx-font-size: 12px;
+}
+
+.equipment-search-field:focused {
+    -fx-border-color: #06b6d4;
+    -fx-background-color: rgba(6, 182, 212, 0.08);
+}
+
+.equipment-combo-box {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-text-fill: #f8fafc;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 12px;
+    -fx-padding: 3 6;
+}
+
+.equipment-combo-box .list-cell {
+    -fx-text-fill: #f8fafc;
+    -fx-background-color: transparent;
+}
+
+.equipment-combo-box .list-cell:filled:selected,
+.equipment-combo-box .list-cell:filled:hover {
+    -fx-background-color: #0284c7;
+    -fx-text-fill: #ffffff;
+}
+
+.equipment-refresh-btn {
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+    -fx-text-fill: #60a5fa;
+    -fx-border-color: rgba(59, 130, 246, 0.35);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+    -fx-padding: 7 14;
+    -fx-cursor: hand;
+}
+
+.equipment-refresh-btn:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.3);
+    -fx-border-color: #60a5fa;
+    -fx-text-fill: #ffffff;
+}
+
+.equipment-add-btn {
+    -fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 900;
+    -fx-font-size: 13px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.45), 12, 0, 0, 3);
+}
+
+.equipment-add-btn:hover {
+    -fx-background-color: linear-gradient(to right, #4f46e5, #7c3aed);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* KPI Summary Stat Blocks */
+.equipment-kpi-block {
+    -fx-background-radius: 12px;
+    -fx-padding: 16 20;
+    -fx-cursor: hand;
+}
+
+.equipment-kpi-block-active {
+    -fx-border-color: #ffffff;
+    -fx-border-width: 2px;
+    -fx-border-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.5), 14, 0, 0, 3);
+}
+
+/* Category Cards */
+.equipment-cat-card {
+    -fx-background-color: rgba(30, 41, 59, 0.65);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 18;
+    -fx-cursor: hand;
+}
+
+.equipment-cat-card:hover {
+    -fx-background-color: rgba(30, 41, 59, 0.9);
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 16, 0, 0, 6);
+}
+
+/* Equipment Item Cards */
+.equipment-item-card {
+    -fx-background-color: rgba(30, 41, 59, 0.7);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 16;
+}
+
+.equipment-item-card:hover {
+    -fx-background-color: rgba(30, 41, 59, 0.95);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 14, 0, 0, 4);
+}
+
+/* Right Column Panels */
+.equipment-glass-panel {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 20, 0, 0, 6);
+}
+
+.equipment-map-canvas {
+    -fx-background-color: #0b1120;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+/* Secondary & Action Buttons */
+.equipment-card-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #e2e8f0;
+    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+
+.equipment-card-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-border-color: rgba(255, 255, 255, 0.35);
+    -fx-text-fill: #ffffff;
+}
+
+.equipment-maint-btn {
+    -fx-background-color: rgba(16, 185, 129, 0.12);
+    -fx-text-fill: #34d399;
+    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-border-color: rgba(16, 185, 129, 0.35);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+
+.equipment-maint-btn:hover {
+    -fx-background-color: rgba(16, 185, 129, 0.25);
+    -fx-border-color: #34d399;
+    -fx-text-fill: #ffffff;
+}
+
+/* Badge Capsules */
+.equipment-status-badge {
+    -fx-background-radius: 20px;
+    -fx-padding: 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}

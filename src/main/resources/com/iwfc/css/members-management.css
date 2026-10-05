@@ -1,0 +1,199 @@
+﻿/* =========================================================================
+   MEMBERS MANAGEMENT SUPREME STYLESHEET
+   ========================================================================= */
+
+.members-management-view {
+    -fx-background-color: transparent;
+}
+
+/* Glassmorphic Panel Cards */
+.member-glass-card {
+    -fx-background-color: rgba(30, 41, 59, 0.65);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+}
+
+.member-glass-card-elevated {
+    -fx-background-color: rgba(15, 23, 42, 0.75);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 20, 0, 0, 8);
+}
+
+/* Search Bar in Sidebar */
+.member-search-input {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-text-fill: #f8fafc;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 8 16;
+    -fx-font-size: 13px;
+}
+
+.member-search-input:focused {
+    -fx-border-color: #06b6d4;
+    -fx-background-color: rgba(6, 182, 212, 0.08);
+}
+
+/* Filter Capsule Buttons */
+.member-filter-chip {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 5 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.member-filter-chip:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-text-fill: #ffffff;
+}
+
+.member-filter-chip-active {
+    -fx-background-color: rgba(6, 182, 212, 0.2);
+    -fx-text-fill: #22d3ee;
+    -fx-border-color: #06b6d4;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 5 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(6, 182, 212, 0.35), 8, 0, 0, 2);
+}
+
+/* Member Directory List Items */
+.member-list-card {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 10 14;
+    -fx-cursor: hand;
+}
+
+.member-list-card:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+}
+
+.member-list-card-selected {
+    -fx-background-color: rgba(6, 182, 212, 0.14);
+    -fx-border-color: #06b6d4;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(6, 182, 212, 0.3), 12, 0, 0, 4);
+}
+
+/* Primary Action Button (+ Add, Action buttons) */
+.member-primary-btn {
+    -fx-background-color: linear-gradient(to right, #06b6d4, #0891b2);
+    -fx-text-fill: #ffffff;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-font-weight: 800;
+    -fx-padding: 8 16;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(6, 182, 212, 0.35), 10, 0, 0, 2);
+}
+
+.member-primary-btn:hover {
+    -fx-background-color: linear-gradient(to right, #22d3ee, #06b6d4);
+    -fx-effect: dropshadow(gaussian, rgba(6, 182, 212, 0.6), 14, 0, 0, 4);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Secondary Button */
+.member-secondary-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #f1f5f9;
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-font-weight: 700;
+    -fx-padding: 8 14;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.member-secondary-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Top Segmented Sub-Navigation Bar */
+.member-nav-bar {
+    -fx-background-color: rgba(15, 23, 42, 0.6);
+    -fx-border-radius: 30px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-background-radius: 30px;
+    -fx-padding: 6;
+}
+
+.member-nav-tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 8 18;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.member-nav-tab:hover {
+    -fx-text-fill: #f1f5f9;
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+}
+
+.member-nav-tab-active {
+    -fx-background-color: #10b981;
+    -fx-text-fill: #ffffff;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 8 18;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.4), 10, 0, 0, 3);
+}
+
+/* Metric / Stat Card in Sub-windows */
+.member-kpi-card {
+    -fx-background-color: rgba(255, 255, 255, 0.035);
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(255, 255, 255, 0.07);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 16;
+}
+
+.member-kpi-card:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Interactive Table Rows */
+.member-data-row {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-background-radius: 8px;
+    -fx-padding: 12 16;
+}
+
+.member-data-row:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+}

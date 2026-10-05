@@ -130,6 +130,17 @@ public class NotificationService {
                 .ifPresent(n -> n.setRead(true));
     }
 
+    public void markAsUnread(String notificationId) {
+        dataStore.getNotifications().findAll().stream()
+                .filter(n -> n.getNotificationId().equals(notificationId))
+                .findFirst()
+                .ifPresent(n -> n.setRead(false));
+    }
+
+    public void deleteNotification(String notificationId) {
+        dataStore.getNotifications().delete(notificationId);
+    }
+
     public void markAllAsRead(Role role) {
         getNotificationsForRole(role).forEach(n -> n.setRead(true));
     }

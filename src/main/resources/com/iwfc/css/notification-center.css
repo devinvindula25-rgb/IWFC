@@ -1,0 +1,305 @@
+/* =========================================================================
+   IWFC SUPREME NOTIFICATION CENTER & TELEMETRY HUB STYLESHEET
+   Strict JavaFX CSS (-fx- properties only for 100% warning-free compilation)
+   High-Tech Cyber-Dark Glassmorphic & Modern SaaS Aesthetic
+   ========================================================================= */
+
+.notification-view {
+    -fx-background-color: transparent;
+}
+
+/* -------------------------------------------------------------------------
+   Top Header & Titles
+   ------------------------------------------------------------------------- */
+.notification-title-main {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+}
+
+.notification-unread-badge {
+    -fx-text-fill: #60a5fa;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-background-color: rgba(59, 130, 246, 0.16);
+    -fx-border-color: rgba(59, 130, 246, 0.4);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3 10;
+}
+
+.notification-total-badge {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3 9;
+}
+
+.notification-title-sub {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.2px;
+}
+
+/* -------------------------------------------------------------------------
+   Search Field
+   ------------------------------------------------------------------------- */
+.notification-search-field {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-text-fill: #f8fafc;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 7 16;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.notification-search-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-background-color: rgba(59, 130, 246, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.35), 10, 0, 0, 0);
+}
+
+/* -------------------------------------------------------------------------
+   Header Action Buttons
+   ------------------------------------------------------------------------- */
+.notification-header-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-text-fill: #38bdf8;
+    -fx-border-color: rgba(56, 189, 248, 0.45);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 7 15;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+}
+
+.notification-header-btn:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.12);
+    -fx-border-color: #38bdf8;
+    -fx-text-fill: #ffffff;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.notification-danger-btn {
+    -fx-background-color: rgba(239, 68, 68, 0.06);
+    -fx-text-fill: #f87171;
+    -fx-border-color: rgba(239, 68, 68, 0.45);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 7 15;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+}
+
+.notification-danger-btn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.16);
+    -fx-border-color: #ef4444;
+    -fx-text-fill: #ffffff;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* -------------------------------------------------------------------------
+   Category & Status Filter Chips
+   ------------------------------------------------------------------------- */
+.notification-chip {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 5 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.notification-chip:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+}
+
+.notification-chip-active {
+    -fx-background-color: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(99, 102, 241, 0.22));
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #3b82f6;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 5 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.35), 8, 0, 0, 1);
+}
+
+/* -------------------------------------------------------------------------
+   Notification Card Containers (High-Tech Glassmorphic)
+   ------------------------------------------------------------------------- */
+.notification-card {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-padding: 16 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 16, 0, 0, 4);
+}
+
+.notification-card:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.045);
+    -fx-border-color: rgba(59, 130, 246, 0.35);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 20, 0, 0, 6);
+}
+
+.notification-card-unread {
+    -fx-background-color: linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(255, 255, 255, 0.02));
+    -fx-border-color: rgba(255, 255, 255, 0.08) rgba(255, 255, 255, 0.08) rgba(255, 255, 255, 0.08) #3b82f6;
+    -fx-border-width: 1px 1px 1px 3.5px;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+}
+
+.notification-card-read {
+    -fx-opacity: 0.72;
+}
+
+.notification-card-read:hover {
+    -fx-opacity: 0.95;
+}
+
+/* -------------------------------------------------------------------------
+   Telemetry Visual Capsule (Left Side of Card)
+   ------------------------------------------------------------------------- */
+.notification-telemetry-capsule {
+    -fx-background-color: rgba(255, 255, 255, 0.035);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-alignment: center;
+}
+
+/* -------------------------------------------------------------------------
+   Interactive Card Action Buttons
+   ------------------------------------------------------------------------- */
+.notification-cta-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: #e2e8f0;
+    -fx-border-color: rgba(255, 255, 255, 0.16);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: 800;
+    -fx-padding: 5 14;
+    -fx-cursor: hand;
+}
+
+.notification-cta-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: #38bdf8;
+    -fx-text-fill: #ffffff;
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.notification-quick-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.035);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 5 10;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.notification-quick-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-scale-x: 1.06;
+    -fx-scale-y: 1.06;
+}
+
+/* -------------------------------------------------------------------------
+   Pagination Bar
+   ------------------------------------------------------------------------- */
+.notification-page-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-min-width: 32px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 5 10;
+    -fx-cursor: hand;
+}
+
+.notification-page-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+}
+
+.notification-page-btn-active {
+    -fx-background-color: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(99, 102, 241, 0.3));
+    -fx-text-fill: #60a5fa;
+    -fx-border-color: rgba(59, 130, 246, 0.7);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-min-width: 32px;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 5 10;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 8, 0, 0, 1);
+}
+
+/* -------------------------------------------------------------------------
+   Scrollbar Modernization
+   ------------------------------------------------------------------------- */
+.notification-view .scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.notification-view .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.notification-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.notification-view .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-background-radius: 4px;
+}
+
+.notification-view .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}
+
+.notification-view .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.notification-view .scroll-bar:vertical .increment-button,
+.notification-view .scroll-bar:vertical .decrement-button {
+    -fx-pref-height: 0px;
+    -fx-padding: 0px;
+}

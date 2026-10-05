@@ -331,6 +331,10 @@ public class IWFCSystemFacade {
         return sessionService.getAvailableSessions();
     }
 
+    public List<FitnessSession> getAllFitnessSessions() {
+        return sessionService.getAllSessions();
+    }
+
     /**
      * Returns all bookings.
      */
@@ -370,6 +374,59 @@ public class IWFCSystemFacade {
             return sessionService.getBookingsForMemberInMonth(currentUser.getUserId(), month);
         }
         return List.of();
+    }
+
+    /**
+     * Books a session on behalf of a specific member (Admin or Staff action).
+     */
+    public Booking bookSessionForMember(String memberId, String sessionId, LocalDate date)
+            throws InvalidBookingException, UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_SESSIONS");
+        User user = userService.login(memberId);
+        if (!(user instanceof Member member)) {
+            throw new InvalidBookingException("Selected user is not a gym member.");
+        }
+        return sessionService.bookSessionForDate(member, sessionId, date);
+    }
+
+    /**
+     * Admin cancellation of any booking.
+     */
+    public void cancelBookingAdmin(String bookingId) throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_SESSIONS");
+        Booking booking = getAllBookings().stream()
+                .filter(b -> b.getBookingId().equals(bookingId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
+        booking.cancel();
+        notificationService.notifyListeners("BOOKING_CANCELLED",
+                "Booking " + bookingId + " has been cancelled by administrator.");
+    }
+
+    /**
+     * Updates booking status (e.g. check-in or mark attended).
+     */
+    public void updateBookingStatus(String bookingId, BookingStatus newStatus) throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_SESSIONS");
+        Booking booking = getAllBookings().stream()
+                .filter(b -> b.getBookingId().equals(bookingId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
+        booking.setStatus(newStatus);
+        notificationService.notifyListeners("BOOKING_UPDATED",
+                "Booking " + bookingId + " status updated to " + newStatus.getDisplayName());
+    }
+
+    /**
+     * Reports a maintenance issue on behalf of gym operations/staff.
+     */
+    public void reportMaintenanceByStaff(Equipment equipment, Instructor reportedBy, String description, Urgency urgency)
+            throws UnauthorizedAccessException {
+        userService.checkPermission(currentUser, "MANAGE_EQUIPMENT");
+        String requestId = maintenanceService.generateRequestId();
+        MaintenanceRequest request = new MaintenanceRequest(
+                requestId, equipment, reportedBy, description, urgency);
+        maintenanceService.reportIssue(request);
     }
 
     // =========================================================================
@@ -471,6 +528,16 @@ public class IWFCSystemFacade {
         userService.addUser(user);
     }
 
+    /**
+     * Updates an existing user in the system. Requires ADMIN role (MANAGE_USERS permission) or current user.
+     */
+    public void updateUser(User user) throws UnauthorizedAccessException {
+        if (currentUser == null || (!currentUser.getUserId().equals(user.getUserId()) && currentUser.getRole() != Role.ADMIN)) {
+            userService.checkPermission(currentUser, "MANAGE_USERS");
+        }
+        userService.updateUser(user);
+    }
+
     // =========================================================================
     // Notification Service (for UI to subscribe)
     // =========================================================================
@@ -496,6 +563,14 @@ public class IWFCSystemFacade {
 
     public void markNotificationAsRead(String notificationId) {
         notificationService.markAsRead(notificationId);
+    }
+
+    public void markNotificationAsUnread(String notificationId) {
+        notificationService.markAsUnread(notificationId);
+    }
+
+    public void deleteNotification(String notificationId) {
+        notificationService.deleteNotification(notificationId);
     }
 
     public void markAllNotificationsAsRead() {
@@ -546,6 +621,13 @@ public class IWFCSystemFacade {
     public java.util.List<com.iwfc.model.Payment> getAllPayments() throws UnauthorizedAccessException {
         userService.checkPermission(currentUser, "MANAGE_USERS");
         return paymentService.getAllPayments();
+    }
+
+    public void refundPayment(String paymentId, String reason) throws UnauthorizedAccessException {
+        if (currentUser.getRole() != com.iwfc.model.Role.ADMIN) {
+            throw new UnauthorizedAccessException("Only administrators can issue payment refunds.");
+        }
+        paymentService.refundPayment(paymentId, reason);
     }
 
     // =========================================================================
@@ -686,5 +768,17 @@ public class IWFCSystemFacade {
 
     public List<FollowUp> getFollowUps() {
         return com.iwfc.pattern.DataStore.getInstance().getFollowUps().findAll();
+    }
+
+    public void addFollowUp(FollowUp followUp) throws DuplicateDataException {
+        com.iwfc.pattern.DataStore.getInstance().getFollowUps().save(followUp);
+    }
+
+    public void updateFollowUp(FollowUp followUp) {
+        com.iwfc.pattern.DataStore.getInstance().getFollowUps().update(followUp);
+    }
+
+    public void deleteFollowUp(String id) {
+        com.iwfc.pattern.DataStore.getInstance().getFollowUps().delete(id);
     }
 }

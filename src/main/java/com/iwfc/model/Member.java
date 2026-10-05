@@ -77,4 +77,60 @@ public class Member extends User {
     public void setMachinesUsed(List<String> machinesUsed) {
         this.machinesUsed = machinesUsed;
     }
+
+    // Additional Profile & Lifestyle Attributes
+    private String gender = "Female";
+    private String dateOfBirth = "1995-04-12";
+    private String nationality = "American";
+    private double waterGoal = 2.5;
+    private String allergies = "None";
+    private String supplements = "Whey Protein, Multivitamins";
+
+    public String getGender() {
+        return gender != null ? gender : "N/A";
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getDateOfBirth() {
+        return dateOfBirth != null ? dateOfBirth : "N/A";
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getNationality() {
+        return nationality != null ? nationality : "N/A";
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
+
+    public double getWaterGoal() {
+        return waterGoal > 0 ? waterGoal : 2.5;
+    }
+
+    public void setWaterGoal(double waterGoal) {
+        this.waterGoal = waterGoal;
+    }
+
+    public String getAllergies() {
+        return allergies != null ? allergies : "None";
+    }
+
+    public void setAllergies(String allergies) {
+        this.allergies = allergies;
+    }
+
+    public String getSupplements() {
+        return supplements != null ? supplements : "None";
+    }
+
+    public void setSupplements(String supplements) {
+        this.supplements = supplements;
+    }
 }
