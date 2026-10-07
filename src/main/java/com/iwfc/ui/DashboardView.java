@@ -6,6 +6,7 @@ import com.iwfc.exception.PaymentFailedException;
 import com.iwfc.exception.UnauthorizedAccessException;
 import com.iwfc.facade.IWFCSystemFacade;
 import com.iwfc.model.*;
+import com.iwfc.pattern.DataStore;
 import com.iwfc.ui.components.DialogUtils;
 import com.iwfc.ui.components.StatusBadge;
 import javafx.animation.FadeTransition;
@@ -107,6 +108,24 @@ public class DashboardView extends StackPane {
     private void buildUI() {
         getChildren().clear();
 
+        User user = facade.getCurrentUser();
+        Role role = user != null ? user.getRole() : Role.ADMIN;
+
+        if (role == Role.INSTRUCTOR) {
+            getChildren().add(new InstructorDashboardView(facade, navCallback));
+            return;
+        }
+
+        if (role == Role.MEMBER) {
+            getChildren().add(new MemberDashboardView(facade, navCallback));
+            return;
+        }
+
+        // Role.ADMIN: All-Encompassing Central Command Dashboard
+        buildAdminOmniUI();
+    }
+
+    private void buildAdminOmniUI() {
         mainContainer = new VBox(24);
         mainContainer.setPadding(new Insets(24, 28, 32, 28));
         mainContainer.setFillWidth(true);
@@ -114,7 +133,7 @@ public class DashboardView extends StackPane {
         // 1. Executive Command Bar
         BorderPane commandBar = buildExecutiveCommandBar();
 
-        // 2. High-Tech Glass KPI Cards Row
+        // 2. High-Tech 6-Pillar Bento Glass KPI Cards Row
         kpiCardsRow = buildKpiCardsRow();
 
         // 3. Middle Section: Telemetry Analytics Chart & Equipment Duty Matrix
@@ -123,7 +142,10 @@ public class DashboardView extends StackPane {
         // 4. Bottom Section: Operational Bookings Ledger & Maintenance Incident Command
         HBox bottomRow = buildBookingsAndIncidentsRow();
 
-        mainContainer.getChildren().addAll(commandBar, kpiCardsRow, middleRow, bottomRow);
+        // 5. Staff Coaching Load & Workout Curriculum Analytics
+        HBox staffCurriculumRow = buildStaffAndCurriculumRow();
+
+        mainContainer.getChildren().addAll(commandBar, kpiCardsRow, middleRow, bottomRow, staffCurriculumRow);
 
         ScrollPane scrollPane = new ScrollPane(mainContainer);
         scrollPane.setFitToWidth(true);
@@ -131,7 +153,7 @@ public class DashboardView extends StackPane {
 
         getChildren().add(scrollPane);
 
-        Platform.runLater(() -> playEntranceAnimations(commandBar, kpiCardsRow, middleRow, bottomRow));
+        Platform.runLater(() -> playEntranceAnimations(commandBar, kpiCardsRow, middleRow, bottomRow, staffCurriculumRow));
     }
 
     // =========================================================================
@@ -195,6 +217,10 @@ public class DashboardView extends StackPane {
         actionHub.setAlignment(Pos.CENTER_RIGHT);
         actionHub.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
+        Button quickMemberBtn = new Button("+ Quick Member");
+        quickMemberBtn.getStyleClass().add("dashboard-primary-btn");
+        quickMemberBtn.setOnAction(e -> showQuickMemberRegistrationModal());
+
         Button quickBookingBtn = new Button("+ Quick Booking");
         quickBookingBtn.getStyleClass().add("dashboard-primary-btn");
         quickBookingBtn.setOnAction(e -> showQuickBookingModal());
@@ -207,20 +233,15 @@ public class DashboardView extends StackPane {
         reportIncidentBtn.getStyleClass().add("dashboard-amber-btn");
         reportIncidentBtn.setOnAction(e -> showQuickIncidentModal(null));
 
+        Button broadcastBtn = new Button("📢 Broadcast");
+        broadcastBtn.getStyleClass().add("dashboard-amber-btn");
+        broadcastBtn.setOnAction(e -> showBroadcastModal());
+
         Button liveSyncBtn = new Button("🔄 Sync");
         liveSyncBtn.getStyleClass().add("dashboard-action-btn");
         liveSyncBtn.setOnAction(e -> refreshData(true));
 
-        actionHub.getChildren().addAll(quickBookingBtn, processPaymentBtn, reportIncidentBtn);
-
-        if (user != null && user.getRole() == Role.MEMBER) {
-            Button dailyLogBtn = new Button("📝 Daily Log");
-            dailyLogBtn.getStyleClass().add("dashboard-action-btn");
-            dailyLogBtn.setOnAction(e -> showDailyLogDialog());
-            actionHub.getChildren().add(dailyLogBtn);
-        }
-
-        actionHub.getChildren().add(liveSyncBtn);
+        actionHub.getChildren().addAll(quickMemberBtn, quickBookingBtn, processPaymentBtn, reportIncidentBtn, broadcastBtn, liveSyncBtn);
 
         // Single Master Command Bar (Left: Title | Center: Filter | Right: Actions)
         BorderPane commandBar = new BorderPane();
@@ -240,11 +261,11 @@ public class DashboardView extends StackPane {
     }
 
     // =========================================================================
-    // 2. High-Tech Glass KPI Cards Row
+    // 2. High-Tech Glass KPI Cards Row (6-Pillar Bento Matrix)
     // =========================================================================
 
     private HBox buildKpiCardsRow() {
-        HBox row = new HBox(18);
+        HBox row = new HBox(14);
         row.setAlignment(Pos.CENTER_LEFT);
 
         // Fetch data
@@ -318,11 +339,42 @@ public class DashboardView extends StackPane {
                 e -> navCallback.accept("Equipment")
         );
 
-        row.getChildren().addAll(revCard, bookingCard, memberCard, equipCard);
+        // Card 5: Coaching Staff Network
+        long instructorCount = DataStore.getInstance().getUsers().findAll().stream()
+                .filter(u -> u.getRole() == Role.INSTRUCTOR)
+                .count();
+        VBox staffCard = createKpiCard(
+                "Coaching & Staff Network",
+                String.format("%d Trainers", instructorCount),
+                "🏋️",
+                "100% on active duty schedule",
+                "Full Readiness",
+                true,
+                e -> navCallback.accept("Team")
+        );
+
+        // Card 6: Incidents & Leads Pulse
+        long pendingIncidents = facade.getAllMaintenanceRequests().stream()
+                .filter(r -> r.getStatus() != RequestStatus.COMPLETED)
+                .count();
+        long pendingFollowUps = facade.getFollowUps().size();
+        VBox pulseCard = createKpiCard(
+                "Incidents & Leads Pulse",
+                String.format("%d Alerts", pendingIncidents + pendingFollowUps),
+                "⚡",
+                String.format("%d Active Tickets • %d Inquiries", pendingIncidents, pendingFollowUps),
+                pendingIncidents == 0 ? "Optimal" : "Requires Action",
+                pendingIncidents == 0,
+                e -> navCallback.accept("Maintenance")
+        );
+
+        row.getChildren().addAll(revCard, bookingCard, memberCard, equipCard, staffCard, pulseCard);
         HBox.setHgrow(revCard, Priority.ALWAYS);
         HBox.setHgrow(bookingCard, Priority.ALWAYS);
         HBox.setHgrow(memberCard, Priority.ALWAYS);
         HBox.setHgrow(equipCard, Priority.ALWAYS);
+        HBox.setHgrow(staffCard, Priority.ALWAYS);
+        HBox.setHgrow(pulseCard, Priority.ALWAYS);
 
         return row;
     }
@@ -1021,7 +1073,241 @@ public class DashboardView extends StackPane {
     }
 
     // =========================================================================
-    // 5. Operations & Dialogs (100% Functional)
+    // 5. Staff Coaching Load & Workout Curriculum Analytics
+    // =========================================================================
+
+    private HBox buildStaffAndCurriculumRow() {
+        HBox row = new HBox(20);
+        row.setAlignment(Pos.TOP_LEFT);
+
+        // Left: Trainer Coaching Network & Load
+        VBox staffSection = buildStaffCoachingSection();
+        HBox.setHgrow(staffSection, Priority.ALWAYS);
+
+        // Right: Curriculum Popularity & Enrollments
+        VBox curriculumSection = buildCurriculumRankingSection();
+        curriculumSection.setMinWidth(420);
+        curriculumSection.setPrefWidth(460);
+
+        row.getChildren().addAll(staffSection, curriculumSection);
+        return row;
+    }
+
+    private VBox buildStaffCoachingSection() {
+        VBox section = new VBox(14);
+        section.getStyleClass().add("dashboard-card-section");
+
+        HBox header = new HBox(8);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        VBox titles = new VBox(2);
+        Label title = new Label("Staff & Instructor Deployment Load");
+        title.getStyleClass().add("dashboard-section-title");
+
+        Label subtitle = new Label("Real-time coach deployment and athlete mentoring ratios");
+        subtitle.getStyleClass().add("dashboard-section-subtitle");
+        titles.getChildren().addAll(title, subtitle);
+
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
+
+        Hyperlink viewTeamLink = new Hyperlink("Team Management ↗");
+        viewTeamLink.setStyle("-fx-text-fill: #38bdf8; -fx-font-weight: bold; -fx-font-size: 11px;");
+        viewTeamLink.setOnAction(e -> navCallback.accept("Team"));
+
+        header.getChildren().addAll(titles, sp, viewTeamLink);
+
+        VBox list = new VBox(8);
+        List<User> instructors = DataStore.getInstance().getUsers().findAll().stream()
+                .filter(u -> u.getRole() == Role.INSTRUCTOR)
+                .collect(Collectors.toList());
+
+        for (User u : instructors) {
+            if (u instanceof Instructor instr) {
+                HBox iRow = new HBox(12);
+                iRow.setAlignment(Pos.CENTER_LEFT);
+                iRow.setPadding(new Insets(8, 12, 8, 12));
+                iRow.setStyle("-fx-background-color: rgba(30, 41, 59, 0.4); -fx-background-radius: 8px;");
+
+                StackPane av = new StackPane();
+                av.setPrefSize(32, 32);
+                av.setStyle("-fx-background-color: linear-gradient(to bottom right, #f59e0b, #ef4444); -fx-background-radius: 16px;");
+                Label initLbl = new Label(getInitials(instr.getName()));
+                initLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold; -fx-font-size: 11px;");
+                av.getChildren().add(initLbl);
+
+                VBox details = new VBox(2);
+                Label nameLbl = new Label(instr.getName());
+                nameLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: 700; -fx-font-size: 12px;");
+                String spec = instr.getSpecialization() != null ? instr.getSpecialization() : "Certified Fitness Coach";
+                Label specLbl = new Label(spec);
+                specLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
+                details.getChildren().addAll(nameLbl, specLbl);
+                HBox.setHgrow(details, Priority.ALWAYS);
+
+                int traineeCount = instr.getTraineeIds() != null ? instr.getTraineeIds().size() : 0;
+                Label loadLbl = new Label(traineeCount + " Athletes Mentored");
+                loadLbl.setStyle("-fx-background-color: rgba(56, 189, 248, 0.15); -fx-text-fill: #38bdf8; -fx-font-size: 10px; -fx-padding: 2px 8px; -fx-background-radius: 8px;");
+
+                iRow.getChildren().addAll(av, details, loadLbl);
+                list.getChildren().add(iRow);
+            }
+        }
+
+        section.getChildren().addAll(header, list);
+        return section;
+    }
+
+    private VBox buildCurriculumRankingSection() {
+        VBox section = new VBox(14);
+        section.getStyleClass().add("dashboard-card-section");
+
+        HBox header = new HBox(8);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        VBox titles = new VBox(2);
+        Label title = new Label("Curriculum Ranking & Plans");
+        title.getStyleClass().add("dashboard-section-title");
+
+        Label subtitle = new Label("Fitness plans by member enrollment popularity");
+        subtitle.getStyleClass().add("dashboard-section-subtitle");
+        titles.getChildren().addAll(title, subtitle);
+
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
+
+        Hyperlink viewPlansLink = new Hyperlink("Plan Catalogue ↗");
+        viewPlansLink.setStyle("-fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-font-size: 11px;");
+        viewPlansLink.setOnAction(e -> navCallback.accept("Workout Plans"));
+
+        header.getChildren().addAll(titles, sp, viewPlansLink);
+
+        VBox list = new VBox(8);
+        List<FitnessPlan> plans = facade.getPlanCatalogue();
+
+        for (FitnessPlan plan : plans) {
+            HBox pRow = new HBox(12);
+            pRow.setAlignment(Pos.CENTER_LEFT);
+            pRow.setPadding(new Insets(8, 12, 8, 12));
+            pRow.setStyle("-fx-background-color: rgba(30, 41, 59, 0.4); -fx-background-radius: 8px;");
+
+            Label iconLbl = new Label("📋");
+            iconLbl.setStyle("-fx-font-size: 16px;");
+
+            VBox pInfo = new VBox(2);
+            Label name = new Label(plan.getTitle());
+            name.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: 700; -fx-font-size: 12px;");
+            String obj = (!plan.getObjectives().isEmpty()) ? plan.getObjectives().get(0) : "General Fitness";
+            Label dur = new Label(plan.getDurationWeeks() + " Weeks • " + obj);
+            dur.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
+            pInfo.getChildren().addAll(name, dur);
+            HBox.setHgrow(pInfo, Priority.ALWAYS);
+
+            Label feeLbl = new Label(String.format("LKR %,.0f", plan.calculateTotalCost()));
+            feeLbl.setStyle("-fx-text-fill: #34d399; -fx-font-weight: 700; -fx-font-size: 11px;");
+
+            pRow.getChildren().addAll(iconLbl, pInfo, feeLbl);
+            list.getChildren().add(pRow);
+        }
+
+        section.getChildren().addAll(header, list);
+        return section;
+    }
+
+    private void showQuickMemberRegistrationModal() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Quick Member Registration");
+        DialogUtils.stylePremiumDialog(dialog);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(12);
+        grid.setPadding(new Insets(10));
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Full Name");
+        TextField emailField = new TextField();
+        emailField.setPromptText("Email Address");
+        TextField phoneField = new TextField();
+        phoneField.setPromptText("Phone Number");
+
+        ComboBox<String> tierCombo = new ComboBox<>(FXCollections.observableArrayList("Standard", "Premium", "VIP"));
+        tierCombo.setValue("Premium");
+        tierCombo.setMaxWidth(Double.MAX_VALUE);
+
+        grid.addRow(0, new Label("Full Name:"), nameField);
+        grid.addRow(1, new Label("Email:"), emailField);
+        grid.addRow(2, new Label("Phone:"), phoneField);
+        grid.addRow(3, new Label("Membership Tier:"), tierCombo);
+
+        Button submitBtn = new Button("Register & Activate Member");
+        submitBtn.getStyleClass().add("dashboard-primary-btn");
+        submitBtn.setMaxWidth(Double.MAX_VALUE);
+        submitBtn.setOnAction(e -> {
+            String name = nameField.getText().trim();
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
+            if (name.isEmpty() || email.isEmpty()) {
+                showSimpleAlert("Incomplete", "Please enter both name and email.", Alert.AlertType.WARNING);
+                return;
+            }
+
+            try {
+                String newId = "MEM" + String.format("%03d", DataStore.getInstance().getUsers().findAll().stream().filter(u -> u.getRole() == Role.MEMBER).count() + 1);
+                Member newMem = new Member(newId, name, email, phone, "IWFC Center", "", tierCombo.getValue());
+                facade.addUser(newMem);
+                showSimpleAlert("Member Registered", "Successfully registered member " + name + " (ID: " + newId + ")!", Alert.AlertType.INFORMATION);
+                refreshData(false);
+                dialog.close();
+            } catch (Exception ex) {
+                showSimpleAlert("Registration Error", ex.getMessage(), Alert.AlertType.ERROR);
+            }
+        });
+
+        VBox content = new VBox(14, grid, submitBtn);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+        dialog.showAndWait();
+    }
+
+    private void showBroadcastModal() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Broadcast System Emergency / Operational Alert");
+        DialogUtils.stylePremiumDialog(dialog);
+
+        VBox content = new VBox(12);
+        content.setPrefWidth(460);
+        content.setPadding(new Insets(10));
+
+        Label header = new Label("Dispatch Instant Push Notification Across IWFC");
+        header.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-font-weight: 700;");
+
+        TextArea msgArea = new TextArea();
+        msgArea.setPromptText("Enter emergency broadcast, schedule update, or facility announcement...");
+        msgArea.setPrefRowCount(3);
+
+        Button sendBtn = new Button("Dispatch Broadcast Alert");
+        sendBtn.getStyleClass().add("dashboard-amber-btn");
+        sendBtn.setMaxWidth(Double.MAX_VALUE);
+        sendBtn.setOnAction(e -> {
+            String msg = msgArea.getText().trim();
+            if (msg.isEmpty()) {
+                showSimpleAlert("Incomplete", "Please write an announcement text.", Alert.AlertType.WARNING);
+                return;
+            }
+            facade.getNotificationService().notifyListeners("BROADCAST", "📢 SYSTEM BROADCAST: " + msg);
+            showSimpleAlert("Broadcast Dispatched", "Alert broadcasted to all members, instructors, and staff.", Alert.AlertType.INFORMATION);
+            dialog.close();
+        });
+
+        content.getChildren().addAll(header, msgArea, new Separator(), sendBtn);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+        dialog.showAndWait();
+    }
+
+    // =========================================================================
+    // 6. Operations & Dialogs (100% Functional)
     // =========================================================================
 
     private void handleCheckInBooking(Booking booking) {
@@ -1529,6 +1815,10 @@ public class DashboardView extends StackPane {
     // =========================================================================
 
     private void refreshData(boolean playFullAnimation) {
+        if (mainContainer == null) {
+            buildUI();
+            return;
+        }
         if (syncTimestampLabel != null) {
             syncTimestampLabel.setText("Synced: " + LocalDateTime.now().format(TIME_FMT));
         }

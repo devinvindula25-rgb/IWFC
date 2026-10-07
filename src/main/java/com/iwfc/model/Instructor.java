@@ -33,6 +33,7 @@ public class Instructor extends User {
     public List<String> getPermissions() {
         return List.of(
             "CREATE_SESSION",
+            "MANAGE_SESSIONS",
             "VIEW_EQUIPMENT",
             "LOG_EQUIPMENT_USAGE",
             "REPORT_MAINTENANCE",

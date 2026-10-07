@@ -9,13 +9,11 @@ com\iwfc\exception\InvalidBookingException.class
 com\iwfc\ui\ThemeManager.class
 com\iwfc\ui\AdminReportsView$16.class
 com\iwfc\ui\DashboardView$5.class
-com\iwfc\ui\MainLayout.class
 com\iwfc\ui\SessionView$10.class
 com\iwfc\ui\PaymentView.class
 com\iwfc\ui\FollowUpView.class
 com\iwfc\ui\AdminReportsView$4.class
 com\iwfc\ui\MeasurementAnalyticsView$1.class
-com\iwfc\ui\DashboardView$Timeframe.class
 com\iwfc\pattern\NotificationService.class
 com\iwfc\ui\DashboardView$13.class
 com\iwfc\ui\AdminReportsView$10.class
@@ -36,7 +34,6 @@ com\iwfc\ui\WorkoutPlansView.class
 com\iwfc\model\Enrollment.class
 com\iwfc\service\PaymentService.class
 com\iwfc\ui\AdminReportsView$15.class
-com\iwfc\ui\DashboardView$1.class
 com\iwfc\model\Booking.class
 com\iwfc\model\Convertibility.class
 com\iwfc\model\Notification.class
@@ -106,9 +103,7 @@ com\iwfc\model\RequestStatus.class
 com\iwfc\exception\DuplicateDataException.class
 com\iwfc\model\Role.class
 com\iwfc\pattern\payment\DigitalWalletPayment.class
-com\iwfc\ui\DashboardView$2.class
 com\iwfc\ui\SessionView$5.class
-com\iwfc\ui\MainLayout$NavItemData.class
 com\iwfc\model\SelfGuidedPlan.class
 com\iwfc\ui\AdminReportsView$21.class
 com\iwfc\pattern\payment\PaymentResult.class
@@ -152,12 +147,10 @@ com\iwfc\ui\components\DialogUtils.class
 com\iwfc\ui\MaintenanceView.class
 com\iwfc\model\InstructorChange.class
 com\iwfc\ui\components\UsageRing.class
-com\iwfc\ui\DashboardView$3.class
 com\iwfc\ui\SessionView$2.class
 com\iwfc\model\FollowUpType.class
 com\iwfc\ui\MainLayout$1.class
 com\iwfc\model\FollowUp.class
-com\iwfc\ui\DashboardView.class
 com\iwfc\ui\AdminReportsView$18.class
 com\iwfc\ui\AdminReportsView$23.class
 com\iwfc\ui\AdminReportsView$PTClientModel.class
