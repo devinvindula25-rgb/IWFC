@@ -1,0 +1,40 @@
+classDiagram
+    class Exception {
+        <<built-in>>
+    }
+    
+    class IWFCException {
+        <<abstract>>
+        -String errorCode
+        -LocalDateTime timestamp
+        +getErrorCode() String
+        +getTimestamp() LocalDateTime
+        +getUserFriendlyMessage()* String
+    }
+    
+    class InvalidBookingException {
+        +getUserFriendlyMessage() String
+    }
+    
+    class UnauthorizedAccessException {
+        +getUserFriendlyMessage() String
+    }
+    
+    class DuplicateDataException {
+        +getUserFriendlyMessage() String
+    }
+    
+    class PaymentFailedException {
+        +getUserFriendlyMessage() String
+    }
+    
+    class InsufficientFundsException {
+        +getUserFriendlyMessage() String
+    }
+
+    Exception <|-- IWFCException
+    IWFCException <|-- InvalidBookingException
+    IWFCException <|-- UnauthorizedAccessException
+    IWFCException <|-- DuplicateDataException
+    IWFCException <|-- PaymentFailedException
+    PaymentFailedException <|-- InsufficientFundsException

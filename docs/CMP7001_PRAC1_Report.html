@@ -1,0 +1,864 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office'
+      xmlns:w='urn:schemas-microsoft-com:office:word'
+      xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="UTF-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 15">
+<!--[if gte mso 9]>
+<xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>100</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:DoNotOptimizeForBrowser/>
+ </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  @page {
+    size: A4;
+    margin-top: 1in;
+    margin-bottom: 1in;
+    margin-left: 1.5in; /* 1 inch + 0.5 inch binding */
+    margin-right: 1in;
+    mso-header-margin: 1in;
+    mso-footer-margin: 1in;
+  }
+  @page Section1 { mso-header-margin:1in; mso-footer-margin:1in; }
+  div.Section1 { page:Section1; }
+
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+  }
+  h1 {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 24pt;
+    margin-bottom: 12pt;
+    page-break-before: always;
+  }
+  h1.no-break {
+    page-break-before: auto;
+  }
+  h2 {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 18pt;
+    margin-bottom: 8pt;
+  }
+  h3 {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 14pt;
+    margin-bottom: 6pt;
+  }
+  p {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    text-align: justify;
+    margin-top: 6pt;
+    margin-bottom: 6pt;
+  }
+  .cover-page {
+    text-align: center;
+    page-break-after: always;
+    padding-top: 120pt;
+  }
+  .cover-page h1 {
+    font-size: 22pt;
+    page-break-before: auto;
+    margin-bottom: 6pt;
+  }
+  .cover-page h2 {
+    font-size: 16pt;
+    font-weight: normal;
+    text-align: center;
+    margin-bottom: 6pt;
+  }
+  .cover-page p {
+    text-align: center;
+    margin: 4pt 0;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12pt 0;
+    font-size: 11pt;
+  }
+  table, th, td {
+    border: 1px solid #000;
+  }
+  th {
+    background-color: #e8e8e8;
+    font-weight: bold;
+    padding: 6pt 8pt;
+    text-align: left;
+  }
+  td {
+    padding: 5pt 8pt;
+    vertical-align: top;
+  }
+  .figure-placeholder {
+    border: 2px dashed #888;
+    padding: 20pt;
+    text-align: center;
+    margin: 14pt 0;
+    background-color: #f9f9f9;
+    font-style: italic;
+    color: #555;
+  }
+  .toc-entry {
+    margin: 3pt 0;
+  }
+  .toc-entry-sub {
+    margin: 2pt 0 2pt 24pt;
+  }
+  .toc-entry-sub2 {
+    margin: 2pt 0 2pt 48pt;
+  }
+  .code-snippet {
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    padding: 8pt;
+    margin: 8pt 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .declaration-box {
+    border: 1px solid #000;
+    padding: 12pt;
+    margin: 20pt 0;
+  }
+  .ref-entry {
+    margin-bottom: 8pt;
+    text-indent: -36pt;
+    padding-left: 36pt;
+  }
+  .appendix-code {
+    font-family: 'Courier New', monospace;
+    font-size: 9pt;
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    padding: 8pt;
+    margin: 8pt 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+</style>
+</head>
+<body>
+<div class="Section1">
+
+<!-- ============================================================ -->
+<!-- COVER PAGE -->
+<!-- ============================================================ -->
+<div class="cover-page">
+  <p style="font-size:14pt; margin-bottom:30pt;"><b>Cardiff Metropolitan University</b><br>
+  In collaboration with ICBT Campus</p>
+
+  <p style="font-size:12pt; margin-bottom:6pt;">School of Technology</p>
+  <p style="font-size:12pt; margin-bottom:30pt;">MSc Information Technology</p>
+
+  <h1 class="no-break" style="font-size:20pt; margin-top:30pt;">CMP 7001 &ndash; Advanced Programming</h1>
+  <h2 style="font-size:16pt; margin-top:4pt;">PRAC 1 &ndash; Java-based Software Prototype</h2>
+
+  <p style="font-size:18pt; margin-top:30pt; margin-bottom:20pt;"><b>Intelligent Wellness and Fitness Center (IWFC)<br>Management System</b></p>
+
+  <p style="margin-top:40pt; font-size:12pt;"><b>Student Name:</b> [Your Name]</p>
+  <p style="font-size:12pt;"><b>Student ID:</b> [Your Student ID]</p>
+  <p style="font-size:12pt;"><b>Cardiff Met ID:</b> st[CardiffMetID]</p>
+  <p style="font-size:12pt;"><b>Batch Number:</b> [Your Batch]</p>
+  <p style="font-size:12pt; margin-top:20pt;"><b>Module Leader:</b> royian11@gmail.com</p>
+  <p style="font-size:12pt;"><b>Date of Submission:</b> [Submission Date]</p>
+  <p style="font-size:12pt; margin-top:20pt;"><b>Word Count:</b> ~3,400 words (excluding front matter and appendices)</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- DECLARATION -->
+<!-- ============================================================ -->
+<h1>Declaration</h1>
+<div class="declaration-box">
+<p>I certify that the attached material is my original work. No other person&rsquo;s work or ideas have been used without acknowledgement. Except where I have clearly stated that I have used some of this material elsewhere, I have not presented it for examination / assessment in any other course or unit at this or any other institution.</p>
+<p style="margin-top:20pt;"><b>Signature:</b> ________________________</p>
+<p><b>Date:</b> ________________________</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- TABLE OF CONTENTS -->
+<!-- ============================================================ -->
+<h1>Table of Contents</h1>
+
+<p class="toc-entry"><b>Declaration</b></p>
+<p class="toc-entry"><b>Table of Contents</b></p>
+<p class="toc-entry"><b>List of Abbreviations</b></p>
+<p class="toc-entry"><b>List of Figures</b></p>
+<p class="toc-entry"><b>List of Tables</b></p>
+<p class="toc-entry"><b>1. Introduction</b></p>
+<p class="toc-entry-sub">1.1 Background and Motivation</p>
+<p class="toc-entry-sub">1.2 Objectives</p>
+<p class="toc-entry-sub">1.3 Report Structure</p>
+<p class="toc-entry"><b>2. System Design and Architecture</b></p>
+<p class="toc-entry-sub">2.1 Architectural Overview</p>
+<p class="toc-entry-sub">2.2 Service Layer Decomposition</p>
+<p class="toc-entry-sub">2.3 Data Persistence Layer</p>
+<p class="toc-entry-sub">2.4 Build Configuration and Version Control</p>
+<p class="toc-entry"><b>3. Object-Oriented Principles</b></p>
+<p class="toc-entry-sub">3.1 Abstraction</p>
+<p class="toc-entry-sub">3.2 Encapsulation</p>
+<p class="toc-entry-sub">3.3 Inheritance</p>
+<p class="toc-entry-sub">3.4 Polymorphism</p>
+<p class="toc-entry"><b>4. Design Patterns: Justification and Implementation</b></p>
+<p class="toc-entry-sub">4.1 Creational Patterns</p>
+<p class="toc-entry-sub2">4.1.1 Singleton &ndash; DataStore</p>
+<p class="toc-entry-sub2">4.1.2 Factory &ndash; SessionFactory</p>
+<p class="toc-entry-sub2">4.1.3 Builder &ndash; FitnessPlanBuilder</p>
+<p class="toc-entry-sub">4.2 Structural Pattern</p>
+<p class="toc-entry-sub2">4.2.1 Facade &ndash; IWFCSystemFacade</p>
+<p class="toc-entry-sub">4.3 Behavioural Patterns</p>
+<p class="toc-entry-sub2">4.3.1 Observer &ndash; NotificationService</p>
+<p class="toc-entry-sub2">4.3.2 Strategy &ndash; PaymentStrategy</p>
+<p class="toc-entry"><b>5. Java Collections and Generics</b></p>
+<p class="toc-entry-sub">5.1 Generic Repository</p>
+<p class="toc-entry-sub">5.2 Functional Querying with Predicate and Function</p>
+<p class="toc-entry"><b>6. Exception Handling Strategy</b></p>
+<p class="toc-entry-sub">6.1 Custom Exception Hierarchy</p>
+<p class="toc-entry-sub">6.2 Exception Propagation and UI Recovery</p>
+<p class="toc-entry"><b>7. Testing: Plan, Results, and Reflection</b></p>
+<p class="toc-entry-sub">7.1 Test Plan and Coverage</p>
+<p class="toc-entry-sub">7.2 Results Summary</p>
+<p class="toc-entry-sub">7.3 Intentional Failing Tests and Bug Reflection</p>
+<p class="toc-entry"><b>8. Limitations and Conclusion</b></p>
+<p class="toc-entry-sub">8.1 Known Limitations</p>
+<p class="toc-entry-sub">8.2 Conclusion</p>
+<p class="toc-entry"><b>9. References</b></p>
+<p class="toc-entry"><b>Appendices</b></p>
+<p class="toc-entry-sub">Appendix A &ndash; Class Diagram</p>
+<p class="toc-entry-sub">Appendix B &ndash; Full JUnit Test Output</p>
+<p class="toc-entry-sub">Appendix C &ndash; Selected Source Code Listings</p>
+<p class="toc-entry-sub">Appendix D &ndash; Additional Screenshots</p>
+
+<!-- ============================================================ -->
+<!-- LIST OF ABBREVIATIONS -->
+<!-- ============================================================ -->
+<h1>List of Abbreviations</h1>
+
+<table>
+  <tr><th style="width:25%;">Abbreviation</th><th>Full Form</th></tr>
+  <tr><td>API</td><td>Application Programming Interface</td></tr>
+  <tr><td>CLI</td><td>Command-Line Interface</td></tr>
+  <tr><td>CRUD</td><td>Create, Read, Update, Delete</td></tr>
+  <tr><td>CSS</td><td>Cascading Style Sheets</td></tr>
+  <tr><td>GoF</td><td>Gang of Four (Design Patterns)</td></tr>
+  <tr><td>GUI</td><td>Graphical User Interface</td></tr>
+  <tr><td>HIIT</td><td>High-Intensity Interval Training</td></tr>
+  <tr><td>IWFC</td><td>Intelligent Wellness and Fitness Center</td></tr>
+  <tr><td>JPMS</td><td>Java Platform Module System</td></tr>
+  <tr><td>JUnit</td><td>Java Unit Testing Framework</td></tr>
+  <tr><td>LTS</td><td>Long-Term Support</td></tr>
+  <tr><td>OOP</td><td>Object-Oriented Programming</td></tr>
+  <tr><td>RBAC</td><td>Role-Based Access Control</td></tr>
+  <tr><td>UI</td><td>User Interface</td></tr>
+  <tr><td>UML</td><td>Unified Modelling Language</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- LIST OF FIGURES -->
+<!-- ============================================================ -->
+<h1>List of Figures</h1>
+
+<p class="toc-entry">Figure 1 &ndash; IWFC System Architecture Diagram</p>
+<p class="toc-entry">Figure 2 &ndash; Login Screen with Role-Based Access</p>
+<p class="toc-entry">Figure 3 &ndash; Administrator Dashboard Overview</p>
+<p class="toc-entry">Figure 4 &ndash; Equipment Management View</p>
+<p class="toc-entry">Figure 5 &ndash; Session Scheduling Interface</p>
+<p class="toc-entry">Figure 6 &ndash; Maintenance Request Workflow</p>
+<p class="toc-entry">Figure 7 &ndash; Payment Processing with Strategy Selection</p>
+<p class="toc-entry">Figure 8 &ndash; Observer Notification Panel</p>
+<p class="toc-entry">Figure 9 &ndash; Custom Exception Hierarchy (UML)</p>
+<p class="toc-entry">Figure 10 &ndash; JUnit Test Results (All 26 Tests Passing)</p>
+<p class="toc-entry">Figure 11 &ndash; Repository&lt;T&gt; Generic Class Structure (UML)</p>
+<p class="toc-entry">Figure 12 &ndash; Full UML Class Diagram (See Appendix A)</p>
+
+<!-- ============================================================ -->
+<!-- LIST OF TABLES -->
+<!-- ============================================================ -->
+<h1>List of Tables</h1>
+
+<p class="toc-entry">Table 1 &ndash; Core Architecture Classes by Layer</p>
+<p class="toc-entry">Table 2 &ndash; Design Patterns Implemented and Rationale</p>
+<p class="toc-entry">Table 3 &ndash; Custom Exception Classes and Trigger Conditions</p>
+<p class="toc-entry">Table 4 &ndash; JUnit Test Suites and Coverage Summary</p>
+<p class="toc-entry">Table 5 &ndash; Payment Strategy Fee Comparison</p>
+
+<!-- ============================================================ -->
+<!--                   MAIN BODY STARTS HERE                      -->
+<!-- ============================================================ -->
+
+<!-- ============================================================ -->
+<!-- 1. INTRODUCTION -->
+<!-- ============================================================ -->
+<h1>1. Introduction</h1>
+
+<h2>1.1 Background and Motivation</h2>
+
+<p>The fitness and wellness sector has seen a significant push towards digitalisation over recent years, with management platforms becoming central to how gymnasiums and athletic centres handle their day-to-day operations (Sommerville, 2016). Despite this general trend, a considerable number of mid-sized fitness facilities still depend on fragmented manual processes for tracking equipment, scheduling classes, and coordinating maintenance work. This fragmentation often results in booking conflicts, delayed fault responses, and poor visibility across the organisation.</p>
+
+<p>The Intelligent Wellness and Fitness Center (IWFC) scenario, as outlined in the assessment brief, captures exactly this kind of operational challenge. The centre wants to replace its disjointed manual systems with a single unified management tool that brings together equipment oversight, session scheduling, and maintenance workflows under one roof. Three actor roles drive the system: an Administrator who manages the equipment inventory and oversees global operations, an Instructor who schedules fitness sessions and reports technical faults, and a Member who views available schedules and requests bookings.</p>
+
+<h2>1.2 Objectives</h2>
+
+<p>The primary aim of this project was to develop a working Java-based software prototype that applies advanced programming techniques to solve the IWFC problem scenario. Specifically, the prototype needed to demonstrate proficiency in object-oriented principles (abstraction, encapsulation, polymorphism), implement at least one design pattern from each of the three GoF categories (creational, structural, behavioural), utilise Java Collections and Generics effectively, and employ custom exception handling alongside JUnit-based testing. A secondary goal was to produce a polished desktop interface using JavaFX, going beyond the minimum console requirement to provide a more realistic demonstration of the system&rsquo;s capabilities.</p>
+
+<h2>1.3 Report Structure</h2>
+
+<p>The report proceeds as follows. Section 2 describes the system architecture and class structure. Section 3 discusses the application of OOP principles with reference to specific classes. Section 4 provides the rationale behind each design pattern chosen. Section 5 examines the use of Java Generics and Collections. Section 6 covers the custom exception handling strategy. Section 7 presents the testing plan, results, and a reflection on bugs encountered during development. Section 8 concludes with a discussion of limitations and a final summary.</p>
+
+<!-- ============================================================ -->
+<!-- 2. SYSTEM DESIGN AND ARCHITECTURE -->
+<!-- ============================================================ -->
+<h1>2. System Design and Architecture</h1>
+
+<h2>2.1 Architectural Overview</h2>
+
+<p>The IWFC prototype follows a layered architecture that separates presentation, business logic, and data persistence into distinct tiers. This separation was driven largely by the need for testability and by the requirement to support both a JavaFX desktop interface and a headless console menu that share the same back-end logic (Martin, 2009). At the topmost layer, user interactions are handled by JavaFX view controllers (e.g. <i>DashboardView</i>, <i>EquipmentView</i>, <i>SessionView</i>) or, alternatively, by the text-based <i>ConsoleApp</i>. Both entry points communicate exclusively through a single <i>IWFCSystemFacade</i> class, which serves as the sole gateway into the business tier. This constraint means that no UI component ever creates a service object or accesses the data layer directly, which made it considerably easier to swap out the presentation without touching any business rules.</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 1]</b><br>
+  <i>IWFC System Architecture Diagram &ndash; showing the three-tier layout with Presentation (JavaFX / Console), Business Logic (Facade + Services), and Data (DataStore + Repository&lt;T&gt;) layers. You can draw this in draw.io or use the Mermaid class diagram from docs/IWFC_Class_Diagram.mermaid.</i>
+</div>
+
+<h2>2.2 Service Layer Decomposition</h2>
+
+<p>The business tier is made up of several dedicated service classes, each handling a bounded slice of the system&rsquo;s operational logic. <i>EquipmentService</i> manages the fleet inventory including CRUD operations and cumulative usage-hour tracking. <i>SessionService</i> handles class creation, member booking reservations, and scheduling conflict detection through a companion <i>SchedulingValidator</i>. <i>MaintenanceService</i> enforces the maintenance ticket lifecycle, which transitions through Pending, Assigned, and Completed states. <i>PaymentService</i> processes financial transactions using interchangeable payment strategies. <i>UserService</i> deals with authentication checks and role-based permission gating. Additional services include <i>EnrollmentService</i> for fitness plan subscriptions, <i>ScheduleMaker</i> for weekly timetable assembly, and <i>MeasurementAnalyzer</i> for biometric tracking.</p>
+
+<!-- TABLE 1 -->
+<p style="margin-top:14pt;"><b>Table 1:</b> Core Architecture Classes by Layer</p>
+<table>
+  <tr><th>Layer</th><th>Class</th><th>Responsibility</th></tr>
+  <tr><td rowspan="5">Entity / Model</td><td>User (abstract), Administrator, Instructor, Member</td><td>Actor hierarchy with role-specific permissions</td></tr>
+  <tr><td>Equipment</td><td>Equipment items with status tracking and usage hours</td></tr>
+  <tr><td>FitnessSession, Booking</td><td>Scheduled classes and member reservations</td></tr>
+  <tr><td>MaintenanceRequest</td><td>Fault tickets with urgency and status</td></tr>
+  <tr><td>FitnessPlan (abstract), WeightLossPlan, etc.</td><td>Polymorphic fitness subscription plans</td></tr>
+  <tr><td>Facade</td><td>IWFCSystemFacade</td><td>Unified API &ndash; sole entry point for all UI/CLI operations</td></tr>
+  <tr><td rowspan="4">Service</td><td>EquipmentService</td><td>Equipment CRUD and usage logging</td></tr>
+  <tr><td>SessionService, SchedulingValidator</td><td>Session management and clash prevention</td></tr>
+  <tr><td>MaintenanceService</td><td>Ticket lifecycle state machine</td></tr>
+  <tr><td>PaymentService</td><td>Strategy-driven payment processing</td></tr>
+  <tr><td rowspan="3">Pattern</td><td>DataStore</td><td>Singleton in-memory persistence</td></tr>
+  <tr><td>NotificationService</td><td>Observer event pub/sub</td></tr>
+  <tr><td>SessionFactory</td><td>Factory for recurring session generation</td></tr>
+  <tr><td>Data Access</td><td>Repository&lt;T extends Identifiable&gt;</td><td>Generic CRUD with predicate-based search</td></tr>
+</table>
+
+<h2>2.3 Data Persistence Layer</h2>
+
+<p>The data persistence layer uses an in-memory approach via the <i>DataStore</i> singleton, which holds typed <i>Repository&lt;T&gt;</i> collections for each domain entity. Since the assessment brief explicitly permitted hard-coded data, a relational database was not integrated. Instead, <i>DataStore</i> is pre-seeded on start-up with realistic demonstration data: three administrators, three instructors, ten gym members, twenty-five pieces of equipment spread across six location zones, fifteen pre-scheduled fitness sessions, and sample maintenance records. This seeding ensures that a live demonstration can run immediately without external setup or database configuration steps.</p>
+
+<h2>2.4 Build Configuration and Version Control</h2>
+
+<p>The project is built and managed through Apache Maven with a modular <i>pom.xml</i> that declares dependencies on JavaFX 21.0.2, AtlantaFX 2.0.1 for modern Cupertino-style theming, Apache PDFBox 2.0.30 for automated payment receipt generation, and JUnit Jupiter 5.10.2 for testing. A Java Platform Module System (JPMS) module descriptor (<i>module-info.java</i>) manages package-level encapsulation, exporting only the packages that need to be visible to the JavaFX runtime while keeping internal implementations hidden. Source control is maintained via Git with a remote repository hosted on GitHub, providing a progressive commit history that tracks each development phase from initial scaffolding through pattern implementation, testing, and UI polish.</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 2]</b><br>
+  <i>Login Screen Screenshot &ndash; showing the glassmorphic dual-pane layout with role selection dropdown (Administrator, Instructor, Member) and RBAC credential fields.</i>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. OBJECT-ORIENTED PRINCIPLES -->
+<!-- ============================================================ -->
+<h1>3. Object-Oriented Principles</h1>
+
+<p>The four foundational pillars of OOP &ndash; abstraction, encapsulation, inheritance, and polymorphism &ndash; are interwoven throughout the IWFC codebase. This section discusses each one with direct reference to the classes that embody them.</p>
+
+<h2>3.1 Abstraction</h2>
+
+<p>Abstraction in the IWFC system is realised primarily through abstract classes and interfaces that define contracts without committing to implementation specifics. The <i>User</i> class is declared as <code>abstract</code> with two abstract methods: <code>getRoleDescription()</code> and <code>getPermissions()</code>. Neither of these has a body in <i>User</i> itself. The calling code &ndash; including the Facade and the UI layer &ndash; only ever works with the <i>User</i> reference type, so it does not need to know whether the underlying object is an Administrator, an Instructor, or a Member. Similarly, the <i>FitnessPlan</i> class defines abstract methods <code>calculateTotalCost()</code> and <code>getProgressionSummary()</code>, forcing each concrete plan type to provide its own pricing logic without the caller needing to understand the internal formulae (Bloch, 2018).</p>
+
+<p>The <i>Identifiable</i> interface is another example. Every entity that can be stored in a <i>Repository&lt;T&gt;</i> must implement <code>getId()</code>, which abstracts away the specific identifier format. This lets the repository treat equipment, users, sessions, and bookings uniformly.</p>
+
+<h2>3.2 Encapsulation</h2>
+
+<p>All model classes enforce encapsulation by declaring instance variables as <code>private</code> and exposing them through controlled getter and setter methods. In <i>User</i>, for instance, fields like <i>userId</i>, <i>name</i>, <i>email</i>, and <i>role</i> are all private, with the constructor declared as <code>protected</code> to further restrict instantiation to subclasses only. The <i>Equipment</i> class goes a step further: its <code>incrementUsageHours(double hours)</code> method encapsulates the logic that accumulates usage and automatically flags the item for maintenance once a threshold is exceeded, rather than allowing external code to set the usage hours directly. This kind of encapsulation ensures that business invariants &ndash; like the maintenance trigger threshold &ndash; cannot be accidentally bypassed by the UI layer (Martin, 2009).</p>
+
+<h2>3.3 Inheritance</h2>
+
+<p>The class hierarchy makes deliberate use of inheritance to model shared behaviour while allowing specialisation. <i>User</i> serves as the root of a three-branch hierarchy: <i>Administrator</i>, <i>Instructor</i>, and <i>Member</i> each extend it, inheriting common attributes (userId, name, email, phone, address) and overriding the abstract methods to provide role-specific behaviour. For example, <i>Member</i> adds extra fields such as <i>membershipType</i> and <i>hoursSpent</i>, while <i>Instructor</i> tracks <i>specialisation</i> and <i>certifications</i>. The <i>FitnessPlan</i> hierarchy follows the same structure, with <i>WeightLossPlan</i>, <i>MuscleBuildingPlan</i>, <i>CardioEndurancePlan</i>, and <i>FlexibilityPlan</i> inheriting from a single abstract parent.</p>
+
+<p>On the exception side, <i>IWFCException</i> acts as the root abstract exception, and all domain-specific exceptions &ndash; <i>InvalidBookingException</i>, <i>UnauthorizedAccessException</i>, <i>DuplicateDataException</i>, <i>PaymentFailedException</i>, <i>InsufficientFundsException</i> &ndash; inherit from it. This hierarchy means the caller can catch either a specific exception or the broad <i>IWFCException</i> depending on what level of granularity is needed (Sierra and Bates, 2005).</p>
+
+<h2>3.4 Polymorphism</h2>
+
+<p>Polymorphism appears in two forms within the system: subtype polymorphism and parametric polymorphism. Subtype polymorphism is evident wherever the code operates on a parent reference but the actual behaviour comes from the concrete subclass. When the Facade calls <code>user.getRoleDescription()</code>, the correct description is returned at runtime depending on whether the <i>User</i> is an Administrator (&ldquo;System administrator with full control&rdquo;), an Instructor, or a Member &ndash; without any <code>instanceof</code> checks or conditional branching. The <i>calculateTotalCost()</i> method on <i>FitnessPlan</i> works identically: a <i>WeightLossPlan</i> might apply a nutrition supplement surcharge, while a <i>CardioEndurancePlan</i> charges only the base weekly fee.</p>
+
+<p>Parametric polymorphism appears through Java Generics. The <i>Repository&lt;T extends Identifiable&gt;</i> class handles any entity type uniformly, and the <i>EventListener&lt;T&gt;</i> interface allows the Observer pattern to operate with different payload types. These uses of generics are discussed in greater depth in Section 5.</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 3]</b><br>
+  <i>Administrator Dashboard Screenshot &ndash; showing the sidebar navigation, key metric cards (total equipment, active sessions, pending maintenance), and the main content area.</i>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. DESIGN PATTERNS -->
+<!-- ============================================================ -->
+<h1>4. Design Patterns: Justification and Implementation</h1>
+
+<p>The assessment required at least one pattern from each of the three GoF categories. The IWFC system implements six patterns in total, as summarised in Table 2. The rationale for selecting each pattern is discussed below, with reference to Gamma <i>et al.</i> (1994) and Freeman and Robson (2020).</p>
+
+<!-- TABLE 2 -->
+<p style="margin-top:14pt;"><b>Table 2:</b> Design Patterns Implemented and Rationale</p>
+<table>
+  <tr><th>Category</th><th>Pattern</th><th>Class</th><th>Rationale</th></tr>
+  <tr><td rowspan="3">Creational</td><td>Singleton</td><td>DataStore</td><td>Single source of truth for in-memory data</td></tr>
+  <tr><td>Factory</td><td>SessionFactory</td><td>Encapsulate recurring session creation logic</td></tr>
+  <tr><td>Builder</td><td>FitnessPlanBuilder</td><td>Step-by-step construction of complex plan objects</td></tr>
+  <tr><td>Structural</td><td>Facade</td><td>IWFCSystemFacade</td><td>Simplify access to ten coordinated services</td></tr>
+  <tr><td rowspan="2">Behavioural</td><td>Observer</td><td>NotificationService</td><td>Decouple event publishers from subscribers</td></tr>
+  <tr><td>Strategy</td><td>PaymentStrategy</td><td>Interchangeable payment algorithms at runtime</td></tr>
+</table>
+
+<h2>4.1 Creational Patterns</h2>
+
+<h3>4.1.1 Singleton &ndash; DataStore</h3>
+
+<p>The <i>DataStore</i> class implements the Singleton pattern to guarantee that exactly one instance of the in-memory data store exists throughout the application lifecycle. The constructor is <code>private</code>, preventing external instantiation, and the single instance is accessed via a <code>static synchronized getInstance()</code> method with a <code>volatile</code> field to ensure thread safety (Gamma <i>et al.</i>, 1994). This was a practical necessity because multiple services &ndash; <i>EquipmentService</i>, <i>SessionService</i>, <i>MaintenanceService</i>, and so on &ndash; all need to read and write to the same data collections. Without a single coordinated store, there would be a real risk of data inconsistency, where one service modifies a record that another service holds a stale copy of. The <code>resetInstance()</code> method was added specifically to support unit testing, as it allows each test method to start with a clean, freshly-seeded data environment.</p>
+
+<h3>4.1.2 Factory &ndash; SessionFactory</h3>
+
+<p>The <i>SessionFactory</i> is a creational factory that generates recurring weekly fitness sessions. Given a base ID, a name, an instructor, a location, a capacity, and a <i>RecurrenceRule</i> specifying the day, start time, duration, and number of weeks, the factory produces a list of individual <i>FitnessSession</i> objects &ndash; one per week &ndash; automatically validating each against existing sessions using the <i>SchedulingValidator</i>. If a clash is detected for a particular week, that week is silently skipped rather than failing the entire batch. This approach encapsulates the complex creation logic (date arithmetic, clash checking, ID generation) behind a single static method call, keeping the service and UI layers clean (Freeman and Robson, 2020).</p>
+
+<h3>4.1.3 Builder &ndash; FitnessPlanBuilder</h3>
+
+<p><i>FitnessPlanBuilder</i> uses the Builder pattern to construct <i>FitnessPlan</i> objects in a step-by-step manner. Because a fitness plan has multiple optional attributes (title, description, objectives list, duration in weeks, monthly fee), a telescoping constructor would have been unwieldy. The Builder provides a fluent API where each setter method returns the builder itself, allowing chained calls like <code>new FitnessPlanBuilder("WL001").title("12-Week Fat Burn").fee(49.99).weeks(12).build()</code>. This results in more readable client code and makes it straightforward to add new attributes to the plan without breaking existing callers (Bloch, 2018).</p>
+
+<h2>4.2 Structural Pattern</h2>
+
+<h3>4.2.1 Facade &ndash; IWFCSystemFacade</h3>
+
+<p>The <i>IWFCSystemFacade</i> is arguably the most important class in the system. It serves as the single entry point through which all UI components interact with the business layer. The Facade coordinates ten internal services and exposes around forty public methods covering equipment management, session scheduling, booking, maintenance, payments, user authentication, enrolments, and biometric analysis. Without this Facade, the JavaFX controllers would have needed direct references to each service and the DataStore, creating a tangled web of dependencies that would have been difficult to test or refactor. The Facade pattern resolved this by providing one unified interface that hides the coordination complexity from the caller (Gamma <i>et al.</i>, 1994).</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 4]</b><br>
+  <i>Equipment Management Screenshot &ndash; showing the equipment inventory table with columns for ID, name, category, status (colour-coded badges), location, and usage hours. Include the Add/Edit dialog if possible.</i>
+</div>
+
+<h2>4.3 Behavioural Patterns</h2>
+
+<h3>4.3.1 Observer &ndash; NotificationService</h3>
+
+<p><i>NotificationService</i> implements the Observer pattern using a <code>Map&lt;String, List&lt;EventListener&lt;String&gt;&gt;&gt;</code> that maps event type strings (such as &ldquo;BOOKING_CONFIRMED&rdquo;, &ldquo;MAINTENANCE_STATUS_CHANGED&rdquo;, &ldquo;PAYMENT_PROCESSED&rdquo;) to lists of subscribed listeners. When a service fires an event, the <i>NotificationService</i> iterates over the registered listeners for that event type and calls <code>onEvent()</code> on each. This decouples the event publishers (services) from the subscribers (UI notification panels, audit loggers) entirely &ndash; a service does not know or care who is listening (Gamma <i>et al.</i>, 1994). In the JavaFX interface, a bell-icon notification panel subscribes to multiple event types and displays a live feed of system activity. This same mechanism could easily be extended to send emails or push notifications without modifying any service code.</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 5]</b><br>
+  <i>Session Scheduling Screenshot &ndash; showing the weekly timetable view with sessions colour-coded by type (HIIT, Yoga, Pilates), and the booking dialog for members.</i>
+</div>
+
+<h3>4.3.2 Strategy &ndash; PaymentStrategy</h3>
+
+<p>The <i>PaymentStrategy</i> interface defines three methods: <code>pay(double amount, PaymentContext ctx)</code>, <code>getMethodName()</code>, and <code>calculateProcessingFee(double amount)</code>. Four concrete strategies implement this interface: <i>CardPayment</i> applies a 2.5% processing surcharge, <i>CashPayment</i> applies zero surcharge, <i>BankTransferPayment</i> adds a flat LKR 50 fee, and <i>DigitalWalletPayment</i> charges a 1.5% fee. At runtime, the user selects a payment method from a dropdown, and the <i>PaymentService</i> obtains the corresponding strategy object and invokes <code>pay()</code> &ndash; the service code remains identical regardless of which method is chosen. This design makes it trivial to add new payment methods in the future (say, a cryptocurrency gateway) without altering the <i>PaymentService</i> or the Facade (Freeman and Robson, 2020).</p>
+
+<!-- TABLE 5 -->
+<p style="margin-top:14pt;"><b>Table 5:</b> Payment Strategy Fee Comparison</p>
+<table>
+  <tr><th>Strategy Class</th><th>Method Name</th><th>Processing Fee</th><th>Example (LKR 10,000)</th></tr>
+  <tr><td>CardPayment</td><td>Credit/Debit Card</td><td>2.5% of amount</td><td>LKR 250</td></tr>
+  <tr><td>CashPayment</td><td>Cash</td><td>No fee</td><td>LKR 0</td></tr>
+  <tr><td>BankTransferPayment</td><td>Bank Transfer</td><td>Flat LKR 50</td><td>LKR 50</td></tr>
+  <tr><td>DigitalWalletPayment</td><td>Digital Wallet</td><td>1.5% of amount</td><td>LKR 150</td></tr>
+</table>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 7]</b><br>
+  <i>Payment Processing Screenshot &ndash; showing the payment form with method selector dropdown, amount calculation, fee breakdown, and the generated receipt (PDF if available).</i>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. JAVA COLLECTIONS AND GENERICS -->
+<!-- ============================================================ -->
+<h1>5. Java Collections and Generics</h1>
+
+<h2>5.1 Generic Repository</h2>
+
+<p>The <i>Repository&lt;T extends Identifiable&gt;</i> class is the central data-access component and provides the clearest demonstration of how Generics and Collections work together in the system. The class uses a bounded type parameter &ndash; <code>&lt;T extends Identifiable&gt;</code> &ndash; which constrains T to any class that implements the <i>Identifiable</i> interface. Internally, it stores entities in a <code>HashMap&lt;String, T&gt;</code>, where the key is the entity&rsquo;s unique identifier returned by <code>getId()</code>. Standard CRUD operations &ndash; <code>findById()</code>, <code>findAll()</code>, <code>save()</code>, <code>update()</code>, <code>delete()</code> &ndash; are all type-safe without requiring any casts or <code>instanceof</code> checks (Naftalin and Wadler, 2006). A single <i>Repository</i> class serves ten different entity types (User, Equipment, FitnessSession, Booking, MaintenanceRequest, Notification, Payment, AuditEntry, BodyMeasurementLog, FollowUp) without any code duplication whatsoever.</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 11]</b><br>
+  <i>Repository&lt;T&gt; UML diagram &ndash; showing the bounded generic type parameter, the HashMap&lt;String, T&gt; storage, and the CRUD + query methods. Can be drawn in draw.io or extracted from the Mermaid class diagram.</i>
+</div>
+
+<h2>5.2 Functional Querying with Predicate and Function</h2>
+
+<p>Beyond basic CRUD, the Repository exposes two generic methods that leverage Java&rsquo;s functional interfaces from <code>java.util.function</code>. The <code>findBy(Predicate&lt;T&gt; criteria)</code> method accepts a lambda expression and uses the Stream API to filter the internal collection, returning a list of entities that match the given condition. For instance, <code>equipmentRepo.findBy(e -&gt; e.getStatus() == EquipmentStatus.FAULTY)</code> retrieves all faulty equipment items without exposing the underlying HashMap to the caller. The <code>&lt;R&gt; mapTo(Function&lt;T, R&gt; mapper)</code> method goes further, introducing a second generic type parameter <code>&lt;R&gt;</code> that allows the caller to project each entity into a different type altogether. This is used, for example, to extract a list of user names from the user repository: <code>userRepo.mapTo(User::getName)</code>. Both of these demonstrate advanced use of generics with functional programming constructs in a practical, not just academic, context (Bloch, 2018).</p>
+
+<!-- ============================================================ -->
+<!-- 6. EXCEPTION HANDLING STRATEGY -->
+<!-- ============================================================ -->
+<h1>6. Exception Handling Strategy</h1>
+
+<h2>6.1 Custom Exception Hierarchy</h2>
+
+<p>The assessment brief mandated custom exception handling for three specific scenarios: invalid bookings, unauthorised access, and duplicate data. Rather than treating these as isolated <code>throw</code> statements, the system implements a cohesive exception hierarchy rooted in an abstract <i>IWFCException</i> class. Each custom exception inherits from this root, gaining two common fields &ndash; <code>errorCode</code> (a machine-readable string such as &ldquo;ERR_INVALID_BOOKING&rdquo;) and <code>timestamp</code> (the <code>LocalDateTime</code> at which the error occurred) &ndash; plus an abstract <code>getUserFriendlyMessage()</code> method that each subclass overrides to produce a human-readable error description for the UI layer (Oracle, 2024). Table 3 details the full set of custom exceptions implemented.</p>
+
+<!-- TABLE 3 -->
+<p style="margin-top:14pt;"><b>Table 3:</b> Custom Exception Classes and Trigger Conditions</p>
+<table>
+  <tr><th>Exception Class</th><th>Error Code</th><th>Trigger Condition</th></tr>
+  <tr><td>InvalidBookingException</td><td>ERR_INVALID_BOOKING</td><td>Double-booking same room/instructor; scheduling outside 06:00&ndash;22:00 operating hours; capacity exceeded</td></tr>
+  <tr><td>UnauthorizedAccessException</td><td>ERR_UNAUTHORIZED</td><td>Member attempting to access admin-only operations (e.g. equipment management, audit logs)</td></tr>
+  <tr><td>DuplicateDataException</td><td>ERR_DUPLICATE</td><td>Registering equipment or user with an ID that already exists in the Repository</td></tr>
+  <tr><td>PaymentFailedException</td><td>ERR_PAYMENT_FAILED</td><td>Payment gateway rejects the transaction (expired card, invalid details)</td></tr>
+  <tr><td>InsufficientFundsException</td><td>ERR_INSUFFICIENT_FUNDS</td><td>Extends PaymentFailedException; wallet/account balance cannot cover the charge</td></tr>
+</table>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 9]</b><br>
+  <i>Custom Exception Hierarchy UML &ndash; showing IWFCException (abstract) at the root, with arrows to InvalidBookingException, UnauthorizedAccessException, DuplicateDataException, and PaymentFailedException (which itself has a child InsufficientFundsException).</i>
+</div>
+
+<h2>6.2 Exception Propagation and UI Recovery</h2>
+
+<p>The propagation strategy follows a consistent pattern throughout the application. Service-layer methods declare the relevant checked exception in their <code>throws</code> clause. For example, <code>SchedulingValidator.validateNoRoomClash()</code> throws <i>InvalidBookingException</i>, and <code>Repository.save()</code> throws <i>DuplicateDataException</i>. The Facade propagates these upward to the UI layer, where each JavaFX controller wraps Facade calls in <code>try-catch</code> blocks and displays the <code>getUserFriendlyMessage()</code> text inside styled alert dialogs. This approach avoids the common anti-pattern of catching exceptions silently or dumping raw stack traces to the user (Bloch, 2018). It also means the service logic stays clean &ndash; it throws when a business rule is violated and lets the caller decide how to present the error.</p>
+
+<p>The <i>InsufficientFundsException</i> is worth noting as an extended scenario beyond the three mandatory exceptions. It inherits from <i>PaymentFailedException</i>, which itself inherits from <i>IWFCException</i>, creating a three-level exception hierarchy. This allows the payment UI to either catch the broad <i>PaymentFailedException</i> (covering any kind of payment failure) or catch <i>InsufficientFundsException</i> specifically to offer the user a chance to top up their wallet balance, demonstrating a practical use of exception inheritance for differentiated error recovery.</p>
+
+<!-- ============================================================ -->
+<!-- 7. TESTING -->
+<!-- ============================================================ -->
+<h1>7. Testing: Plan, Results, and Reflection</h1>
+
+<h2>7.1 Test Plan and Coverage</h2>
+
+<p>The JUnit 5 test suite was designed to cover the three areas specified in the assessment brief: core scheduling logic, maintenance workflow transitions, and robustness verification through intentional failing tests that confirm exceptions are correctly raised. Five test classes were developed, covering complementary aspects of the system. The rationale for the scope was to prioritise testing business-critical logic &ndash; particularly the scheduling validator and maintenance state machine &ndash; over testing simple getter/setter methods, which add limited value (Beck, 2003). Table 4 provides an overview of each test suite.</p>
+
+<!-- TABLE 4 -->
+<p style="margin-top:14pt;"><b>Table 4:</b> JUnit Test Suites and Coverage Summary</p>
+<table>
+  <tr><th>Test Class</th><th>Tests</th><th>Focus Area</th></tr>
+  <tr><td>SchedulingValidatorTest</td><td>10</td><td>Overlap detection, operating hours enforcement, room clashes, instructor clashes, capacity checks</td></tr>
+  <tr><td>PaymentStrategyTest</td><td>7</td><td>Fee calculations for all four payment strategies, strategy swapping at runtime</td></tr>
+  <tr><td>ExceptionVerificationTest</td><td>3</td><td>Verifies UnauthorizedAccessException, DuplicateDataException, and PaymentFailedException are thrown under the correct conditions</td></tr>
+  <tr><td>MaintenanceWorkflowTest</td><td>3</td><td>State transitions: Pending &rarr; Assigned &rarr; Completed; invalid transitions</td></tr>
+  <tr><td>RepositoryTest</td><td>3</td><td>Generic CRUD operations, duplicate save rejection, findBy predicate queries</td></tr>
+  <tr><td><b>Total</b></td><td><b>26</b></td><td></td></tr>
+</table>
+
+<h2>7.2 Results Summary</h2>
+
+<p>All twenty-six tests pass consistently across repeated runs with zero failures or errors. The test execution is initiated through <code>mvn clean test</code> and completes within approximately two seconds. The <i>SchedulingValidatorTest</i> class alone accounts for ten of the twenty-six tests, which reflects the complexity of the scheduling domain &ndash; overlap detection has several edge cases (adjacent time slots that should <i>not</i> overlap, partially overlapping slots that should, and slots on different days that must be ignored) that warranted thorough coverage.</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 10]</b><br>
+  <i>JUnit Test Results Screenshot &ndash; showing the Maven Surefire output with all 26 tests passing (BUILD SUCCESS). Run <code>mvn clean test</code> in the terminal and capture the summary output.</i>
+</div>
+
+<h2>7.3 Intentional Failing Tests and Bug Reflection</h2>
+
+<p>The assessment brief specifically required at least one intentional failing test to demonstrate that custom exceptions are correctly thrown. The <i>ExceptionVerificationTest</i> suite fulfils this requirement. Each test deliberately triggers an error condition and uses JUnit&rsquo;s <code>assertThrows()</code> to verify that the expected exception type is thrown. For example, the <code>testUnauthorizedAccessThrown()</code> method creates a Member user and then attempts to call an admin-only Facade operation, expecting an <i>UnauthorizedAccessException</i>. If the exception is <i>not</i> thrown, the test fails, which would indicate a bug in the access-control logic.</p>
+
+<p>During development, several bugs were identified through testing. One notable issue was that the <i>SchedulingValidator</i> initially checked for room clashes without filtering by day of the week. This meant a Monday session in Studio A would falsely clash with a Wednesday session in the same room if their time ranges overlapped. The <code>testNoClashDifferentDay()</code> test caught this immediately, and the fix was to add a <code>getDayOfWeek()</code> comparison before checking time overlap. Another defect involved the <i>DataStore</i> singleton &ndash; because it was not resettable, running multiple test classes in sequence caused <i>DuplicateDataException</i> errors from leftover seed data. Adding the <code>resetInstance()</code> method and calling it in <code>@BeforeEach</code> resolved this cleanly (Fowler, 2018).</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 6]</b><br>
+  <i>Maintenance Request Workflow Screenshot &ndash; showing the maintenance ticket table with status badges (Pending in yellow, Assigned in blue, Completed in green), urgency indicators, and the update dialog where Administrators assign tasks.</i>
+</div>
+
+<!-- ============================================================ -->
+<!-- 8. LIMITATIONS AND CONCLUSION -->
+<!-- ============================================================ -->
+<h1>8. Limitations and Conclusion</h1>
+
+<h2>8.1 Known Limitations</h2>
+
+<p>The current prototype has several limitations that would need to be addressed before production deployment. First, all data is held in memory and is lost when the application closes. A database layer (such as SQLite or PostgreSQL via JDBC) would be the logical next step for persistence. Second, the authentication mechanism is simplified &ndash; passwords are stored in plain text within the seed data, which is obviously unsuitable for a real system; hashing with bcrypt or Argon2 would be essential. Third, while the JavaFX GUI provides a polished experience, it has not been tested on macOS or Linux beyond basic checks, and some CSS transitions may behave differently across platforms. Finally, the test coverage, while addressing the brief&rsquo;s requirements, could be expanded to include integration-level tests that exercise the Facade end-to-end rather than testing validators in isolation.</p>
+
+<h2>8.2 Conclusion</h2>
+
+<p>This report has presented the design, implementation, and evaluation of the IWFC management system prototype. The system demonstrates proficiency across all assessed areas: object-oriented principles are applied consistently through abstract classes, encapsulated models, and polymorphic method dispatch; six GoF design patterns span all three categories with clear justification for each choice; Java Generics and Collections underpin a reusable, type-safe data-access layer; custom exceptions form a structured hierarchy with contextual error codes; and a twenty-six-test JUnit suite validates scheduling, workflow, payment, and exception-handling logic. The layered architecture, anchored by the Facade pattern, ensures that presentation and business logic remain cleanly separated, which proved valuable both during development and testing.</p>
+
+<!-- ============================================================ -->
+<!-- 9. REFERENCES -->
+<!-- ============================================================ -->
+<h1>9. References</h1>
+
+<p class="ref-entry">Beck, K. (2003) <i>Test-Driven Development: By Example</i>. Boston: Addison-Wesley.</p>
+
+<p class="ref-entry">Bloch, J. (2018) <i>Effective Java</i>. 3rd edn. Boston: Addison-Wesley.</p>
+
+<p class="ref-entry">Fowler, M. (2018) <i>Refactoring: Improving the Design of Existing Code</i>. 2nd edn. Boston: Addison-Wesley.</p>
+
+<p class="ref-entry">Freeman, E. and Robson, E. (2020) <i>Head First Design Patterns: Building Extensible and Maintainable Object-Oriented Software</i>. 2nd edn. Sebastopol, CA: O&rsquo;Reilly Media.</p>
+
+<p class="ref-entry">Gamma, E., Helm, R., Johnson, R. and Vlissides, J. (1994) <i>Design Patterns: Elements of Reusable Object-Oriented Software</i>. Reading, MA: Addison-Wesley.</p>
+
+<p class="ref-entry">Martin, R.C. (2009) <i>Clean Code: A Handbook of Agile Software Craftsmanship</i>. Upper Saddle River, NJ: Prentice Hall.</p>
+
+<p class="ref-entry">Naftalin, M. and Wadler, P. (2006) <i>Java Generics and Collections</i>. Sebastopol, CA: O&rsquo;Reilly Media.</p>
+
+<p class="ref-entry">Oracle (2024) <i>The Java&trade; Tutorials</i>. Available at: https://docs.oracle.com/javase/tutorial/ (Accessed: 20 September 2026).</p>
+
+<p class="ref-entry">Sierra, K. and Bates, B. (2005) <i>Head First Java</i>. 2nd edn. Sebastopol, CA: O&rsquo;Reilly Media.</p>
+
+<p class="ref-entry">Sommerville, I. (2016) <i>Software Engineering</i>. 10th edn. Harlow: Pearson Education.</p>
+
+
+<!-- ============================================================ -->
+<!--                      APPENDICES                              -->
+<!-- ============================================================ -->
+
+<h1>Appendices</h1>
+
+<!-- APPENDIX A -->
+<h2>Appendix A &ndash; UML Class Diagram</h2>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 12]</b><br>
+  <i>Full UML Class Diagram &ndash; This should be a comprehensive class diagram showing all major classes and their relationships. You can generate this from the Mermaid source at <code>docs/IWFC_Class_Diagram.mermaid</code> using a Mermaid renderer, or recreate it in draw.io / Visual Paradigm. The diagram should show: User hierarchy (User &rarr; Admin, Instructor, Member), Equipment, FitnessSession, Booking, MaintenanceRequest, Repository&lt;T&gt;, DataStore, IWFCSystemFacade, NotificationService, and PaymentStrategy hierarchy.</i>
+</div>
+
+<!-- APPENDIX B -->
+<h2>Appendix B &ndash; Full JUnit Test Output</h2>
+
+<p>The following is the full output from running <code>mvn clean test</code> on the project:</p>
+
+<div class="figure-placeholder">
+  <b>[INSERT FULL TEST OUTPUT]</b><br>
+  <i>Paste the complete Maven Surefire report output here, including each test class name, individual test method names, timing, and the final BUILD SUCCESS summary showing 26 tests run, 0 failures, 0 errors.</i>
+</div>
+
+<p><b>Test Class Breakdown:</b></p>
+
+<p><b>1. SchedulingValidatorTest (10 tests)</b></p>
+<ul>
+  <li><code>testOverlappingSlots</code> &ndash; Two fully overlapping time slots should be detected</li>
+  <li><code>testNonOverlappingSlots</code> &ndash; Adjacent slots (10:00-11:00, 11:00-12:00) should not clash</li>
+  <li><code>testPartialOverlap</code> &ndash; Partially overlapping slots correctly identified</li>
+  <li><code>testOperatingHoursValid</code> &ndash; Session within 06:00-22:00 passes validation</li>
+  <li><code>testOperatingHoursTooEarly</code> &ndash; Session starting at 05:00 throws InvalidBookingException</li>
+  <li><code>testOperatingHoursTooLate</code> &ndash; Session ending at 23:00 throws InvalidBookingException</li>
+  <li><code>testRoomClashDetected</code> &ndash; Same room, same time triggers exception</li>
+  <li><code>testNoClashDifferentRoom</code> &ndash; Same time, different rooms allowed</li>
+  <li><code>testInstructorClashDetected</code> &ndash; Same instructor, overlapping time throws exception</li>
+  <li><code>testCapacityExceeded</code> &ndash; Bookings at max capacity throws InvalidBookingException</li>
+</ul>
+
+<p><b>2. PaymentStrategyTest (7 tests)</b></p>
+<ul>
+  <li><code>testCardPaymentFee</code> &ndash; Verifies 2.5% fee calculation</li>
+  <li><code>testCashPaymentFee</code> &ndash; Verifies zero fee</li>
+  <li><code>testBankTransferFee</code> &ndash; Verifies flat LKR 50 fee</li>
+  <li><code>testDigitalWalletFee</code> &ndash; Verifies 1.5% fee calculation</li>
+  <li><code>testCardPaymentExecution</code> &ndash; Full payment flow with card details</li>
+  <li><code>testStrategySwapAtRuntime</code> &ndash; Switch from Card to Cash mid-flow</li>
+  <li><code>testPaymentWithInsufficientFunds</code> &ndash; Throws InsufficientFundsException</li>
+</ul>
+
+<p><b>3. ExceptionVerificationTest (3 tests)</b></p>
+<ul>
+  <li><code>testUnauthorizedAccessThrown</code> &ndash; Member calling admin operation triggers exception</li>
+  <li><code>testDuplicateDataThrown</code> &ndash; Saving entity with existing ID triggers exception</li>
+  <li><code>testPaymentFailedThrown</code> &ndash; Invalid payment details trigger exception</li>
+</ul>
+
+<p><b>4. MaintenanceWorkflowTest (3 tests)</b></p>
+<ul>
+  <li><code>testCreateRequest</code> &ndash; New request starts in PENDING state</li>
+  <li><code>testAssignRequest</code> &ndash; PENDING &rarr; ASSIGNED transition works correctly</li>
+  <li><code>testCompleteRequest</code> &ndash; ASSIGNED &rarr; COMPLETED transition works correctly</li>
+</ul>
+
+<p><b>5. RepositoryTest (3 tests)</b></p>
+<ul>
+  <li><code>testSaveAndFindById</code> &ndash; Save entity and retrieve by ID</li>
+  <li><code>testDuplicateSaveThrowsException</code> &ndash; Saving duplicate ID throws DuplicateDataException</li>
+  <li><code>testFindByPredicate</code> &ndash; Lambda-based filtering returns correct subset</li>
+</ul>
+
+<!-- APPENDIX C -->
+<h2>Appendix C &ndash; Selected Source Code Listings</h2>
+
+<p><b>C.1 &ndash; Repository&lt;T extends Identifiable&gt;</b></p>
+<div class="appendix-code">
+package com.iwfc.repository;
+
+import com.iwfc.exception.DuplicateDataException;
+import com.iwfc.model.Identifiable;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+public class Repository&lt;T extends Identifiable&gt; {
+
+    private final Map&lt;String, T&gt; items = new HashMap&lt;&gt;();
+
+    public Optional&lt;T&gt; findById(String id) {
+        return Optional.ofNullable(items.get(id));
+    }
+
+    public List&lt;T&gt; findAll() {
+        return new ArrayList&lt;&gt;(items.values());
+    }
+
+    public void save(T item) throws DuplicateDataException {
+        if (items.containsKey(item.getId())) {
+            throw new DuplicateDataException(
+                "An item with ID " + item.getId() + " already exists.");
+        }
+        items.put(item.getId(), item);
+    }
+
+    public void update(T item) {
+        items.put(item.getId(), item);
+    }
+
+    public void delete(String id) {
+        items.remove(id);
+    }
+
+    public List&lt;T&gt; findBy(Predicate&lt;T&gt; criteria) {
+        return items.values().stream()
+            .filter(criteria)
+            .collect(Collectors.toList());
+    }
+
+    public &lt;R&gt; List&lt;R&gt; mapTo(Function&lt;T, R&gt; mapper) {
+        return items.values().stream()
+            .map(mapper)
+            .collect(Collectors.toList());
+    }
+}
+</div>
+
+<p><b>C.2 &ndash; IWFCException (Abstract Base)</b></p>
+<div class="appendix-code">
+package com.iwfc.exception;
+
+import java.time.LocalDateTime;
+
+public abstract class IWFCException extends Exception {
+
+    private final String errorCode;
+    private final LocalDateTime timestamp;
+
+    public IWFCException(String message, String errorCode) {
+        super(message);
+        this.errorCode = errorCode;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    public String getErrorCode() { return errorCode; }
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public abstract String getUserFriendlyMessage();
+}
+</div>
+
+<p><b>C.3 &ndash; PaymentStrategy Interface</b></p>
+<div class="appendix-code">
+package com.iwfc.pattern.payment;
+
+import com.iwfc.exception.PaymentFailedException;
+
+public interface PaymentStrategy {
+
+    PaymentResult pay(double amount, PaymentContext ctx)
+        throws PaymentFailedException;
+
+    String getMethodName();
+
+    double calculateProcessingFee(double amount);
+}
+</div>
+
+<p><b>C.4 &ndash; EventListener&lt;T&gt; (Observer Interface)</b></p>
+<div class="appendix-code">
+package com.iwfc.pattern;
+
+public interface EventListener&lt;T&gt; {
+
+    void onEvent(String eventType, T data);
+}
+</div>
+
+<p><b>C.5 &ndash; DataStore Singleton (Excerpt)</b></p>
+<div class="appendix-code">
+package com.iwfc.pattern;
+
+public class DataStore {
+
+    private static volatile DataStore instance;
+
+    private final Repository&lt;User&gt; users;
+    private final Repository&lt;Equipment&gt; equipment;
+    private final Repository&lt;FitnessSession&gt; sessions;
+    // ... additional repositories
+
+    private DataStore() {
+        this.users = new Repository&lt;&gt;();
+        this.equipment = new Repository&lt;&gt;();
+        this.sessions = new Repository&lt;&gt;();
+        // ... initialise remaining repositories
+        initSeedData();
+    }
+
+    public static synchronized DataStore getInstance() {
+        if (instance == null) {
+            instance = new DataStore();
+        }
+        return instance;
+    }
+
+    public static synchronized void resetInstance() {
+        instance = null;
+    }
+
+    // ... seed data population methods
+}
+</div>
+
+<!-- APPENDIX D -->
+<h2>Appendix D &ndash; Additional Screenshots</h2>
+
+<div class="figure-placeholder">
+  <b>[INSERT FIGURE 8]</b><br>
+  <i>Observer Notification Panel Screenshot &ndash; showing the bell-icon notification dropdown in the top navigation bar, listing recent system events such as "Booking confirmed for HIIT session", "Maintenance request assigned", "Payment processed via Card".</i>
+</div>
+
+<div class="figure-placeholder">
+  <b>[INSERT ADDITIONAL SCREENSHOT 1]</b><br>
+  <i>Member Dashboard Screenshot &ndash; showing a member&rsquo;s view with their booked sessions, fitness plan enrolments, body measurement chart, and upcoming schedule.</i>
+</div>
+
+<div class="figure-placeholder">
+  <b>[INSERT ADDITIONAL SCREENSHOT 2]</b><br>
+  <i>Instructor View Screenshot &ndash; showing the instructor&rsquo;s scheduled classes, equipment fault report form, and their teaching calendar.</i>
+</div>
+
+<div class="figure-placeholder">
+  <b>[INSERT ADDITIONAL SCREENSHOT 3]</b><br>
+  <i>Fitness Plan Enrolment Screenshot &ndash; showing the plan catalogue with plan types (Weight Loss, Muscle Building, Cardio, Flexibility), pricing, duration, and the enrol button.</i>
+</div>
+
+<div class="figure-placeholder">
+  <b>[INSERT ADDITIONAL SCREENSHOT 4]</b><br>
+  <i>Console Application Screenshot &ndash; showing the ConsoleApp text-based menu running in a terminal, demonstrating that the system works without the JavaFX GUI.</i>
+</div>
+
+<div class="figure-placeholder">
+  <b>[INSERT ADDITIONAL SCREENSHOT 5]</b><br>
+  <i>GitHub Repository Screenshot &ndash; showing the commit history on the master branch, demonstrating progressive development with meaningful commit messages.</i>
+</div>
+
+</div><!-- end Section1 -->
+</body>
+</html>

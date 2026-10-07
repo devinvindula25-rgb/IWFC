@@ -10,39 +10,106 @@
 
 /* --- Sidebar --- */
 .sidebar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
     -fx-border-width: 0 1 0 0;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 2, 0);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 10, 0, 2, 0);
 }
 
 .sidebar-logo {
-    -fx-text-fill: #1f2937;
+    -fx-text-fill: #0f172a;
+}
+
+.sidebar-logo-text {
+    -fx-text-fill: #0f172a;
+}
+
+.sidebar-subtitle {
+    -fx-text-fill: #2563eb;
+}
+
+.sidebar-header-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-text-fill: #64748b;
+}
+
+.sidebar-header-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.06);
+    -fx-text-fill: #0f172a;
+}
+
+.sidebar-search-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+}
+
+.sidebar-search-box:focused-within {
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.2), 6, 0, 0, 0);
+}
+
+.sidebar-search-field {
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+}
+
+.sidebar-search-icon {
+    -fx-text-fill: #94a3b8;
+}
+
+.sidebar-chip {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-text-fill: #64748b;
+}
+
+.sidebar-chip:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
+}
+
+.sidebar-section-title {
+    -fx-text-fill: #94a3b8;
 }
 
 .nav-button {
-    -fx-text-fill: #6b7280;
+    -fx-text-fill: #475569;
 }
 
 .nav-button:hover {
-    -fx-text-fill: #374151;
-    -fx-background-color: rgba(99, 102, 241, 0.08);
+    -fx-text-fill: #0f172a;
+    -fx-background-color: rgba(59, 130, 246, 0.08);
 }
 
 .nav-button-active {
-    -fx-text-fill: #4f46e5;
-    -fx-background-color: rgba(99, 102, 241, 0.12);
+    -fx-text-fill: #1d4ed8;
+    -fx-background-color: #eff6ff;
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 0 0 0 3px;
 }
 
-.sidebar-user-info {
-    -fx-background-color: #f9fafb;
-    -fx-border-color: #e5e7eb;
-    -fx-border-width: 1;
-    -fx-border-radius: 10;
+.nav-icon-chip {
+    -fx-background-color: #e2e8f0;
+}
+
+.nav-item-title {
+    -fx-text-fill: #475569;
+}
+
+.nav-item-title-active {
+    -fx-text-fill: #1d4ed8;
+}
+
+.sidebar-user-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 8, 0, 0, 2);
 }
 
 .sidebar-user-name {
-    -fx-text-fill: #1f2937;
+    -fx-text-fill: #0f172a;
 }
 
 .sidebar-user-role {
@@ -679,3 +746,110 @@
     -fx-prompt-text-fill: #94a3b8;
     -fx-border-color: rgba(0, 0, 0, 0.12);
 }
+
+/* --- Role Switcher Light Overrides --- */
+.role-switcher-dialog {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 35, 0, 0, 12);
+}
+
+.role-modal-title {
+    -fx-text-fill: #0f172a;
+}
+
+.role-modal-subtitle {
+    -fx-text-fill: #64748b;
+}
+
+.role-modal-close-btn {
+    -fx-text-fill: #64748b;
+}
+
+.role-modal-close-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.06);
+    -fx-text-fill: #0f172a;
+}
+
+.role-option-card {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-text-fill: #0f172a;
+}
+
+.role-option-card:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.15), 10, 0, 0, 2);
+}
+
+.role-option-card-current {
+    -fx-background-color: #f0fdf4;
+    -fx-border-color: #86efac;
+}
+
+.role-card-name {
+    -fx-text-fill: #0f172a;
+}
+
+.role-card-desc {
+    -fx-text-fill: #64748b;
+}
+
+.role-modal-dismiss-btn {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #475569;
+}
+
+.role-modal-dismiss-btn:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #0f172a;
+}
+
+/* --- Dashboard Executive Command Bar Light Overrides --- */
+.dashboard-header-title {
+    -fx-text-fill: #0f172a;
+}
+
+.dashboard-header-subtitle {
+    -fx-text-fill: #64748b;
+}
+
+.dashboard-timestamp {
+    -fx-text-fill: #94a3b8;
+}
+
+.timeframe-segment-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 8, 0, 0, 1);
+}
+
+.timeframe-btn {
+    -fx-text-fill: #64748b;
+}
+
+.timeframe-btn:hover {
+    -fx-text-fill: #0f172a;
+    -fx-background-color: #f1f5f9;
+}
+
+.timeframe-btn:selected {
+    -fx-background-color: linear-gradient(to right, #0284c7, #3b82f6);
+    -fx-text-fill: #ffffff;
+}
+
+.dashboard-action-btn {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #334155;
+}
+
+.dashboard-action-btn:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #94a3b8;
+    -fx-text-fill: #0f172a;
+}
+
+

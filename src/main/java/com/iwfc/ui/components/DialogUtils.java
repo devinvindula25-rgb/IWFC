@@ -25,10 +25,22 @@ public class DialogUtils {
             if (dialog.getDialogPane().getScene() != null) {
                 dialog.getDialogPane().getScene().setFill(Color.TRANSPARENT);
                 
-                // Center on parent window if possible
+                // Center on parent window if possible, or center on screen
                 Window window = dialog.getDialogPane().getScene().getWindow();
-                if (window != null && dialog.getOwner() != null) {
-                    window.centerOnScreen();
+                if (window != null) {
+                    if (dialog.getOwner() != null) {
+                        Window owner = dialog.getOwner();
+                        if (owner.getWidth() > 0 && owner.getHeight() > 0) {
+                            double x = owner.getX() + (owner.getWidth() - window.getWidth()) / 2.0;
+                            double y = owner.getY() + (owner.getHeight() - window.getHeight()) / 2.0;
+                            window.setX(Math.max(20, x));
+                            window.setY(Math.max(20, y));
+                        } else {
+                            window.centerOnScreen();
+                        }
+                    } else {
+                        window.centerOnScreen();
+                    }
                 }
             }
         });

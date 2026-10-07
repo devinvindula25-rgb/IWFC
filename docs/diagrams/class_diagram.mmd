@@ -1,0 +1,89 @@
+classDiagram
+    class Identifiable {
+        <<interface>>
+        +getId() String
+    }
+    
+    class User {
+        <<abstract>>
+        -String userId
+        -String name
+        -String email
+        -Role role
+        +getRoleDescription()* String
+        +getPermissions()* List~String~
+    }
+    Identifiable <|.. User
+    User <|-- Administrator
+    User <|-- Instructor
+    User <|-- Member
+
+    class Equipment {
+        -String id
+        -String name
+        -EquipmentStatus status
+        -double usageHours
+        +incrementUsageHours(double)
+    }
+    Identifiable <|.. Equipment
+
+    class FitnessSession {
+        -String sessionId
+        -Instructor instructor
+        -Location location
+        -int capacity
+        +bookSlot()
+    }
+    Identifiable <|.. FitnessSession
+
+    class MaintenanceRequest {
+        -String requestId
+        -Equipment equipment
+        -RequestStatus status
+        -Urgency urgency
+    }
+    Identifiable <|.. MaintenanceRequest
+
+    class Repository~T~ {
+        -Map~String, T~ items
+        +findById(String) Optional~T~
+        +findAll() List~T~
+        +save(T)
+        +update(T)
+        +delete(String)
+        +findBy(Predicate~T~) List~T~
+    }
+
+    class DataStore {
+        <<Singleton>>
+        -static DataStore instance
+        -Repository~User~ users
+        -Repository~Equipment~ equipment
+        -Repository~FitnessSession~ sessions
+        +getInstance() DataStore
+    }
+    DataStore *-- Repository
+
+    class IWFCSystemFacade {
+        <<Facade>>
+        -EquipmentService equipmentService
+        -SessionService sessionService
+        -MaintenanceService maintenanceService
+        -PaymentService paymentService
+        +bookSession(...)
+        +reportFault(...)
+        +processPayment(...)
+    }
+
+    class PaymentStrategy {
+        <<interface>>
+        +pay(double, PaymentContext) PaymentResult
+        +calculateProcessingFee(double) double
+    }
+    PaymentStrategy <|.. CardPayment
+    PaymentStrategy <|.. CashPayment
+    PaymentStrategy <|.. BankTransferPayment
+    PaymentStrategy <|.. DigitalWalletPayment
+
+    IWFCSystemFacade --> DataStore
+    IWFCSystemFacade --> PaymentStrategy

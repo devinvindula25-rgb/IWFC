@@ -1,0 +1,51 @@
+flowchart TD
+    %% Presentation Layer
+    subgraph Presentation ["Presentation Layer"]
+        UI["JavaFX Desktop UI\n(Dashboard, Views)"]
+        CLI["ConsoleApp\n(Headless Menu)"]
+    end
+
+    %% Business Logic Layer
+    subgraph BusinessLogic ["Business Logic Layer"]
+        Facade{"IWFCSystemFacade\n(Unified API)"}
+        
+        subgraph Services ["Service Classes"]
+            EqSvc["EquipmentService"]
+            SesSvc["SessionService"]
+            MntSvc["MaintenanceService"]
+            PaySvc["PaymentService"]
+            UsrSvc["UserService"]
+        end
+        
+        subgraph Patterns ["Design Patterns"]
+            Notif["NotificationService\n(Observer)"]
+            Fact["SessionFactory\n(Factory)"]
+            Build["FitnessPlanBuilder\n(Builder)"]
+            Strat["PaymentStrategy\n(Strategy)"]
+        end
+    end
+
+    %% Data Layer
+    subgraph DataLayer ["Data Persistence Layer"]
+        DS["DataStore\n(Singleton)"]
+        Repo["Repository<T extends Identifiable>\n(Generics & Collections)"]
+    end
+
+    %% Connections
+    UI --> Facade
+    CLI --> Facade
+    
+    Facade --> EqSvc
+    Facade --> SesSvc
+    Facade --> MntSvc
+    Facade --> PaySvc
+    Facade --> UsrSvc
+    
+    EqSvc --> Notif
+    SesSvc --> Notif
+    SesSvc --> Fact
+    MntSvc --> Notif
+    PaySvc --> Strat
+    
+    Services --> DS
+    DS --> Repo

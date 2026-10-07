@@ -1,0 +1,18 @@
+classDiagram
+    class Identifiable {
+        <<interface>>
+        +getId() String
+    }
+    
+    class Repository~T~ {
+        -Map~String, T~ items
+        +findById(id: String) Optional~T~
+        +findAll() List~T~
+        +save(item: T) void
+        +update(item: T) void
+        +delete(id: String) void
+        +findBy(criteria: Predicate~T~) List~T~
+        +mapTo(mapper: Function~T, R~) List~R~
+    }
+    
+    Identifiable <.. Repository : "T extends Identifiable"

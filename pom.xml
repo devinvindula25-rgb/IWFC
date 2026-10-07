@@ -96,6 +96,16 @@
                     <mainClass>com.iwfc/com.iwfc.IWFCApp</mainClass>
                 </configuration>
             </plugin>
+
+            <!-- Exec Maven Plugin for Headless / Console CLI -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <mainClass>com.iwfc.ConsoleApp</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

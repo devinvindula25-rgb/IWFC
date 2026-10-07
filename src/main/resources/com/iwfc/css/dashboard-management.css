@@ -35,6 +35,10 @@
 }
 
 /* --- Executive Command Bar --- */
+.dashboard-command-bar {
+    -fx-padding: 0 0 6px 0;
+}
+
 .dashboard-header-title {
     -fx-text-fill: #ffffff;
     -fx-font-size: 26px;
@@ -193,7 +197,7 @@
     -fx-text-fill: #94a3b8;
     -fx-font-size: 12px;
     -fx-font-weight: 700;
-    -fx-text-transform: uppercase;
+    -fx-padding: 2px 0 0 0;
 }
 
 .dashboard-kpi-icon-wrap {

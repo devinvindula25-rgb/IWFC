@@ -112,7 +112,7 @@ public class DashboardView extends StackPane {
         mainContainer.setFillWidth(true);
 
         // 1. Executive Command Bar
-        HBox commandBar = buildExecutiveCommandBar();
+        BorderPane commandBar = buildExecutiveCommandBar();
 
         // 2. High-Tech Glass KPI Cards Row
         kpiCardsRow = buildKpiCardsRow();
@@ -138,17 +138,21 @@ public class DashboardView extends StackPane {
     // 1. Executive Command Bar
     // =========================================================================
 
-    private HBox buildExecutiveCommandBar() {
+    private BorderPane buildExecutiveCommandBar() {
         User user = facade.getCurrentUser();
         String userName = user != null ? user.getName() : "Administrator";
         String userRole = user != null ? user.getRole().getDisplayName() : "System Admin";
 
-        // Title and Subtitle Block
+        // 1. Header Identity & Subtitle (Left)
         VBox headerText = new VBox(3);
+        headerText.setAlignment(Pos.CENTER_LEFT);
+        headerText.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
         Label titleLbl = new Label("Executive Telemetry & Operations");
         titleLbl.getStyleClass().add("dashboard-header-title");
+        titleLbl.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-        HBox subBox = new HBox(10);
+        HBox subBox = new HBox(8);
         subBox.setAlignment(Pos.CENTER_LEFT);
 
         Label welcomeLbl = new Label("Logged in as " + userName + " (" + userRole + ")");
@@ -163,13 +167,11 @@ public class DashboardView extends StackPane {
         subBox.getChildren().addAll(welcomeLbl, statusPill, syncTimestampLabel);
         headerText.getChildren().addAll(titleLbl, subBox);
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        // Period Timeframe Segmented Control
+        // 2. Period Timeframe Filter (Center / Middle)
         HBox timeframeBox = new HBox(4);
         timeframeBox.setAlignment(Pos.CENTER);
         timeframeBox.getStyleClass().add("timeframe-segment-box");
+        timeframeBox.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         ToggleGroup tfGroup = new ToggleGroup();
         for (Timeframe tf : Timeframe.values()) {
@@ -188,16 +190,10 @@ public class DashboardView extends StackPane {
             timeframeBox.getChildren().add(btn);
         }
 
-        // Action Hub Buttons
-        HBox actionHub = new HBox(10);
+        // 3. Action Hub Buttons (Right Corner)
+        HBox actionHub = new HBox(8);
         actionHub.setAlignment(Pos.CENTER_RIGHT);
-
-        if (user != null && user.getRole() == Role.MEMBER) {
-            Button dailyLogBtn = new Button("📝 Daily Log");
-            dailyLogBtn.getStyleClass().add("dashboard-action-btn");
-            dailyLogBtn.setOnAction(e -> showDailyLogDialog());
-            actionHub.getChildren().add(dailyLogBtn);
-        }
+        actionHub.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         Button quickBookingBtn = new Button("+ Quick Booking");
         quickBookingBtn.getStyleClass().add("dashboard-primary-btn");
@@ -215,10 +211,31 @@ public class DashboardView extends StackPane {
         liveSyncBtn.getStyleClass().add("dashboard-action-btn");
         liveSyncBtn.setOnAction(e -> refreshData(true));
 
-        actionHub.getChildren().addAll(quickBookingBtn, processPaymentBtn, reportIncidentBtn, liveSyncBtn);
+        actionHub.getChildren().addAll(quickBookingBtn, processPaymentBtn, reportIncidentBtn);
 
-        HBox commandBar = new HBox(18, headerText, spacer, timeframeBox, actionHub);
-        commandBar.setAlignment(Pos.CENTER_LEFT);
+        if (user != null && user.getRole() == Role.MEMBER) {
+            Button dailyLogBtn = new Button("📝 Daily Log");
+            dailyLogBtn.getStyleClass().add("dashboard-action-btn");
+            dailyLogBtn.setOnAction(e -> showDailyLogDialog());
+            actionHub.getChildren().add(dailyLogBtn);
+        }
+
+        actionHub.getChildren().add(liveSyncBtn);
+
+        // Single Master Command Bar (Left: Title | Center: Filter | Right: Actions)
+        BorderPane commandBar = new BorderPane();
+        commandBar.getStyleClass().add("dashboard-command-bar");
+
+        commandBar.setLeft(headerText);
+        BorderPane.setAlignment(headerText, Pos.CENTER_LEFT);
+
+        commandBar.setCenter(timeframeBox);
+        BorderPane.setAlignment(timeframeBox, Pos.CENTER);
+        BorderPane.setMargin(timeframeBox, new Insets(0, 16, 0, 16));
+
+        commandBar.setRight(actionHub);
+        BorderPane.setAlignment(actionHub, Pos.CENTER_RIGHT);
+
         return commandBar;
     }
 
@@ -311,13 +328,13 @@ public class DashboardView extends StackPane {
     }
 
     private VBox createKpiCard(String title, String mainValue, String icon, String subtext, String trendBadge, boolean isPositive, Consumer<javafx.scene.input.MouseEvent> onClick) {
-        VBox card = new VBox(10);
+        VBox card = new VBox(8);
         card.getStyleClass().add("dashboard-kpi-card");
         if (onClick != null) {
             card.setOnMouseClicked(onClick::accept);
         }
 
-        // Header
+        // Header: Icon on left, Trend pill on right
         HBox top = new HBox(8);
         top.setAlignment(Pos.CENTER_LEFT);
         top.getStyleClass().add("dashboard-kpi-header");
@@ -325,16 +342,17 @@ public class DashboardView extends StackPane {
         Label iconLbl = new Label(icon);
         iconLbl.getStyleClass().add("dashboard-kpi-icon-wrap");
 
-        Label titleLbl = new Label(title);
-        titleLbl.getStyleClass().add("dashboard-kpi-title");
-
         Region sp = new Region();
         HBox.setHgrow(sp, Priority.ALWAYS);
 
         Label trend = new Label(trendBadge);
         trend.getStyleClass().add(isPositive ? "dashboard-trend-pill-up" : "dashboard-trend-pill-neutral");
 
-        top.getChildren().addAll(iconLbl, titleLbl, sp, trend);
+        top.getChildren().addAll(iconLbl, sp, trend);
+
+        // Title: Full width of the card so labels never truncate to ellipses
+        Label titleLbl = new Label(title);
+        titleLbl.getStyleClass().add("dashboard-kpi-title");
 
         // Value
         Label valueLbl = new Label(mainValue);
@@ -344,7 +362,7 @@ public class DashboardView extends StackPane {
         Label subLbl = new Label(subtext);
         subLbl.getStyleClass().add("dashboard-kpi-subtext");
 
-        card.getChildren().addAll(top, valueLbl, subLbl);
+        card.getChildren().addAll(top, titleLbl, valueLbl, subLbl);
         return card;
     }
 

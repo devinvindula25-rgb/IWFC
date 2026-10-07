@@ -1,7 +1,7 @@
 # 🗂️ IWFC Project File Categories & Complete Inventory
 
 > **Intelligent Wellness and Fitness Center (IWFC)**  
-> **Total Source Files:** 94 Java Files • 13 CSS Files • 5 Test Suites (26 Unit Tests) • 4 Image Assets  
+> **Total Source Files:** 95 Java Files • 14 CSS Files • 5 Test Suites (27 Unit Tests) • 4 Image Assets  
 > **Runtime Environment:** Java 21 (LTS) • JavaFX 21.0.2 • AtlantaFX 2.0.1 • Apache PDFBox 2.0.30 • Maven  
 
 ---
@@ -10,8 +10,8 @@
 
 | # | Category | Package / Directory | File Count | Primary Responsibility |
 |---|---|---|:---:|---|
-| **1** | **Application Core & Module** | `com.iwfc`, root `src/main/java` | **2** | Bootstrap, JavaFX lifecycle, JPMS module descriptor |
-| **2** | **Facade Architecture** | `com.iwfc.facade` | **1** | Subsystem orchestration, single entry point for UI |
+| **1** | **Application Core & Entry Points** | `com.iwfc`, root `src/main/java` | **3** | Bootstrap, JavaFX GUI lifecycle, Headless CLI Console, JPMS module descriptor |
+| **2** | **Facade Architecture** | `com.iwfc.facade` | **1** | Subsystem orchestration, single entry point for UI & CLI |
 | **3** | **Domain Models & Entities** | `com.iwfc.model` | **35** | Core business entities, enums, value objects, and states |
 | **4** | **Business Services Layer** | `com.iwfc.service` | **10** | Business rules, scheduling validation, analytics, payment gateway |
 | **5** | **Design Pattern Implementations** | `com.iwfc.pattern` | **14** | GoF patterns: Strategy, Observer, Singleton, Factory, Builder |
@@ -20,9 +20,9 @@
 | **8** | **Utilities & Document Generation** | `com.iwfc.util` | **1** | Apache PDFBox automated A4 billing & receipt generator |
 | **9** | **User Interface (Views & Controllers)** | `com.iwfc.ui` | **18** | JavaFX glassmorphic screens, dashboards, and modal controllers |
 | **10**| **Reusable UI Components** | `com.iwfc.ui.components` | **5** | Custom widgets: Toast notifications, badges, rings, dialog styler |
-| **11**| **Design System & CSS Stylesheets** | `src/main/resources/com/iwfc/css` | **13** | Design tokens, Cupertino dark/light overrides, module stylesheets |
+| **11**| **Design System & CSS Stylesheets** | `src/main/resources/com/iwfc/css` | **14** | Design tokens, Cupertino dark/light overrides, module stylesheets |
 | **12**| **Static Media Assets** | `src/main/resources/com/iwfc/images` | **4+** | Anatomy charts, backgrounds, avatars, and exercise illustrations |
-| **13**| **Automated Unit Test Suite** | `src/test/java/com/iwfc` | **5** | JUnit 5 automated regression and verification suite (26 tests) |
+| **13**| **Automated Unit Test Suite** | `src/test/java/com/iwfc` | **5** | JUnit 5 automated regression and verification suite (27 tests) |
 | **14**| **Build, Config & Output** | Project Root, `bills/` | **3** | `pom.xml`, `README.md`, generated PDF receipt storage |
 
 ---
@@ -32,7 +32,8 @@
 | File Path | Type | Description |
 |---|---|---|
 | `src/main/java/module-info.java` | Java Module | JPMS module declaration (`com.iwfc`), exports packages, requires JavaFX, AtlantaFX, and PDFBox. |
-| `src/main/java/com/iwfc/IWFCApp.java` | Application | JavaFX entry point; sets initial window parameters, scene size (1200×750), and transitions between Login and MainLayout. |
+| `src/main/java/com/iwfc/IWFCApp.java` | JavaFX Application | JavaFX entry point; sets initial window parameters, scene size (1200×750), and transitions between Login and MainLayout. |
+| `src/main/java/com/iwfc/ConsoleApp.java` | Console CLI Application | Interactive headless terminal menu application driven directly by `IWFCSystemFacade`; ideal for headless, server, or terminal grading environments. |
 
 ---
 
@@ -249,6 +250,7 @@
 | `member-reports.css` | Reports | Performance graphs, measurement cards, BMI gauge widgets, progress delta pills. |
 | `workout-plans.css` | Regimens | Plan card grid, tier badges, pricing tags, routine bullet items. |
 | `session-schedule.css` | Sessions | Timetable slots, day-of-week headers, capacity indicators. |
+| `sidebar-navigation.css` | Side Menu & Nav | Modern glassmorphic sidebar tokens, category filter chips, search input, quick action command palette, compact rail styles. |
 
 ---
 
@@ -269,12 +271,12 @@
 
 | Test Suite File | Test Target | Test Count | Key Scenarios Tested |
 |---|---|:---:|---|
-| `exception/ExceptionVerificationTest.java` | Exception Hierarchy | **3** | Validates exception inheritance, status codes, and friendly message generation. |
+| `exception/ExceptionVerificationTest.java` | Exception Hierarchy | **4** | Validates `UnauthorizedAccessException`, `DuplicateDataException`, `PaymentFailedException`/`InsufficientFundsException`, and `InvalidBookingException`. |
 | `pattern/RepositoryTest.java` | `Repository<T>` | **3** | Verifies entity save, findById, findAll, update, and delete semantics. |
 | `pattern/payment/PaymentStrategyTest.java`| Strategy Pattern | **7** | Tests Card, Wallet, Bank Transfer, and Cash processing strategies with mock gateway. |
 | `service/MaintenanceWorkflowTest.java` | `MaintenanceService` | **3** | Verifies work order reporting, urgency triage, status transitions, and equipment flag. |
 | `service/SchedulingValidatorTest.java` | `SchedulingValidator` | **10** | Tests double-booking prevention, room capacity checks, trainer overlap, and valid hours. |
-| **Total Automated Tests** | — | **26** | **100% Passing (`mvn test`)** |
+| **Total Automated Tests** | — | **27** | **100% Passing (`mvn test`)** |
 
 ---
 

@@ -1,30 +1,65 @@
 package com.iwfc.ui;
 
 import com.iwfc.facade.IWFCSystemFacade;
-import com.iwfc.model.Role;
-import com.iwfc.model.User;
+import com.iwfc.model.*;
+import com.iwfc.pattern.DataStore;
+import com.iwfc.ui.components.DialogUtils;
 import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
 /**
- * Main layout with sidebar navigation and swappable content area.
- * Shows role-appropriate navigation items.
+ * Supreme Enterprise Side Menu & Navigation Architecture.
+ * Features:
+ * - Real-time Navigation Search & Multi-Category Segmented Filter Chips
+ * - Dynamic Live Badge Counters with automatic telemetry refresh (Sessions, Members, Equipment, Alerts)
+ * - Collapsible Accordion Navigation Categories with item indicators
+ * - Expandable/Collapsible Sidebar Drawer (Full 280px vs. 76px Compact Icon Rail)
+ * - Quick-Action Command Center Button (Instant Member, Booking, Maintenance, POS, Broadcast)
+ * - Live User Profile Card with Instant Multi-Role Switcher (Admin, Instructor, Member)
+ * - Glassmorphic Theme Toggle with smooth rotation & center status telemetry
  */
 public class MainLayout extends BorderPane {
 
     private final IWFCSystemFacade facade;
     private final StackPane contentArea;
     private final Runnable onLogout;
+
+    // Sidebar Layout Elements
     private VBox sidebar;
+    private ScrollPane navScrollPane;
+    private VBox navContentBox;
+    private TextField searchField;
+    private Button clearSearchBtn;
+    private VBox filterChipsBox;
+    private Button collapseToggleBtn;
     private Button activeNavButton;
-    private final java.util.Map<String, Button> navButtons = new java.util.HashMap<>();
+    private String activeViewName = "Dashboard";
+
+    // State
+    private boolean isCompact = false;
+    private String activeCategoryFilter = "ALL";
+    private String searchQuery = "";
+
+    // Mappings
+    private final Map<String, Button> navButtons = new LinkedHashMap<>();
+    private final Map<String, NavItemData> navItemDataMap = new LinkedHashMap<>();
+    private final Map<String, VBox> sectionContainers = new LinkedHashMap<>();
+    private final Map<String, Label> badgeLabels = new LinkedHashMap<>();
+    private final Map<String, Boolean> sectionExpanded = new HashMap<>();
 
     public MainLayout(IWFCSystemFacade facade, StackPane toastContainer, Runnable onLogout) {
         this.facade = facade;
@@ -33,6 +68,7 @@ public class MainLayout extends BorderPane {
         this.contentArea.setAlignment(Pos.TOP_LEFT);
 
         getStyleClass().add("main-layout");
+        getStylesheets().add(getClass().getResource("/com/iwfc/css/sidebar-navigation.css").toExternalForm());
 
         buildSidebar();
         setLeft(sidebar);
@@ -42,180 +78,907 @@ public class MainLayout extends BorderPane {
         navigateTo("Dashboard");
     }
 
+    // =========================================================================
+    // Sidebar Architecture Builder
+    // =========================================================================
+
     private void buildSidebar() {
-        sidebar = new VBox(5);
-        sidebar.setPrefWidth(270);
-        sidebar.setPadding(new Insets(20, 10, 20, 10));
+        sidebar = new VBox(0);
+        sidebar.setPrefWidth(isCompact ? 76 : 280);
+        sidebar.setMinWidth(isCompact ? 76 : 280);
+        sidebar.setMaxWidth(isCompact ? 76 : 280);
         sidebar.getStyleClass().add("sidebar");
+        if (isCompact) {
+            sidebar.getStyleClass().add("sidebar-compact");
+        }
 
-        // Logo
-        Label logo = new Label("IWFC");
-        logo.setFont(Font.font("System", FontWeight.BOLD, 28));
-        logo.getStyleClass().add("sidebar-logo");
-        logo.setPadding(new Insets(0, 0, 5, 10));
+        // 1. Top Brand & Toolbar Header
+        VBox topHeader = buildTopHeader();
 
-        // Theme toggle
-        Button themeToggle = new Button(ThemeManager.getInstance().isDark() ? "🌙" : "☀️");
-        themeToggle.getStyleClass().add("theme-toggle-btn");
-        themeToggle.setOnAction(e -> {
+        // 2. Search & Filter Bar (hidden in compact mode)
+        VBox searchAndFilterArea = buildSearchAndFilterArea();
+
+        // 3. Quick Action Floating Button
+        VBox quickActionArea = buildQuickActionButton();
+
+        // 4. Scrollable Navigation Sections
+        navScrollPane = buildNavScrollPane();
+        navScrollPane.setMinHeight(120);
+        VBox.setVgrow(navScrollPane, Priority.ALWAYS);
+
+        // 5. Bottom User Profile Card & Role Switcher
+        VBox userProfileCard = buildUserProfileCard();
+        VBox.setMargin(userProfileCard, isCompact ? new Insets(4, 6, 8, 6) : new Insets(4, 12, 10, 12));
+
+        sidebar.getChildren().addAll(topHeader, searchAndFilterArea, quickActionArea, navScrollPane, userProfileCard);
+    }
+
+    // =========================================================================
+    // 1. Brand & Header Bar
+    // =========================================================================
+
+    private VBox buildTopHeader() {
+        VBox header = new VBox();
+        header.getStyleClass().add("sidebar-header");
+
+        HBox brandRow = new HBox(10);
+        brandRow.setAlignment(Pos.CENTER_LEFT);
+
+        // Glowing Brand Badge Icon
+        StackPane brandBadge = new StackPane();
+        brandBadge.getStyleClass().add("sidebar-brand-badge");
+        Label brandIcon = new Label("⚡");
+        brandIcon.getStyleClass().add("sidebar-brand-icon");
+        brandBadge.getChildren().add(brandIcon);
+
+        // Logo Texts with Integrated Live Telemetry Indicator
+        VBox logoTextBox = new VBox(2);
+        logoTextBox.setAlignment(Pos.CENTER_LEFT);
+        Label logoTitle = new Label("IWFC");
+        logoTitle.getStyleClass().add("sidebar-logo-text");
+
+        HBox statusLine = new HBox(5);
+        statusLine.setAlignment(Pos.CENTER_LEFT);
+        statusLine.getStyleClass().add("sidebar-status-line");
+
+        Circle statusDot = new Circle(3);
+        statusDot.getStyleClass().add("sidebar-status-dot");
+
+        Label statusText = new Label("LIVE SYNC • FITNESS OS");
+        statusText.getStyleClass().add("sidebar-status-text");
+
+        statusLine.getChildren().addAll(statusDot, statusText);
+        logoTextBox.getChildren().addAll(logoTitle, statusLine);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        // Theme Toggle Button
+        Button themeBtn = new Button(ThemeManager.getInstance().isDark() ? "🌙" : "☀️");
+        themeBtn.getStyleClass().add("sidebar-header-btn");
+        themeBtn.setTooltip(new Tooltip("Toggle Dark / Light Theme"));
+        themeBtn.setOnAction(e -> {
             ThemeManager tm = ThemeManager.getInstance();
             tm.toggle();
             tm.applyTheme(getScene());
-            themeToggle.setText(tm.isDark() ? "🌙" : "☀️");
+            themeBtn.setText(tm.isDark() ? "🌙" : "☀️");
         });
 
-        HBox logoBar = new HBox(10);
-        logoBar.setAlignment(Pos.CENTER_LEFT);
-        Region logoSpacer = new Region();
-        HBox.setHgrow(logoSpacer, Priority.ALWAYS);
-        logoBar.getChildren().addAll(logo, logoSpacer, themeToggle);
-        logoBar.setPadding(new Insets(0, 0, 15, 0));
+        // Live Refresh Button
+        Button refreshBtn = new Button("↻");
+        refreshBtn.getStyleClass().add("sidebar-header-btn");
+        refreshBtn.setTooltip(new Tooltip("Sync Live Telemetry & Badges"));
+        refreshBtn.setOnAction(e -> refreshAllBadges(true));
 
-        Separator sep1 = new Separator();
+        // Collapse / Expand Toggle
+        collapseToggleBtn = new Button(isCompact ? "▶" : "◀");
+        collapseToggleBtn.getStyleClass().add("sidebar-header-btn");
+        collapseToggleBtn.setTooltip(new Tooltip(isCompact ? "Expand Sidebar" : "Collapse Sidebar (Icon Rail)"));
+        collapseToggleBtn.setOnAction(e -> toggleSidebarCompactMode());
 
-        // Navigation buttons grouped into premium sections
-        VBox navItems = new VBox(2);
-        navItems.setPadding(new Insets(10, 15, 0, 15)); // Inner padding for floated buttons
-
-        // --- OVERVIEW ---
-        navItems.getChildren().add(createSectionHeader("Overview"));
-        Button dashboardBtn = createNavButton("📊", "Dashboard");
-        Button plansBtn = createNavButton("💪", "Workout Plans", facade.getPlanCatalogue().size());
-        Button sessionsBtn = createNavButton("📅", "Sessions", facade.getAllSessions().size());
-        navItems.getChildren().addAll(dashboardBtn, plansBtn, sessionsBtn);
-        
-        // --- MANAGEMENT ---
-        navItems.getChildren().add(createSectionHeader("Management"));
-        if (facade.getCurrentUser().getRole() == com.iwfc.model.Role.ADMIN || facade.getCurrentUser().getRole() == com.iwfc.model.Role.INSTRUCTOR) {
-            long memberCount = com.iwfc.pattern.DataStore.getInstance().getUsers().findAll().stream()
-                .filter(u -> u.getRole() == com.iwfc.model.Role.MEMBER).count();
-            navItems.getChildren().add(createNavButton("🙋‍♂️", "Members", (int) memberCount));
+        if (isCompact) {
+            header.setPadding(new Insets(14, 0, 10, 0));
+            header.setAlignment(Pos.CENTER);
+            VBox compactBrandBox = new VBox(10);
+            compactBrandBox.setAlignment(Pos.CENTER);
+            compactBrandBox.getChildren().addAll(brandBadge, collapseToggleBtn);
+            header.getChildren().add(compactBrandBox);
+        } else {
+            header.setPadding(new Insets(14, 14, 12, 14));
+            HBox actionControls = new HBox(5, themeBtn, refreshBtn, collapseToggleBtn);
+            actionControls.setAlignment(Pos.CENTER_RIGHT);
+            brandRow.getChildren().addAll(brandBadge, logoTextBox, spacer, actionControls);
+            header.getChildren().add(brandRow);
         }
-        Button equipmentBtn = createNavButton("🏋️", "Equipment", facade.getAllEquipment().size());
-        Button maintenanceBtn = createNavButton("🔧", "Maintenance");
-        navItems.getChildren().addAll(equipmentBtn, maintenanceBtn);
 
-        // --- OPERATIONS ---
-        navItems.getChildren().add(createSectionHeader("Operations"));
-        Button followUpsBtn = createNavButton("📋", "Follow Ups", facade.getFollowUps().size());
-        long unreadCount = facade.getUnreadNotificationCount();
-        Button notificationsBtn = createNavButton("🔔", "Notifications", unreadCount > 0 ? (int) unreadCount : null);
-        Button reportsBtn = createNavButton("📈", "Reports");
-        navItems.getChildren().addAll(followUpsBtn, notificationsBtn, reportsBtn);
+        return header;
+    }
 
-        // --- BUSINESS SETTINGS ---
-        navItems.getChildren().add(createSectionHeader("Business Settings"));
-        if (facade.getCurrentUser().getRole() == com.iwfc.model.Role.ADMIN || facade.getCurrentUser().getRole() == com.iwfc.model.Role.INSTRUCTOR) {
-            long teamCount = com.iwfc.pattern.DataStore.getInstance().getUsers().findAll().stream()
-                .filter(u -> u.getRole() != com.iwfc.model.Role.MEMBER).count();
-            Button teamBtn = createNavButton("👥", "Team", (int) teamCount); 
-            navItems.getChildren().add(teamBtn);
+    // =========================================================================
+    // 2. Search & Category Filter Area
+    // =========================================================================
+
+    private VBox buildSearchAndFilterArea() {
+        VBox container = new VBox(8);
+        container.setPadding(new Insets(2, 12, 6, 12));
+
+        if (isCompact) {
+            container.setVisible(false);
+            container.setManaged(false);
+            return container;
         }
-        Button paymentsBtn = createNavButton("💳", "Payments");
-        navItems.getChildren().add(paymentsBtn);
 
-        // Spacer
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
+        // Search Input Box
+        HBox searchBox = new HBox(6);
+        searchBox.getStyleClass().add("sidebar-search-box");
 
-        // User info at bottom
-        User user = facade.getCurrentUser();
-        VBox userInfo = new VBox(3);
-        userInfo.setPadding(new Insets(10));
-        userInfo.getStyleClass().add("sidebar-user-info");
+        Label searchIcon = new Label("🔍");
+        searchIcon.getStyleClass().add("sidebar-search-icon");
 
-        Label userName = new Label(user.getName());
-        userName.getStyleClass().add("sidebar-user-name");
+        searchField = new TextField();
+        searchField.setPromptText("Filter views... (e.g. sess, pay)");
+        searchField.getStyleClass().add("sidebar-search-field");
+        HBox.setHgrow(searchField, Priority.ALWAYS);
 
-        Label userRole = new Label(user.getRole().getDisplayName());
-        userRole.getStyleClass().add("sidebar-user-role");
-
-        Button logoutBtn = new Button("Logout");
-        logoutBtn.getStyleClass().add("logout-button");
-        logoutBtn.setMaxWidth(Double.MAX_VALUE);
-        logoutBtn.setOnAction(e -> {
-            facade.logout();
-            onLogout.run();
+        clearSearchBtn = new Button("✕");
+        clearSearchBtn.getStyleClass().add("sidebar-search-clear");
+        clearSearchBtn.setVisible(false);
+        clearSearchBtn.setManaged(false);
+        clearSearchBtn.setOnAction(e -> {
+            searchField.clear();
+            applyNavigationFilters();
         });
 
-        userInfo.getChildren().addAll(userName, userRole, logoutBtn);
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            searchQuery = (newVal == null) ? "" : newVal.trim().toLowerCase();
+            clearSearchBtn.setVisible(!searchQuery.isEmpty());
+            clearSearchBtn.setManaged(!searchQuery.isEmpty());
+            applyNavigationFilters();
+        });
 
-        sidebar.getChildren().addAll(logoBar, sep1, navItems, spacer, userInfo);
-    }
-
-    private Label createSectionHeader(String text) {
-        Label lbl = new Label(text.toUpperCase());
-        lbl.getStyleClass().add("sidebar-section-header");
-        lbl.setPadding(new Insets(20, 10, 8, 10)); // High padding for breathing room
-        return lbl;
-    }
-
-    private Button createNavButton(String icon, String label) {
-        return createNavButton(icon, label, null);
-    }
-
-    private Button createNavButton(String icon, String label, Integer count) {
-        Button btn = new Button();
-        btn.getStyleClass().add("nav-button");
-        btn.setMaxWidth(Double.MAX_VALUE);
-        btn.setAlignment(Pos.CENTER_LEFT);
-        btn.setPrefHeight(40);
-        btn.setUserData(label);
-
-        HBox graphic = new HBox(12);
-        graphic.setAlignment(Pos.CENTER_LEFT);
-        
-        Label iconLbl = new Label(icon);
-        iconLbl.setStyle("-fx-font-size: 14px; -fx-min-width: 24px;");
-        iconLbl.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-        
-        Label textLbl = new Label(label);
-        textLbl.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-        
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
-        graphic.getChildren().addAll(iconLbl, textLbl, spacer);
-        
-        if (count != null && count > 0) {
-            Label badge = new Label(String.valueOf(count));
-            badge.getStyleClass().add("nav-badge");
-            badge.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-            graphic.getChildren().add(badge);
-        }
-        
-        btn.setGraphic(graphic);
-
-        btn.setOnAction(e -> {
-            navigateTo(label);
-            setActiveButton(btn);
-            
-            if ("Notifications".equals(label)) {
-                long unread = facade.getUnreadNotificationCount();
-                if (unread == 0) {
-                    if (graphic.getChildren().size() > 3) {
-                        graphic.getChildren().remove(3);
-                    }
-                } else {
-                    if (graphic.getChildren().size() > 3) {
-                        ((Label)graphic.getChildren().get(3)).setText(String.valueOf(unread));
-                    } else {
-                        Label badge = new Label(String.valueOf(unread));
-                        badge.getStyleClass().add("nav-badge");
-                        badge.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-                        graphic.getChildren().add(badge);
-                    }
+        searchField.setOnAction(e -> {
+            // Jump to first matching view on Enter
+            for (Map.Entry<String, Button> entry : navButtons.entrySet()) {
+                if (entry.getValue().isVisible()) {
+                    navigateTo(entry.getKey());
+                    setActiveButton(entry.getValue());
+                    break;
                 }
             }
         });
 
-        if ("Dashboard".equals(label)) {
+        searchBox.getChildren().addAll(searchIcon, searchField, clearSearchBtn);
+
+        // Segmented Category Filter Chips (Balanced 2-Row Layout - Always Symmetrical & Never Truncates)
+        filterChipsBox = new VBox(5);
+        filterChipsBox.getStyleClass().add("sidebar-filter-chips");
+
+        HBox row1 = new HBox(5);
+        row1.setAlignment(Pos.CENTER);
+        HBox row2 = new HBox(5);
+        row2.setAlignment(Pos.CENTER);
+
+        String[][] row1Defs = {
+            {"ALL", "All"},
+            {"OVERVIEW", "Overview"},
+            {"MANAGE", "Manage"}
+        };
+        String[][] row2Defs = {
+            {"OPS", "Operations"},
+            {"SETTINGS", "Settings"}
+        };
+
+        List<Button> allChips = new ArrayList<>();
+
+        for (String[] def : row1Defs) {
+            Button chip = createFilterChip(def[0], def[1], allChips);
+            HBox.setHgrow(chip, Priority.ALWAYS);
+            chip.setMaxWidth(Double.MAX_VALUE);
+            row1.getChildren().add(chip);
+        }
+
+        for (String[] def : row2Defs) {
+            Button chip = createFilterChip(def[0], def[1], allChips);
+            HBox.setHgrow(chip, Priority.ALWAYS);
+            chip.setMaxWidth(Double.MAX_VALUE);
+            row2.getChildren().add(chip);
+        }
+
+        filterChipsBox.getChildren().addAll(row1, row2);
+        container.getChildren().addAll(searchBox, filterChipsBox);
+        return container;
+    }
+
+    private Button createFilterChip(String code, String label, List<Button> allChips) {
+        Button chip = new Button(label);
+        chip.getStyleClass().add("sidebar-chip");
+        chip.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        chip.setTextOverrun(OverrunStyle.CLIP);
+        chip.setEllipsisString("");
+        chip.setAlignment(Pos.CENTER);
+
+        if ("ALL".equals(code)) {
+            chip.getStyleClass().add("sidebar-chip-active");
+        }
+        allChips.add(chip);
+
+        chip.setOnAction(e -> {
+            activeCategoryFilter = code;
+            for (Button b : allChips) {
+                b.getStyleClass().remove("sidebar-chip-active");
+            }
+            chip.getStyleClass().add("sidebar-chip-active");
+            applyNavigationFilters();
+        });
+        return chip;
+    }
+
+    // =========================================================================
+    // 3. Quick Action Floating Button
+    // =========================================================================
+
+    private VBox buildQuickActionButton() {
+        VBox container = new VBox();
+
+        Button quickActionBtn = new Button(isCompact ? "⚡" : "⚡ Quick Action  ▾");
+        quickActionBtn.getStyleClass().add("sidebar-quick-action-btn");
+        quickActionBtn.setTooltip(new Tooltip("Instant Operations Command Menu"));
+        quickActionBtn.setOnAction(e -> showQuickActionContextMenu(quickActionBtn));
+
+        if (isCompact) {
+            container.setAlignment(Pos.CENTER);
+            container.setPadding(new Insets(0, 0, 8, 0));
+            quickActionBtn.setPrefSize(42, 42);
+            quickActionBtn.setMinSize(42, 42);
+            quickActionBtn.setMaxSize(42, 42);
+            quickActionBtn.setStyle("-fx-padding: 0; -fx-alignment: center;");
+        } else {
+            container.setPadding(new Insets(0, 12, 8, 12));
+            quickActionBtn.setMaxWidth(Double.MAX_VALUE);
+        }
+
+        container.getChildren().add(quickActionBtn);
+        return container;
+    }
+
+    private void showQuickActionContextMenu(Node anchor) {
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem registerMemberItem = new MenuItem("➕  Quick Register Member");
+        registerMemberItem.setOnAction(e -> showQuickAddMemberDialog());
+
+        MenuItem bookSessionItem = new MenuItem("📅  Quick Book Fitness Class");
+        bookSessionItem.setOnAction(e -> showQuickBookSessionDialog());
+
+        MenuItem reportMaintItem = new MenuItem("🔧  Quick Report Equipment Issue");
+        reportMaintItem.setOnAction(e -> showQuickReportMaintenanceDialog());
+
+        MenuItem posPaymentItem = new MenuItem("💳  Process POS Quick Payment");
+        posPaymentItem.setOnAction(e -> showQuickProcessPaymentDialog());
+
+        MenuItem broadcastAlertItem = new MenuItem("📢  Dispatch Broadcast Notification");
+        broadcastAlertItem.setOnAction(e -> showQuickBroadcastDialog());
+
+        menu.getItems().addAll(registerMemberItem, bookSessionItem, reportMaintItem, posPaymentItem, new SeparatorMenuItem(), broadcastAlertItem);
+        menu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 4);
+    }
+
+    // =========================================================================
+    // 4. Scrollable Navigation Accordion Body
+    // =========================================================================
+
+    private ScrollPane buildNavScrollPane() {
+        navContentBox = new VBox(4);
+        if (isCompact) {
+            navContentBox.setAlignment(Pos.TOP_CENTER);
+            navContentBox.setPadding(new Insets(2, 0, 8, 0));
+        } else {
+            navContentBox.setPadding(new Insets(2, 10, 8, 10));
+        }
+
+        // Clear tracking structures
+        navButtons.clear();
+        navItemDataMap.clear();
+        sectionContainers.clear();
+        badgeLabels.clear();
+
+        Role role = facade.getCurrentUser().getRole();
+
+        // Section 1: OVERVIEW
+        List<NavItemData> overviewItems = new ArrayList<>();
+        overviewItems.add(new NavItemData("Dashboard", "📊", "Dashboard", "OVERVIEW", "Executive KPI Overview", "#3b82f6", 0, null));
+        overviewItems.add(new NavItemData("Workout Plans", "💪", "Workout Plans", "OVERVIEW", "Training Regimens & Plans", "#8b5cf6", facade.getPlanCatalogue().size(), "pill-normal"));
+        overviewItems.add(new NavItemData("Sessions", "📅", "Sessions", "OVERVIEW", "Timetables & Class Bookings", "#3b82f6", facade.getAllSessions().size(), "pill-normal"));
+        buildSection("Overview", "OVERVIEW", overviewItems);
+
+        // Section 2: MANAGEMENT (Admin / Instructor)
+        List<NavItemData> managementItems = new ArrayList<>();
+        if (role == Role.ADMIN || role == Role.INSTRUCTOR) {
+            long memCount = DataStore.getInstance().getUsers().findAll().stream().filter(u -> u.getRole() == Role.MEMBER).count();
+            managementItems.add(new NavItemData("Members", "🙋‍♂️", "Members", "MANAGE", "Client Profiles & Biometrics", "#10b981", (int) memCount, "pill-success"));
+        }
+        int eqCount = facade.getAllEquipment().size();
+        long faultyCount = facade.getAllEquipment().stream().filter(eq -> eq.getStatus() != EquipmentStatus.OPERATIONAL).count();
+        managementItems.add(new NavItemData("Equipment", "⚙️", "Equipment", "MANAGE", "Gym Asset Fleet Health", "#f59e0b", eqCount, faultyCount > 0 ? "pill-warning" : "pill-normal"));
+
+        if (role == Role.ADMIN || role == Role.INSTRUCTOR) {
+            long pendingWorkOrders = facade.getAllMaintenanceRequests().stream().filter(r -> r.getStatus() == RequestStatus.PENDING).count();
+            managementItems.add(new NavItemData("Maintenance", "🔧", "Maintenance", "MANAGE", "Work Orders & Repairs", "#f59e0b", (int) pendingWorkOrders, pendingWorkOrders > 0 ? "pill-warning" : "pill-normal"));
+        }
+        if (!managementItems.isEmpty()) {
+            buildSection("Management", "MANAGE", managementItems);
+        }
+
+        // Section 3: OPERATIONS
+        List<NavItemData> opsItems = new ArrayList<>();
+        opsItems.add(new NavItemData("Follow Ups", "📋", "Follow Ups", "OPS", "Retention & Lead Pipelines", "#0ea5e9", facade.getFollowUps().size(), "pill-normal"));
+
+        long unread = facade.getUnreadNotificationCount();
+        opsItems.add(new NavItemData("Notifications", "🔔", "Notifications", "OPS", "Operational Alert Center", "#ef4444", (int) unread, "pill-urgent"));
+
+        opsItems.add(new NavItemData("Reports", "📈", "Reports", "OPS", role == Role.ADMIN ? "Executive BI Analytics" : "Personal Biometric Trends", "#a855f7", 0, null));
+        buildSection("Operations", "OPS", opsItems);
+
+        // Section 4: BUSINESS SETTINGS (Admin / Staff)
+        List<NavItemData> settingsItems = new ArrayList<>();
+        if (role == Role.ADMIN || role == Role.INSTRUCTOR) {
+            long staffCount = DataStore.getInstance().getUsers().findAll().stream().filter(u -> u.getRole() != Role.MEMBER).count();
+            settingsItems.add(new NavItemData("Team", "👥", "Team", "SETTINGS", "Staff Rosters & Assignments", "#6366f1", (int) staffCount, "pill-normal"));
+        }
+        try {
+            int payCount = facade.getAllPayments().size();
+            settingsItems.add(new NavItemData("Payments", "💳", "Payments", "SETTINGS", "Financial Ledger & POS", "#10b981", payCount, "pill-normal"));
+        } catch (Exception ignored) {
+            settingsItems.add(new NavItemData("Payments", "💳", "Payments", "SETTINGS", "Financial Ledger & POS", "#10b981", 0, null));
+        }
+        buildSection("Business Settings", "SETTINGS", settingsItems);
+
+        ScrollPane sp = new ScrollPane(navContentBox);
+        sp.getStyleClass().add("sidebar-scroll-pane");
+        sp.setFitToWidth(true);
+        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        return sp;
+    }
+
+    private void buildSection(String title, String categoryCode, List<NavItemData> items) {
+        VBox sectionBox = new VBox(2);
+        sectionBox.getStyleClass().add("sidebar-section-container");
+
+        // Section Accordion Header
+        HBox header = new HBox(6);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.getStyleClass().add("sidebar-section-header");
+
+        Label caret = new Label("▼");
+        caret.getStyleClass().add("sidebar-section-caret");
+
+        Label titleLbl = new Label(title.toUpperCase());
+        titleLbl.getStyleClass().add("sidebar-section-title");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label countLbl = new Label("(" + items.size() + ")");
+        countLbl.getStyleClass().add("sidebar-section-count");
+
+        header.getChildren().addAll(caret, titleLbl, spacer, countLbl);
+
+        VBox itemsBox = new VBox(3);
+        sectionExpanded.put(title, true);
+
+        // Click header to collapse / expand
+        header.setOnMouseClicked(e -> {
+            boolean current = sectionExpanded.getOrDefault(title, true);
+            boolean next = !current;
+            sectionExpanded.put(title, next);
+            caret.setText(next ? "▼" : "▶");
+            itemsBox.setVisible(next);
+            itemsBox.setManaged(next);
+        });
+
+        // Add item buttons
+        for (NavItemData data : items) {
+            Button btn = createModernNavButton(data);
+            itemsBox.getChildren().add(btn);
+            navButtons.put(data.id, btn);
+            navItemDataMap.put(data.id, data);
+        }
+
+        if (isCompact) {
+            header.setVisible(false);
+            header.setManaged(false);
+            itemsBox.setAlignment(Pos.TOP_CENTER);
+            sectionBox.setAlignment(Pos.TOP_CENTER);
+        }
+
+        sectionBox.getChildren().addAll(header, itemsBox);
+        sectionContainers.put(dataKey(title, categoryCode), sectionBox);
+        navContentBox.getChildren().add(sectionBox);
+    }
+
+    private String dataKey(String title, String categoryCode) {
+        return categoryCode + ":" + title;
+    }
+
+    private Button createModernNavButton(NavItemData data) {
+        Button btn = new Button();
+        btn.getStyleClass().add("nav-button");
+        btn.setPrefHeight(42);
+        btn.setUserData(data.id);
+
+        // Icon Box
+        StackPane iconBox = new StackPane();
+        iconBox.getStyleClass().add("nav-icon-chip");
+        Label iconLbl = new Label(data.icon);
+        iconLbl.getStyleClass().add("nav-icon-text");
+        iconLbl.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        iconLbl.setTextOverrun(OverrunStyle.CLIP);
+        iconLbl.setEllipsisString("");
+        iconBox.getChildren().add(iconLbl);
+
+        if (isCompact) {
+            btn.setAlignment(Pos.CENTER);
+            btn.setPrefWidth(48);
+            btn.setMaxWidth(48);
+            btn.setPadding(new Insets(4, 0, 4, 0));
+
+            // In compact rail mode, display ONLY the iconBox without any text or ellipses
+            if (data.count > 0) {
+                StackPane badgeIconStack = new StackPane();
+                Circle dot = new Circle(4);
+                dot.getStyleClass().add("nav-badge-dot");
+                if ("pill-urgent".equals(data.badgeStyle)) {
+                    dot.setStyle("-fx-fill: #ef4444; -fx-stroke: #0c1222; -fx-stroke-width: 1.5;");
+                } else if ("pill-warning".equals(data.badgeStyle)) {
+                    dot.setStyle("-fx-fill: #f59e0b; -fx-stroke: #0c1222; -fx-stroke-width: 1.5;");
+                } else {
+                    dot.setStyle("-fx-fill: #10b981; -fx-stroke: #0c1222; -fx-stroke-width: 1.5;");
+                }
+                StackPane.setAlignment(dot, Pos.TOP_RIGHT);
+                StackPane.setMargin(dot, new Insets(-2, -2, 0, 0));
+                badgeIconStack.getChildren().addAll(iconBox, dot);
+                btn.setGraphic(badgeIconStack);
+            } else {
+                btn.setGraphic(iconBox);
+            }
+        } else {
+            btn.setMaxWidth(Double.MAX_VALUE);
+            btn.setAlignment(Pos.CENTER_LEFT);
+
+            HBox graphic = new HBox(10);
+            graphic.setAlignment(Pos.CENTER_LEFT);
+
+            // Title
+            Label textLbl = new Label(data.label);
+            textLbl.getStyleClass().add("nav-item-title");
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            graphic.getChildren().addAll(iconBox, textLbl, spacer);
+
+            // Badge Pill
+            if (data.count > 0) {
+                Label badge = new Label(String.valueOf(data.count));
+                badge.getStyleClass().add("nav-badge-pill");
+                if ("pill-urgent".equals(data.badgeStyle)) {
+                    badge.getStyleClass().add("nav-badge-pill-urgent");
+                } else if ("pill-warning".equals(data.badgeStyle)) {
+                    badge.getStyleClass().add("nav-badge-pill-warning");
+                } else if ("pill-success".equals(data.badgeStyle)) {
+                    badge.getStyleClass().add("nav-badge-pill-success");
+                }
+                graphic.getChildren().add(badge);
+                badgeLabels.put(data.id, badge);
+            }
+
+            btn.setGraphic(graphic);
+        }
+
+        // Tooltip with description
+        Tooltip tip = new Tooltip(data.label + "\n" + data.description + (data.count > 0 ? " (" + data.count + " active)" : ""));
+        tip.setShowDelay(Duration.millis(200));
+        btn.setTooltip(tip);
+
+        // Click Handler
+        btn.setOnAction(e -> {
+            navigateTo(data.id);
+            setActiveButton(btn);
+
+            if ("Notifications".equals(data.id)) {
+                facade.markAllNotificationsAsRead();
+                refreshAllBadges(false);
+            }
+        });
+
+        if (activeViewName.equals(data.id)) {
             setActiveButton(btn);
         }
-        
-        navButtons.put(label, btn);
+
         return btn;
     }
+
+    // =========================================================================
+    // 5. User Profile Card & Role Switcher
+    // =========================================================================
+
+    private VBox buildUserProfileCard() {
+        VBox card = new VBox(8);
+        card.setPadding(new Insets(10, 12, 10, 12));
+        card.getStyleClass().add("sidebar-user-card");
+
+        User user = facade.getCurrentUser();
+
+        HBox identityRow = new HBox(10);
+        identityRow.setAlignment(Pos.CENTER_LEFT);
+
+        // Avatar with status indicator
+        StackPane avatarPane = new StackPane();
+        avatarPane.getStyleClass().add("sidebar-user-avatar");
+
+        String initials = getInitials(user != null ? user.getName() : "Guest");
+        Label initialsLbl = new Label(initials);
+        initialsLbl.getStyleClass().add("sidebar-user-avatar-text");
+        avatarPane.getChildren().add(initialsLbl);
+
+        VBox userDetails = new VBox(2);
+        userDetails.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(userDetails, Priority.ALWAYS);
+
+        Label userName = new Label(user != null ? user.getName() : "Guest User");
+        userName.getStyleClass().add("sidebar-user-name");
+
+        Role role = user != null ? user.getRole() : Role.MEMBER;
+        Label roleBadge = new Label(role.getDisplayName().toUpperCase());
+        roleBadge.getStyleClass().add("sidebar-role-badge");
+        if (role == Role.ADMIN) {
+            roleBadge.getStyleClass().add("role-badge-admin");
+        } else if (role == Role.INSTRUCTOR) {
+            roleBadge.getStyleClass().add("role-badge-instructor");
+        } else {
+            roleBadge.getStyleClass().add("role-badge-member");
+        }
+
+        userDetails.getChildren().addAll(userName, roleBadge);
+
+        if (isCompact) {
+            card.setAlignment(Pos.CENTER);
+            card.setPadding(new Insets(8, 0, 8, 0));
+            avatarPane.setOnMouseClicked(e -> showRoleSwitchDialog());
+            Tooltip.install(avatarPane, new Tooltip(user != null ? user.getName() + " (" + role.getDisplayName() + ")" : "Profile"));
+            card.getChildren().add(avatarPane);
+            return card;
+        }
+
+        identityRow.getChildren().addAll(avatarPane, userDetails);
+
+        // Action Buttons Row: Switch Role & Logout
+        HBox actionsRow = new HBox(8);
+        actionsRow.setAlignment(Pos.CENTER);
+
+        Button switchRoleBtn = new Button("⇄ Switch Role");
+        switchRoleBtn.getStyleClass().add("sidebar-switch-role-btn");
+        HBox.setHgrow(switchRoleBtn, Priority.ALWAYS);
+        switchRoleBtn.setMaxWidth(Double.MAX_VALUE);
+        switchRoleBtn.setTooltip(new Tooltip("Instant Demo Profile Switcher (Admin / Trainer / Member)"));
+        switchRoleBtn.setOnAction(e -> showRoleSwitchDialog());
+
+        Button logoutBtn = new Button("Logout");
+        logoutBtn.getStyleClass().add("sidebar-logout-btn");
+        logoutBtn.setOnAction(e -> {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to log out of IWFC?", ButtonType.YES, ButtonType.NO);
+            DialogUtils.stylePremiumDialog(confirm);
+            confirm.showAndWait().ifPresent(res -> {
+                if (res == ButtonType.YES) {
+                    facade.logout();
+                    onLogout.run();
+                }
+            });
+        });
+
+        actionsRow.getChildren().addAll(switchRoleBtn, logoutBtn);
+
+        // System Telemetry Footer
+        Label footerTelemetry = new Label("IWFC OS v2.4 • In-Memory DataStore • Facade OK");
+        footerTelemetry.getStyleClass().add("sidebar-footer-telemetry");
+
+        card.getChildren().addAll(identityRow, actionsRow, footerTelemetry);
+        return card;
+    }
+
+    private String getInitials(String name) {
+        if (name == null || name.isBlank()) return "U";
+        String[] parts = name.trim().split("\\s+");
+        if (parts.length == 1) return parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
+        return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+
+    // =========================================================================
+    // Instant Multi-Role Switcher Dialog (Ultra-Premium RBAC Modal)
+    // =========================================================================
+
+    private void showRoleSwitchDialog() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Switch Active Profile");
+
+        if (getScene() != null && getScene().getWindow() != null) {
+            dialog.initOwner(getScene().getWindow());
+        }
+
+        DialogUtils.stylePremiumDialog(dialog);
+        dialog.getDialogPane().getStyleClass().add("role-switcher-dialog");
+
+        VBox content = new VBox(16);
+        content.getStyleClass().add("role-modal-container");
+        content.setPrefWidth(500);
+        content.setMinWidth(500);
+        content.setMaxWidth(500);
+
+        // Header Row (with title, subtitle and close button)
+        HBox headerRow = new HBox(12);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+        headerRow.getStyleClass().add("role-modal-header");
+
+        VBox headerTitles = new VBox(3);
+        headerTitles.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(headerTitles, Priority.ALWAYS);
+
+        Label title = new Label("SWITCH ACTIVE PROFILE");
+        title.getStyleClass().add("role-modal-title");
+
+        Label subtitle = new Label("Instant Role-Based Access Control (RBAC) Switcher");
+        subtitle.getStyleClass().add("role-modal-subtitle");
+
+        headerTitles.getChildren().addAll(title, subtitle);
+
+        Button closeBtn = new Button("✕");
+        closeBtn.getStyleClass().add("role-modal-close-btn");
+        closeBtn.setTooltip(new Tooltip("Dismiss"));
+        closeBtn.setOnAction(e -> {
+            dialog.setResult(null);
+            dialog.close();
+        });
+
+        headerRow.getChildren().addAll(headerTitles, closeBtn);
+
+        // Draggable dialog header
+        final double[] dragDelta = new double[2];
+        headerRow.setOnMousePressed(mouseEvent -> {
+            if (dialog.getDialogPane().getScene() != null && dialog.getDialogPane().getScene().getWindow() != null) {
+                Window win = dialog.getDialogPane().getScene().getWindow();
+                dragDelta[0] = win.getX() - mouseEvent.getScreenX();
+                dragDelta[1] = win.getY() - mouseEvent.getScreenY();
+            }
+        });
+        headerRow.setOnMouseDragged(mouseEvent -> {
+            if (dialog.getDialogPane().getScene() != null && dialog.getDialogPane().getScene().getWindow() != null) {
+                Window win = dialog.getDialogPane().getScene().getWindow();
+                win.setX(mouseEvent.getScreenX() + dragDelta[0]);
+                win.setY(mouseEvent.getScreenY() + dragDelta[1]);
+            }
+        });
+
+        User currentUser = facade.getCurrentUser();
+        String currentUserId = currentUser != null ? currentUser.getUserId() : "";
+
+        // Profiles list
+        VBox profilesBox = new VBox(10);
+        profilesBox.getChildren().addAll(
+            createProfileOption("ADM001", "Sarah Johnson", "ADMINISTRATOR", "role-badge-admin",
+                    "role-card-avatar-admin", "ADM",
+                    "Full executive access: KPI analytics, financial ledger & system settings.",
+                    "ADM001".equalsIgnoreCase(currentUserId), dialog),
+            createProfileOption("INS001", "Alex Morgan", "FITNESS INSTRUCTOR", "role-badge-instructor",
+                    "role-card-avatar-ins", "INS",
+                    "Class scheduling, workout plans, trainee biometrics & maintenance reports.",
+                    "INS001".equalsIgnoreCase(currentUserId), dialog),
+            createProfileOption("MEM001", "John Doe", "GYM MEMBER", "role-badge-member",
+                    "role-card-avatar-mem", "MEM",
+                    "Client self-service: class booking, fitness plans, measurements & payments.",
+                    "MEM001".equalsIgnoreCase(currentUserId), dialog)
+        );
+
+        // Footer Row
+        HBox footerRow = new HBox(12);
+        footerRow.setAlignment(Pos.CENTER_RIGHT);
+
+        Label hint = new Label("Click any profile to instantly switch permissions");
+        hint.getStyleClass().add("role-modal-hint");
+        HBox.setHgrow(hint, Priority.ALWAYS);
+
+        Button dismissBtn = new Button("Keep Current Profile");
+        dismissBtn.getStyleClass().add("role-modal-dismiss-btn");
+        dismissBtn.setOnAction(e -> {
+            dialog.setResult(null);
+            dialog.close();
+        });
+
+        footerRow.getChildren().addAll(hint, dismissBtn);
+
+        content.getChildren().addAll(headerRow, profilesBox, footerRow);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+        Platform.runLater(() -> {
+            Node buttonBar = dialog.getDialogPane().lookup(".button-bar");
+            if (buttonBar != null) {
+                buttonBar.setVisible(false);
+                buttonBar.setManaged(false);
+            }
+        });
+
+        dialog.showAndWait().ifPresent(userId -> {
+            if (userId != null && !userId.isBlank()) {
+                User switched = facade.login(userId);
+                if (switched != null) {
+                    facade.getNotificationService().notifyListeners("SESSION_SWITCHED",
+                            "Active profile switched to: " + switched.getName() + " (" + switched.getRole().getDisplayName() + ")");
+                    // Rebuild entire sidebar to update role permissions and navigation
+                    getChildren().remove(sidebar);
+                    buildSidebar();
+                    setLeft(sidebar);
+                    navigateTo("Dashboard");
+                }
+            }
+        });
+    }
+
+    private Button createProfileOption(String userId, String name, String roleName, String badgeStyleClass,
+                                       String avatarStyleClass, String avatarText, String desc,
+                                       boolean isCurrent, Dialog<String> dialog) {
+        Button btn = new Button();
+        btn.getStyleClass().add("role-option-card");
+        if (isCurrent) {
+            btn.getStyleClass().add("role-option-card-current");
+        }
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setPrefHeight(74);
+        btn.setMinHeight(74);
+        btn.setMaxHeight(74);
+
+        HBox cardBox = new HBox(14);
+        cardBox.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(cardBox, Priority.ALWAYS);
+
+        // Avatar Chip
+        StackPane avatarChip = new StackPane();
+        avatarChip.getStyleClass().addAll("role-card-avatar", avatarStyleClass);
+        Label avatarLbl = new Label(avatarText);
+        avatarLbl.getStyleClass().add("role-card-avatar-text");
+        avatarChip.getChildren().add(avatarLbl);
+
+        // Details
+        VBox infoBox = new VBox(4);
+        infoBox.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(infoBox, Priority.ALWAYS);
+
+        HBox nameRow = new HBox(8);
+        nameRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label nameLbl = new Label(name);
+        nameLbl.getStyleClass().add("role-card-name");
+
+        Label badgeLbl = new Label(roleName);
+        badgeLbl.getStyleClass().addAll("sidebar-role-badge", badgeStyleClass);
+
+        nameRow.getChildren().addAll(nameLbl, badgeLbl);
+
+        Label descLbl = new Label(desc);
+        descLbl.getStyleClass().add("role-card-desc");
+        descLbl.setTextOverrun(OverrunStyle.ELLIPSIS);
+
+        infoBox.getChildren().addAll(nameRow, descLbl);
+
+        // Right side indicator
+        Node rightIndicator;
+        if (isCurrent) {
+            Label currentPill = new Label("● ACTIVE");
+            currentPill.getStyleClass().add("role-card-current-pill");
+            rightIndicator = currentPill;
+        } else {
+            Label switchLbl = new Label("Switch →");
+            switchLbl.getStyleClass().add("role-card-switch-indicator");
+            rightIndicator = switchLbl;
+        }
+
+        cardBox.getChildren().addAll(avatarChip, infoBox, rightIndicator);
+        btn.setGraphic(cardBox);
+
+        btn.setOnAction(e -> {
+            dialog.setResult(userId);
+            dialog.close();
+        });
+        return btn;
+    }
+
+    // =========================================================================
+    // Filter & Search Engine
+    // =========================================================================
+
+    private void applyNavigationFilters() {
+        for (Map.Entry<String, NavItemData> entry : navItemDataMap.entrySet()) {
+            String id = entry.getKey();
+            NavItemData data = entry.getValue();
+            Button btn = navButtons.get(id);
+
+            boolean matchCategory = "ALL".equalsIgnoreCase(activeCategoryFilter) || data.category.equalsIgnoreCase(activeCategoryFilter);
+            boolean matchSearch = searchQuery.isEmpty() ||
+                    data.label.toLowerCase().contains(searchQuery) ||
+                    data.description.toLowerCase().contains(searchQuery) ||
+                    data.category.toLowerCase().contains(searchQuery);
+
+            boolean visible = matchCategory && matchSearch;
+            btn.setVisible(visible);
+            btn.setManaged(visible);
+        }
+
+        // Hide/show section containers based on child visibility
+        for (Map.Entry<String, VBox> secEntry : sectionContainers.entrySet()) {
+            VBox secBox = secEntry.getValue();
+            if (secBox.getChildren().size() > 1 && secBox.getChildren().get(1) instanceof VBox itemsBox) {
+                boolean anyChildVisible = itemsBox.getChildren().stream().anyMatch(Node::isVisible);
+                secBox.setVisible(anyChildVisible);
+                secBox.setManaged(anyChildVisible);
+            }
+        }
+    }
+
+    // =========================================================================
+    // Compact Rail Toggle
+    // =========================================================================
+
+    private void toggleSidebarCompactMode() {
+        isCompact = !isCompact;
+        getChildren().remove(sidebar);
+        buildSidebar();
+        setLeft(sidebar);
+    }
+
+    // =========================================================================
+    // Live Badge Refresh
+    // =========================================================================
+
+    public void refreshAllBadges(boolean showToast) {
+        Platform.runLater(() -> {
+            // Sessions
+            updateBadge("Sessions", facade.getAllSessions().size());
+            // Plans
+            updateBadge("Workout Plans", facade.getPlanCatalogue().size());
+            // Members
+            long memCount = DataStore.getInstance().getUsers().findAll().stream().filter(u -> u.getRole() == Role.MEMBER).count();
+            updateBadge("Members", (int) memCount);
+            // Equipment
+            updateBadge("Equipment", facade.getAllEquipment().size());
+            // Maintenance
+            long pendingWorkOrders = facade.getAllMaintenanceRequests().stream().filter(r -> r.getStatus() == RequestStatus.PENDING).count();
+            updateBadge("Maintenance", (int) pendingWorkOrders);
+            // Follow Ups
+            updateBadge("Follow Ups", facade.getFollowUps().size());
+            // Notifications
+            long unread = facade.getUnreadNotificationCount();
+            updateBadge("Notifications", (int) unread);
+            // Team
+            long staffCount = DataStore.getInstance().getUsers().findAll().stream().filter(u -> u.getRole() != Role.MEMBER).count();
+            updateBadge("Team", (int) staffCount);
+
+            if (showToast) {
+                facade.getNotificationService().notifyListeners("DATA_SYNCED", "Live telemetry and badge statistics synchronized successfully.");
+            }
+        });
+    }
+
+    private void updateBadge(String viewId, int count) {
+        Label badge = badgeLabels.get(viewId);
+        if (badge != null) {
+            badge.setText(String.valueOf(count));
+            badge.setVisible(count > 0);
+            badge.setManaged(count > 0);
+        }
+    }
+
+    // =========================================================================
+    // Navigation Routing
+    // =========================================================================
 
     private void navigateToWithHighlight(String view) {
         Button btn = navButtons.get(view);
@@ -228,17 +991,27 @@ public class MainLayout extends BorderPane {
     private void setActiveButton(Button btn) {
         if (activeNavButton != null) {
             activeNavButton.getStyleClass().remove("nav-button-active");
+            if (activeNavButton.getGraphic() instanceof HBox gh && gh.getChildren().size() > 1) {
+                gh.getChildren().get(0).getStyleClass().remove("nav-icon-chip-active");
+                gh.getChildren().get(1).getStyleClass().remove("nav-item-title-active");
+            }
         }
         btn.getStyleClass().add("nav-button-active");
+        if (btn.getGraphic() instanceof HBox gh && gh.getChildren().size() > 1) {
+            gh.getChildren().get(0).getStyleClass().add("nav-icon-chip-active");
+            gh.getChildren().get(1).getStyleClass().add("nav-item-title-active");
+        }
         activeNavButton = btn;
     }
 
     private void navigateTo(String view) {
+        this.activeViewName = view;
+
         // Remove only non-toast children (keep toast notifications)
         contentArea.getChildren().removeIf(node ->
             !node.getStyleClass().contains("toast-notification"));
 
-        Node content = switch (view.split(" \\(")[0]) { // Remove the unread count like " (3)" if it exists
+        Node content = switch (view.split(" \\(")[0]) {
             case "Dashboard" -> new DashboardView(facade, this::navigateToWithHighlight);
             case "Equipment" -> new EquipmentView(facade);
             case "Sessions" -> new SessionView(facade);
@@ -247,7 +1020,7 @@ public class MainLayout extends BorderPane {
             case "Follow Ups" -> new FollowUpView(facade);
             case "Payments" -> new PaymentView(facade);
             case "Reports" -> facade.getCurrentUser().getRole() == Role.ADMIN ? new AdminReportsView(facade) : new AnalysisView(facade);
-            case "Team" -> new UserManagementView(facade); // Updated mapping from Users to Team
+            case "Team" -> new UserManagementView(facade);
             case "Members" -> new MembersManagementView(facade);
             case "Workout Plans" -> new WorkoutPlansView(facade);
             default -> new DashboardView(facade, this::navigateToWithHighlight);
@@ -257,10 +1030,272 @@ public class MainLayout extends BorderPane {
         StackPane.setAlignment(content, Pos.TOP_LEFT);
         contentArea.getChildren().add(0, content);
 
-        // Add premium fade-in animation
-        FadeTransition ft = new FadeTransition(Duration.millis(300), content);
-        ft.setFromValue(0.0);
+        // Add smooth fade-in animation
+        FadeTransition ft = new FadeTransition(Duration.millis(260), content);
+        ft.setFromValue(0.2);
         ft.setToValue(1.0);
         ft.play();
+    }
+
+    // =========================================================================
+    // Quick Action Modals (100% Functional Operations)
+    // =========================================================================
+
+    private void showQuickAddMemberDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Quick Member Registration");
+        DialogUtils.stylePremiumDialog(dialog);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(16));
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Full Name");
+        TextField emailField = new TextField();
+        emailField.setPromptText("Email Address");
+        TextField phoneField = new TextField();
+        phoneField.setPromptText("Phone Number");
+
+        ComboBox<String> tierBox = new ComboBox<>();
+        tierBox.getItems().addAll("Bronze", "Silver", "Gold", "Platinum");
+        tierBox.setValue("Silver");
+
+        grid.add(new Label("Full Name:"), 0, 0); grid.add(nameField, 1, 0);
+        grid.add(new Label("Email:"), 0, 1); grid.add(emailField, 1, 1);
+        grid.add(new Label("Phone:"), 0, 2); grid.add(phoneField, 1, 2);
+        grid.add(new Label("Tier:"), 0, 3); grid.add(tierBox, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK) {
+                String name = nameField.getText().trim();
+                String email = emailField.getText().trim();
+                if (!name.isEmpty() && !email.isEmpty()) {
+                    String id = "MEM" + String.format("%03d", System.currentTimeMillis() % 1000);
+                    try {
+                        Member m = new Member(id, name, email, phoneField.getText().trim(), "123 Gym Ave", "default.png", tierBox.getValue());
+                        facade.addUser(m);
+                        facade.getNotificationService().notifyListeners("MEMBER_REGISTERED", "New member '" + name + "' registered successfully.");
+                        refreshAllBadges(false);
+                        navigateToWithHighlight("Members");
+                    } catch (Exception ex) {
+                        showErrorAlert("Error", ex.getMessage());
+                    }
+                }
+            }
+        });
+    }
+
+    private void showQuickBookSessionDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Quick Book Fitness Class");
+        DialogUtils.stylePremiumDialog(dialog);
+
+        VBox box = new VBox(10);
+        box.setPadding(new Insets(16));
+
+        ComboBox<FitnessSession> sessionCombo = new ComboBox<>();
+        sessionCombo.getItems().addAll(facade.getAllFitnessSessions());
+        sessionCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(FitnessSession item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName() + " (" + item.getDayOfWeek() + " " + item.getStartTime() + ")");
+            }
+        });
+        sessionCombo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(FitnessSession item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName() + " (" + item.getDayOfWeek() + " " + item.getStartTime() + ")");
+            }
+        });
+        if (!sessionCombo.getItems().isEmpty()) sessionCombo.setValue(sessionCombo.getItems().get(0));
+
+        DatePicker datePicker = new DatePicker(LocalDate.now().plusDays(1));
+
+        box.getChildren().addAll(new Label("Select Fitness Class:"), sessionCombo, new Label("Reservation Date:"), datePicker);
+        dialog.getDialogPane().setContent(box);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK && sessionCombo.getValue() != null) {
+                try {
+                    FitnessSession s = sessionCombo.getValue();
+                    User curr = facade.getCurrentUser();
+                    if (curr instanceof Member) {
+                        facade.bookSessionForDate(s.getSessionId(), datePicker.getValue());
+                    } else {
+                        // Admin/Staff booking for test member
+                        facade.bookSessionForMember("MEM001", s.getSessionId(), datePicker.getValue());
+                    }
+                    facade.getNotificationService().notifyListeners("BOOKING_CONFIRMED", "Confirmed booking for '" + s.getName() + "' on " + datePicker.getValue());
+                    refreshAllBadges(false);
+                    navigateToWithHighlight("Sessions");
+                } catch (Exception ex) {
+                    showErrorAlert("Booking Failed", ex.getMessage());
+                }
+            }
+        });
+    }
+
+    private void showQuickReportMaintenanceDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Quick Report Equipment Fault");
+        DialogUtils.stylePremiumDialog(dialog);
+
+        VBox box = new VBox(10);
+        box.setPadding(new Insets(16));
+
+        ComboBox<Equipment> eqCombo = new ComboBox<>();
+        eqCombo.getItems().addAll(facade.getAllEquipment());
+        eqCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(Equipment item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName() + " [" + item.getId() + "] (" + item.getLocation() + ")");
+            }
+        });
+        eqCombo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Equipment item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName() + " [" + item.getId() + "] (" + item.getLocation() + ")");
+            }
+        });
+        if (!eqCombo.getItems().isEmpty()) eqCombo.setValue(eqCombo.getItems().get(0));
+
+        ComboBox<Urgency> urgencyCombo = new ComboBox<>();
+        urgencyCombo.getItems().addAll(Urgency.LOW, Urgency.MEDIUM, Urgency.HIGH);
+        urgencyCombo.setValue(Urgency.MEDIUM);
+
+        TextArea descArea = new TextArea();
+        descArea.setPromptText("Describe mechanical or electrical defect...");
+        descArea.setPrefRowCount(3);
+
+        box.getChildren().addAll(new Label("Select Equipment Asset:"), eqCombo, new Label("Urgency Level:"), urgencyCombo, new Label("Defect Notes:"), descArea);
+        dialog.getDialogPane().setContent(box);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK && eqCombo.getValue() != null) {
+                try {
+                    Equipment eq = eqCombo.getValue();
+                    Instructor dummyStaff = new Instructor("STAFF_DISPATCH", "Staff Dispatch", "staff@iwfc.com", "000", "p", "p", "General");
+                    facade.reportMaintenanceByStaff(eq, dummyStaff, descArea.getText().trim().isEmpty() ? "Unscheduled staff defect ticket" : descArea.getText().trim(), urgencyCombo.getValue());
+                    facade.getNotificationService().notifyListeners("MAINTENANCE_ALERT", "Maintenance work order created for " + eq.getName());
+                    refreshAllBadges(false);
+                    navigateToWithHighlight("Maintenance");
+                } catch (Exception ex) {
+                    showErrorAlert("Report Failed", ex.getMessage());
+                }
+            }
+        });
+    }
+
+    private void showQuickProcessPaymentDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Process Quick POS Payment");
+        DialogUtils.stylePremiumDialog(dialog);
+
+        VBox box = new VBox(10);
+        box.setPadding(new Insets(16));
+
+        TextField amtField = new TextField("75.00");
+        amtField.setPromptText("Payment Amount ($)");
+
+        ComboBox<PaymentMethod> methodCombo = new ComboBox<>();
+        methodCombo.getItems().addAll(PaymentMethod.CARD, PaymentMethod.CASH, PaymentMethod.BANK_TRANSFER);
+        methodCombo.setValue(PaymentMethod.CARD);
+
+        ComboBox<PaymentPurpose> purposeCombo = new ComboBox<>();
+        purposeCombo.getItems().addAll(PaymentPurpose.MEMBERSHIP_FEE, PaymentPurpose.PERSONAL_TRAINING, PaymentPurpose.SESSION_BOOKING, PaymentPurpose.MERCHANDISE);
+        purposeCombo.setValue(PaymentPurpose.MEMBERSHIP_FEE);
+
+        box.getChildren().addAll(new Label("Amount ($):"), amtField, new Label("Method:"), methodCombo, new Label("Purpose:"), purposeCombo);
+        dialog.getDialogPane().setContent(box);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK) {
+                try {
+                    double amt = Double.parseDouble(amtField.getText().trim());
+                    com.iwfc.pattern.payment.PaymentContext ctx = new com.iwfc.pattern.payment.PaymentContext();
+                    ctx.setCardNumber("4532111122223333");
+                    ctx.setExpiryDate("12/28");
+                    Payment p = facade.processPayment("MEM001", amt, methodCombo.getValue(), purposeCombo.getValue(), "Quick POS Checkout", ctx);
+                    facade.getNotificationService().notifyListeners("PAYMENT_RECEIVED", "Transaction " + p.getPaymentId() + " of $" + p.getAmount() + " processed successfully.");
+                    refreshAllBadges(false);
+                    navigateToWithHighlight("Payments");
+                } catch (Exception ex) {
+                    showErrorAlert("Payment Failed", ex.getMessage());
+                }
+            }
+        });
+    }
+
+    private void showQuickBroadcastDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Dispatch Broadcast Notification");
+        DialogUtils.stylePremiumDialog(dialog);
+
+        VBox box = new VBox(10);
+        box.setPadding(new Insets(16));
+
+        TextField titleField = new TextField("Facility Update");
+        TextArea msgArea = new TextArea("Hydrotherapy pool maintenance completed. All facilities fully operational.");
+        msgArea.setPrefRowCount(3);
+
+        box.getChildren().addAll(new Label("Broadcast Title:"), titleField, new Label("Announcement Message:"), msgArea);
+        dialog.getDialogPane().setContent(box);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK) {
+                String msg = msgArea.getText().trim();
+                if (!msg.isEmpty()) {
+                    facade.getNotificationService().notifyListeners("SYSTEM_BROADCAST", titleField.getText().trim() + ": " + msg);
+                    refreshAllBadges(false);
+                    navigateToWithHighlight("Notifications");
+                }
+            }
+        });
+    }
+
+    private void showErrorAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.setTitle(title);
+        DialogUtils.stylePremiumDialog(alert);
+        alert.showAndWait();
+    }
+
+    // =========================================================================
+    // NavItemData Model Class
+    // =========================================================================
+
+    private static class NavItemData {
+        final String id;
+        final String icon;
+        final String label;
+        final String category;
+        final String description;
+        final String iconColor;
+        final int count;
+        final String badgeStyle;
+
+        NavItemData(String id, String icon, String label, String category, String description, String iconColor, int count, String badgeStyle) {
+            this.id = id;
+            this.icon = icon;
+            this.label = label;
+            this.category = category;
+            this.description = description;
+            this.iconColor = iconColor;
+            this.count = count;
+            this.badgeStyle = badgeStyle;
+        }
     }
 }

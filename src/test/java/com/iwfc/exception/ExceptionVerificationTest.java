@@ -9,6 +9,7 @@ import com.iwfc.model.PaymentPurpose;
 import com.iwfc.pattern.payment.PaymentContext;
 import com.iwfc.service.MockPaymentGateway;
 import com.iwfc.model.Admin;
+import com.iwfc.model.Instructor;
 import com.iwfc.model.Member;
 import com.iwfc.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,11 +23,13 @@ class ExceptionVerificationTest {
 
     @BeforeEach
     void setUp() {
+        com.iwfc.pattern.DataStore.resetInstance();
         facade = new IWFCSystemFacade();
         UserService userService = new UserService();
         try {
             userService.addUser(new Admin("ADM_TEST", "Admin Test", "admin@test.com", "1234567890", "pic", "pwd"));
             userService.addUser(new Member("MEM_TEST", "Member Test", "mem@test.com", "1234567890", "pic", "pwd", "Silver"));
+            userService.addUser(new Instructor("INS_TEST", "Instructor Test", "ins@test.com", "1234567890", "pic", "pwd", "Yoga"));
         } catch (Exception ignored) {}
     }
 
@@ -87,5 +90,21 @@ class ExceptionVerificationTest {
 
         // Reset state
         MockPaymentGateway.getInstance().setForceFailureMode(false);
+    }
+
+    @Test
+    void testInvalidBookingException() {
+        // 1. Member attempting to book a session on an invalid / inactive date
+        facade.login("MEM_TEST");
+        InvalidBookingException exDate = assertThrows(InvalidBookingException.class, 
+            () -> facade.bookSessionForDate("SES001", java.time.LocalDate.now().plusDays(100)));
+        assertNotNull(exDate.getMessage());
+        assertTrue(exDate.getMessage().contains("is not active on") || exDate.getMessage().contains("Cannot book"));
+
+        // 2. Instructor attempting to set session hours outside operating facility hours (before 06:00)
+        facade.login("INS_TEST");
+        InvalidBookingException exSlot = assertThrows(InvalidBookingException.class,
+            () -> facade.editSession("SES001", "Morning HIIT", java.time.LocalTime.of(5, 0), java.time.LocalTime.of(6, 0), 20));
+        assertTrue(exSlot.getMessage().contains("Session times must be within operating hours"));
     }
 }

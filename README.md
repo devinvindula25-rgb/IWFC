@@ -117,20 +117,21 @@ IWFC provides comprehensive role-based workflows for **Administrators**, **Fitne
 The codebase strictly adheres to clean OOP principles and utilizes canonical Gang of Four (GoF) design patterns:
 
 ```
-                          ┌───────────────────────┐
-                          │   JavaFX UI Layer     │
-                          │ (Views & Components)  │
-                          └──────────┬────────────┘
-                                     │
-                                     ▼
-                          ┌───────────────────────┐
-                          │   IWFCSystemFacade    │  ◄── [Facade Pattern]
-                          └──────────┬────────────┘
-         ┌──────────────────┬────────┴────────┬──────────────────┐
-         ▼                  ▼                 ▼                  ▼
-┌─────────────────┐ ┌───────────────┐ ┌───────────────┐ ┌─────────────────┐
-│EquipmentService │ │SessionService │ │UserService    │ │PaymentService   │
-└────────┬────────┘ └───────┬───────┘ └───────┬───────┘ └────────┬────────┘
+                          ┌───────────────────────┐   ┌───────────────────────────┐
+                          │   JavaFX UI Layer     │   │   Headless Terminal CLI   │
+                          │ (Views & Components)  │   │     (ConsoleApp.java)     │
+                          └──────────┬────────────┘   └─────────────┬─────────────┘
+                                     │                              │
+                                     └──────────────┬───────────────┘
+                                                    ▼
+                                      ┌───────────────────────────┐
+                                      │     IWFCSystemFacade      │  ◄── [Facade Pattern]
+                                      └─────────────┬─────────────┘
+         ┌──────────────────┬───────────────────────┴────────┬──────────────────┐
+         ▼                  ▼                                ▼                  ▼
+┌─────────────────┐ ┌───────────────┐               ┌───────────────┐ ┌─────────────────┐
+│EquipmentService │ │SessionService │               │UserService    │ │PaymentService   │
+└────────┬────────┘ └───────┬───────┘               └───────┬───────┘ └────────┬────────┘
          │                  │                 │                  │
          │                  │                 │         ┌────────┴────────┐
          │                  │                 │         │ PaymentStrategy │  ◄── [Strategy]
@@ -172,7 +173,8 @@ IWFC/
     │   ├── java/
     │   │   ├── module-info.java                 # JPMS Java Module Definition (com.iwfc)
     │   │   └── com/iwfc/
-    │   │       ├── IWFCApp.java                 # Application Entry Point & Main Stage Orchestrator
+    │   │       ├── IWFCApp.java                 # JavaFX Enterprise GUI Entry Point & Main Stage
+    │   │       ├── ConsoleApp.java              # Interactive Headless CLI Console (Terminal Mode)
     │   │       ├── exception/                   # Domain Exception Hierarchy
     │   │       │   ├── DuplicateDataException.java
     │   │       │   ├── InsufficientFundsException.java
@@ -221,10 +223,11 @@ IWFC/
     │   │           └── BillGenerator.java       # Apache PDFBox Invoice & Receipt Generator
     │   └── resources/
     │       ├── com/iwfc/
-    │       │   ├── css/                         # Curated Glassmorphism Style Engine (11 sheets)
+    │       │   ├── css/                         # Curated Glassmorphism Style Engine (12 sheets)
     │       │   │   ├── common.css               # Core Typography, Tokens & Components
     │       │   │   ├── dark-overrides.css       # AtlantaFX Cupertino Dark Color Palette
     │       │   │   ├── light-overrides.css      # AtlantaFX Cupertino Light Color Palette
+    │       │   │   ├── sidebar-navigation.css   # Side Menu, Filter Chips, Search, Accordions & Drawer
     │       │   │   ├── dashboard-management.css # Dashboard Grid, KPI, Ledger & Chart Styling
     │       │   │   ├── equipment-management.css # Blueprint Map, Donut Hub & Fleet Styling
     │       │   │   ├── payments-management.css  # Financial KPIs, POS Modals & Invoice Cards
@@ -234,7 +237,7 @@ IWFC/
     │       │   │   └── followup-pipeline.css    # CRM Lead & Retention Pipelines
     │       │   └── images/                      # Anatomy Diagrams, Backgrounds, Avatars
     └── test/
-        └── java/com/iwfc/                       # JUnit 5 Automated Test Suite (26 Tests)
+        └── java/com/iwfc/                       # JUnit 5 Automated Test Suite (27 Tests)
             ├── exception/
             │   └── ExceptionVerificationTest.java
             ├── pattern/
@@ -282,17 +285,26 @@ mvn clean compile
 ```
 
 ### 2. Run the Automated Unit Tests
-To execute the complete **JUnit 5** test suite (26 automated test cases verifying exception handling, repository persistence, payment strategies, and session validation):
+To execute the complete **JUnit 5** test suite (27 automated test cases verifying all domain exceptions, repository persistence, payment strategies, and session validation):
 ```bash
 mvn test
 ```
-*Expected output: `BUILD SUCCESS` with 26 tests run, 0 failures, 0 errors.*
+*Expected output: `BUILD SUCCESS` with 27 tests run, 0 failures, 0 errors.*
 
 ### 3. Launch the Application
-To run the IWFC desktop interface:
+
+#### Option A: JavaFX Enterprise Graphical Dashboard (Default GUI)
+To launch the JavaFX desktop interface:
 ```bash
 mvn javafx:run
 ```
+
+#### Option B: Headless Terminal CLI (ConsoleApp)
+For evaluation in terminal, headless, or SSH environments without JavaFX display libraries:
+```bash
+mvn exec:java
+```
+*Note: Both `IWFCApp` and `ConsoleApp` seamlessly share the exact same underlying architecture, models, and business logic via `IWFCSystemFacade`.*
 
 ---
 

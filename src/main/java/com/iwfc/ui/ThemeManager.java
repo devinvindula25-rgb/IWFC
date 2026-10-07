@@ -61,6 +61,8 @@ public class ThemeManager {
 
         String commonCss = getClass().getResource("/com/iwfc/css/common.css").toExternalForm();
         scene.getStylesheets().add(commonCss);
+        String sidebarCss = getClass().getResource("/com/iwfc/css/sidebar-navigation.css").toExternalForm();
+        scene.getStylesheets().add(sidebarCss);
     }
 
     public ObjectProperty<Theme> currentThemeProperty() {
