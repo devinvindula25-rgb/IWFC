@@ -1,4 +1,4 @@
-﻿/* =========================================================================
+/* =========================================================================
    WORKOUT PLANS COMPONENT STYLES
    ========================================================================= */
 
@@ -247,3 +247,218 @@
     -fx-scale-x: 1.02;
     -fx-scale-y: 1.02;
 }
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: LIGHT THEME
+   ========================================================================== */
+.theme-light .workout-plans-view {
+    -fx-background-color: transparent;
+}
+.theme-light .workout-sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 14, 0, 0, 3);
+}
+.theme-light .workout-sidebar-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .workout-search-field {
+    -fx-background-color: #f8fafc;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-border-color: #e2e8f0;
+}
+.theme-light .workout-search-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-background-color: #ffffff;
+}
+.theme-light .workout-clear-btn {
+    -fx-text-fill: #64748b;
+}
+.theme-light .workout-clear-btn:hover {
+    -fx-text-fill: #0284c7;
+}
+.theme-light .workout-filter-title {
+    -fx-text-fill: #1e293b;
+}
+.theme-light .workout-filter-caret {
+    -fx-text-fill: #64748b;
+}
+.theme-light .premium-checkbox {
+    -fx-text-fill: #334155;
+}
+.theme-light .premium-checkbox .box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .workout-plan-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 14px;
+    -fx-background-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 12, 0, 0, 3);
+}
+.theme-light .workout-plan-card .label {
+    -fx-text-fill: #1e293b;
+}
+.theme-light .workout-card-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .workout-card-prog {
+    -fx-text-fill: #475569;
+}
+.theme-light .workout-card-meta {
+    -fx-text-fill: #64748b;
+}
+.theme-light .workout-plan-card:hover {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.2), 16, 0, 0, 6);
+}
+.theme-light .workout-plan-card-selected {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #2563eb;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.25), 16, 0, 0, 5);
+}
+.theme-light .workout-card-banner {
+    -fx-background-color: linear-gradient(to right bottom, #f1f5f9, #e2e8f0);
+}
+.theme-light .workout-view-btn {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #475569;
+}
+.theme-light .workout-view-btn:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
+}
+.theme-light .workout-view-btn-active {
+    -fx-background-color: #2563eb;
+    -fx-border-color: #2563eb;
+    -fx-text-fill: #ffffff;
+}
+.theme-light .workout-page-btn {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #475569;
+}
+.theme-light .workout-page-btn:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
+}
+.theme-light .workout-page-btn-active {
+    -fx-background-color: #2563eb;
+    -fx-border-color: #2563eb;
+    -fx-text-fill: #ffffff;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: NAVY THEME
+   ========================================================================== */
+.theme-navy .workout-sidebar {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.22);
+}
+.theme-navy .workout-sidebar-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .workout-search-field {
+    -fx-background-color: #051021;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(59, 130, 246, 0.25);
+}
+.theme-navy .workout-filter-title {
+    -fx-text-fill: #f8fafc;
+}
+.theme-navy .premium-checkbox {
+    -fx-text-fill: #cbd5e1;
+}
+.theme-navy .workout-plan-card {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.22);
+    -fx-effect: dropshadow(gaussian, rgba(2, 6, 23, 0.6), 16, 0, 0, 4);
+}
+.theme-navy .workout-plan-card:hover {
+    -fx-background-color: #0b1e3a;
+    -fx-border-color: #38bdf8;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.35), 18, 0, 0, 6);
+}
+.theme-navy .workout-card-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .workout-card-prog {
+    -fx-text-fill: #94a3b8;
+}
+.theme-navy .workout-card-meta {
+    -fx-text-fill: #64748b;
+}
+.theme-navy .workout-plan-card-selected {
+    -fx-background-color: #0b2247;
+    -fx-border-color: #38bdf8;
+}
+.theme-navy .workout-card-banner {
+    -fx-background-color: linear-gradient(to right bottom, #071936, #0e2954);
+}
+.theme-navy .workout-view-btn-active {
+    -fx-background-color: #1d4ed8;
+    -fx-border-color: #38bdf8;
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .workout-page-btn-active {
+    -fx-background-color: #1d4ed8;
+    -fx-border-color: #38bdf8;
+    -fx-text-fill: #ffffff;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: DARK THEME
+   ========================================================================== */
+.theme-dark .workout-sidebar {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .workout-plan-card {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .workout-card-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-dark .workout-card-prog {
+    -fx-text-fill: #94a3b8;
+}
+.theme-dark .workout-card-meta {
+    -fx-text-fill: #64748b;
+}
+.theme-dark .workout-plan-card:hover {
+    -fx-background-color: #161e1a;
+    -fx-border-color: #ccff00;
+    -fx-effect: dropshadow(gaussian, rgba(204, 255, 0, 0.35), 18, 0, 0, 6);
+}
+.theme-dark .workout-card-banner {
+    -fx-background-color: linear-gradient(to right bottom, #111614, #1b241e);
+}
+.theme-dark .workout-view-btn-active {
+    -fx-background-color: #ccff00;
+    -fx-border-color: #ccff00;
+    -fx-text-fill: #000000;
+    -fx-font-weight: 900;
+}
+.theme-dark .workout-page-btn-active {
+    -fx-background-color: #ccff00;
+    -fx-border-color: #ccff00;
+    -fx-text-fill: #000000;
+    -fx-font-weight: 900;
+}
+.theme-dark .workout-detail-section-title {
+    -fx-text-fill: #f8fafc;
+}
+.theme-navy .workout-detail-section-title {
+    -fx-text-fill: #f0f9ff;
+}
+.theme-light .workout-detail-section-title {
+    -fx-text-fill: #0f172a;
+}
+
+

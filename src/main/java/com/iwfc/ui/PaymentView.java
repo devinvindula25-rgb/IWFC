@@ -512,7 +512,8 @@ public class PaymentView extends VBox {
 
         VBox mBox = new VBox(1);
         Label mId = new Label(payment.getMemberId());
-        mId.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: 700; -fx-font-size: 13px;");
+        mId.getStyleClass().add("payments-cell-primary");
+        mId.setStyle("-fx-font-weight: 700; -fx-font-size: 13px;");
         Label mName = new Label(member != null ? member.getName() : "Member");
         mName.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
         mBox.getChildren().addAll(mId, mName);
@@ -524,7 +525,8 @@ public class PaymentView extends VBox {
         dateCol.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(dateCol, Priority.ALWAYS);
         Label d1 = new Label(payment.getPaidAt().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
-        d1.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 12px; -fx-font-weight: 600;");
+        d1.getStyleClass().add("payments-cell-primary");
+        d1.setStyle("-fx-font-size: 12px; -fx-font-weight: 600;");
         Label d2 = new Label(payment.getPaidAt().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         d2.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
         dateCol.getChildren().addAll(d1, d2);
@@ -535,7 +537,8 @@ public class PaymentView extends VBox {
         locCol.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(locCol, Priority.ALWAYS);
         Label l1 = new Label("Main Center");
-        l1.setStyle("-fx-text-fill: #e2e8f0; -fx-font-size: 12px;");
+        l1.getStyleClass().add("payments-cell-primary");
+        l1.setStyle("-fx-font-size: 12px;");
         Label l2 = new Label("POS-01");
         l2.setStyle("-fx-text-fill: #64748b; -fx-font-size: 10px;");
         locCol.getChildren().addAll(l1, l2);
@@ -545,7 +548,8 @@ public class PaymentView extends VBox {
         purpCol.setPrefWidth(150);
         purpCol.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(purpCol, Priority.ALWAYS);
-        purpCol.setStyle("-fx-text-fill: #f1f5f9; -fx-font-size: 12px; -fx-font-weight: 500;");
+        purpCol.getStyleClass().add("payments-cell-primary");
+        purpCol.setStyle("-fx-font-size: 12px; -fx-font-weight: 500;");
 
         // 5. Method Column
         HBox methCol = new HBox(6);
@@ -565,7 +569,8 @@ public class PaymentView extends VBox {
         mIcon.setMinSize(14, 14);
         mIcon.setMaxSize(14, 14);
         Label mTxt = new Label(payment.getMethod().getDisplayName());
-        mTxt.setStyle("-fx-text-fill: #e2e8f0; -fx-font-size: 12px;");
+        mTxt.getStyleClass().add("payments-cell-primary");
+        mTxt.setStyle("-fx-font-size: 12px;");
         methCol.getChildren().addAll(mIcon, mTxt);
 
         // 6. Base Fee Column
@@ -580,7 +585,8 @@ public class PaymentView extends VBox {
         tAmt.setPrefWidth(110);
         tAmt.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(tAmt, Priority.ALWAYS);
-        tAmt.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px; -fx-font-weight: 700;");
+        tAmt.getStyleClass().add("payments-cell-total");
+        tAmt.setStyle("-fx-font-size: 13px; -fx-font-weight: 700;");
 
         // 8. Status Pill Column
         HBox statCol = new HBox();
@@ -627,7 +633,7 @@ public class PaymentView extends VBox {
 
     private ContextMenu createRowContextMenu(Payment payment, User member) {
         ContextMenu menu = new ContextMenu();
-        menu.setStyle("-fx-background-color: #0f172a; -fx-border-color: rgba(56,189,248,0.3); -fx-border-radius: 8px; -fx-padding: 4px;");
+        menu.getStyleClass().add("payments-context-menu");
 
         MenuItem miView = new MenuItem("📄 View Full Receipt");
         miView.setOnAction(e -> showPremiumBillPreview(payment, member));
@@ -768,7 +774,7 @@ public class PaymentView extends VBox {
 
         TextField filterInput = new TextField();
         filterInput.setPromptText("Filter invoices by Member ID or Receipt No...");
-        filterInput.setStyle("-fx-background-color: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 6; -fx-padding: 8;");
+        filterInput.getStyleClass().add("payments-input-field");
 
         VBox list = new VBox(8);
         try {
@@ -839,7 +845,7 @@ public class PaymentView extends VBox {
 
         ComboBox<String> memberCbx = new ComboBox<>();
         memberCbx.setPromptText("Select Member");
-        memberCbx.setStyle("-fx-background-color: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 6;");
+        memberCbx.getStyleClass().add("payments-input-field");
 
         try {
             for (User u : facade.getUsersByRole(Role.MEMBER)) {
@@ -897,8 +903,8 @@ public class PaymentView extends VBox {
             recalc.run();
         });
 
-        String inputStyle = "-fx-background-color: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 6; -fx-padding: 8;";
-        amountF.setStyle(inputStyle); extraF.setStyle(inputStyle);
+        amountF.getStyleClass().add("payments-input-field");
+        extraF.getStyleClass().add("payments-input-field");
 
         grid.add(new Label("Member:"), 0, 0); grid.add(memberCbx, 1, 0);
         grid.add(new Label("Purpose:"), 0, 1); grid.add(purposeCbx, 1, 1);
@@ -1069,7 +1075,7 @@ public class PaymentView extends VBox {
         Label k = new Label(key + ":");
         k.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-min-width: 140;");
         Label v = new Label(val);
-        v.setStyle("-fx-text-fill: #ffffff;");
+        v.getStyleClass().add("payments-cell-primary");
         row.getChildren().addAll(k, v);
         return row;
     }

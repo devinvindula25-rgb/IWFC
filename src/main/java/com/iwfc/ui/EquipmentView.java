@@ -16,8 +16,6 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -492,7 +490,8 @@ public class EquipmentView extends VBox {
 
         // Titles & Stats
         Label catNameLbl = new Label(categoryName);
-        catNameLbl.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 16px; -fx-font-weight: 800;");
+        catNameLbl.getStyleClass().add("equipment-cat-name");
+        catNameLbl.setStyle("-fx-font-size: 16px; -fx-font-weight: 800;");
 
         Label countLbl = new Label(total + " Items");
         countLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px; -fx-font-weight: 700;");
@@ -582,7 +581,8 @@ public class EquipmentView extends VBox {
         HBox.setHgrow(navSpacer, Priority.ALWAYS);
 
         Label catTitle = new Label(selectedCategory + " Equipment");
-        catTitle.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 20px; -fx-font-weight: 900;");
+        catTitle.getStyleClass().add("equipment-drilldown-title");
+        catTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: 900;");
 
         List<Equipment> categoryItems = filteredList.stream()
                 .filter(eq -> eq.getCategory().equalsIgnoreCase(selectedCategory))
@@ -634,7 +634,8 @@ public class EquipmentView extends VBox {
 
         VBox nameBox = new VBox(2);
         Label nameLbl = new Label(eq.getName());
-        nameLbl.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 14px; -fx-font-weight: 800;");
+        nameLbl.getStyleClass().add("equipment-item-name");
+        nameLbl.setStyle("-fx-font-size: 14px; -fx-font-weight: 800;");
         nameLbl.setWrapText(true);
         nameLbl.setMaxWidth(165);
 
@@ -790,7 +791,8 @@ public class EquipmentView extends VBox {
         headerRow.setAlignment(Pos.CENTER_LEFT);
 
         Label title = new Label("Gym Floor Map");
-        title.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 15px; -fx-font-weight: 800;");
+        title.getStyleClass().add("equipment-panel-title");
+        title.setStyle("-fx-font-size: 15px; -fx-font-weight: 800;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -969,7 +971,8 @@ public class EquipmentView extends VBox {
         VBox.setVgrow(panel, Priority.ALWAYS);
 
         Label title = new Label("Recent Maintenance & Alerts");
-        title.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 15px; -fx-font-weight: 800;");
+        title.getStyleClass().add("equipment-panel-title");
+        title.setStyle("-fx-font-size: 15px; -fx-font-weight: 800;");
 
         VBox alertsList = new VBox(10);
         List<MaintenanceRequest> requests = facade.getAllMaintenanceRequests();
@@ -1029,7 +1032,7 @@ public class EquipmentView extends VBox {
         VBox root = new VBox(20);
         root.setPadding(new Insets(26));
         root.setPrefWidth(680);
-        root.setStyle("-fx-background-color: #0f172a; -fx-border-color: #3b82f6; -fx-border-width: 1.5px; -fx-border-radius: 16px; -fx-background-radius: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.65), 30, 0, 0, 10);");
+        root.getStyleClass().add("custom-modal-root");
 
         // Header: Title + ID + Status + Close
         HBox header = new HBox(12);
@@ -1037,7 +1040,7 @@ public class EquipmentView extends VBox {
 
         VBox titleBox = new VBox(3);
         Label title = new Label(eq.getName());
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         HBox metaRow = new HBox(8);
         metaRow.setAlignment(Pos.CENTER_LEFT);
@@ -1095,7 +1098,8 @@ public class EquipmentView extends VBox {
         pTitle.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 700;");
         Region pSp = new Region(); HBox.setHgrow(pSp, Priority.ALWAYS);
         Label pVal = new Label(String.format("%.1f / %.0f hrs (%.0f%%)", usage, thresh, pct * 100));
-        pVal.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 11px; -fx-font-weight: 800;");
+        pVal.setStyle("-fx-font-size: 11px; -fx-font-weight: 800;");
+        pVal.getStyleClass().add("equipment-item-name");
         pTop.getChildren().addAll(pTitle, pSp, pVal);
 
         ProgressBar pBar = new ProgressBar(pct);
@@ -1169,9 +1173,7 @@ public class EquipmentView extends VBox {
 
         root.getChildren().addAll(header, sep1, body, sep2, footer);
 
-        javafx.scene.Scene scene = new javafx.scene.Scene(root);
-        scene.setFill(Color.TRANSPARENT);
-        modal.setScene(scene);
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1183,7 +1185,8 @@ public class EquipmentView extends VBox {
 
     private Label createSpecValue(String text) {
         Label l = new Label(text);
-        l.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 12px; -fx-font-weight: 800;");
+        l.setStyle("-fx-font-size: 12px; -fx-font-weight: 800;");
+        l.getStyleClass().add("equipment-item-name");
         return l;
     }
 

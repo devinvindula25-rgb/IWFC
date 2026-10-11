@@ -464,13 +464,13 @@ public class WorkoutPlansView extends StackPane {
         VBox root = new VBox(20);
         root.setPadding(new Insets(25));
         root.setPrefWidth(Math.max(680, selected.size() * 260));
-        root.setStyle("-fx-background-color: #0f172a; -fx-border-color: #3b82f6; -fx-border-width: 1.5px; -fx-border-radius: 12px; -fx-background-radius: 12px;");
+        root.getStyleClass().add("custom-modal-root");
 
         // Header
         HBox topRow = new HBox(15);
         topRow.setAlignment(Pos.CENTER_LEFT);
         Label mTitle = new Label("Side-by-Side Plan Comparison");
-        mTitle.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: 900;");
+        mTitle.getStyleClass().add("custom-modal-title");
         Region sp = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
         Button closeX = new Button("✕");
         closeX.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 16px; -fx-cursor: hand;");
@@ -542,8 +542,7 @@ public class WorkoutPlansView extends StackPane {
         fRow.getChildren().addAll(clearSel, closeBtn);
 
         root.getChildren().addAll(topRow, compScroll, fRow);
-        Scene sc = new Scene(root);
-        modal.setScene(sc);
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -852,7 +851,7 @@ public class WorkoutPlansView extends StackPane {
         topBanner.getStyleClass().add("workout-card-banner");
         
         Label tag = new Label(plan.getPlanType().toUpperCase());
-        String tagColor = "#3b82f6";
+        String tagColor;
         if (plan.getPlanType().contains("Group")) tagColor = "#38bdf8";
         else if (plan.getPlanType().contains("Personal")) tagColor = "#34d399";
         else tagColor = "#fbbf24";
@@ -887,14 +886,16 @@ public class WorkoutPlansView extends StackPane {
         
         HBox titleRow = new HBox();
         Label title = new Label(plan.getTitle());
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: 900;");
+        title.getStyleClass().add("workout-card-title");
+        title.setStyle("-fx-font-size: 15px; -fx-font-weight: 900;");
         Region tSp = new Region(); HBox.setHgrow(tSp, Priority.ALWAYS);
         Label price = new Label("$" + String.format("%.0f", plan.getBaseMonthlyFee()) + "/mo");
         price.setStyle("-fx-text-fill: #38bdf8; -fx-font-size: 13px; -fx-font-weight: 800;");
         titleRow.getChildren().addAll(title, tSp, price);
         
         Label prog = new Label("Progression: " + plan.getDurationWeeks() + " Wks • " + plan.getDescription());
-        prog.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        prog.getStyleClass().add("workout-card-prog");
+        prog.setStyle("-fx-font-size: 11px;");
         prog.setMaxHeight(32);
         
         Region midSp = new Region();
@@ -946,7 +947,8 @@ public class WorkoutPlansView extends StackPane {
         });
         
         Label lastUpd = new Label("Updated 2d ago");
-        lastUpd.setStyle("-fx-text-fill: #475569; -fx-font-size: 10px;");
+        lastUpd.getStyleClass().add("workout-card-meta");
+        lastUpd.setStyle("-fx-font-size: 10px;");
         lastUpd.setPadding(new Insets(0, 10, 0, 0));
         
         actionsRow.getChildren().addAll(bookmark, aSp, lastUpd, compareCb);

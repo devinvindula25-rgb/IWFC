@@ -535,3 +535,378 @@
     -fx-font-size: 11px;
     -fx-font-weight: 800;
 }
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: LIGHT THEME (Pristine White, Platinum Slate, Lime Fills)
+   ========================================================================== */
+.theme-light .dashboard-header-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .dashboard-header-subtitle {
+    -fx-text-fill: #64748b;
+}
+.theme-light .dashboard-timestamp {
+    -fx-text-fill: #94a3b8;
+}
+.theme-light .dashboard-status-pill {
+    -fx-background-color: rgba(16, 185, 129, 0.12);
+    -fx-border-color: rgba(16, 185, 129, 0.3);
+    -fx-text-fill: #059669;
+}
+.theme-light .timeframe-segment-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 8, 0, 0, 1);
+}
+.theme-light .timeframe-btn {
+    -fx-text-fill: #64748b;
+}
+.theme-light .timeframe-btn:hover {
+    -fx-text-fill: #0f172a;
+    -fx-background-color: #f1f5f9;
+}
+.theme-light .timeframe-btn:selected {
+    -fx-background-color: linear-gradient(to right, #0284c7, #3b82f6);
+    -fx-text-fill: #ffffff;
+}
+.theme-light .dashboard-action-btn {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #334155;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.03), 6, 0, 0, 1);
+}
+.theme-light .dashboard-action-btn:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #94a3b8;
+    -fx-text-fill: #0f172a;
+}
+.theme-light .dashboard-kpi-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 14, 0, 0, 3);
+}
+.theme-light .dashboard-kpi-card:hover {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #84cc16;
+    -fx-effect: dropshadow(gaussian, rgba(132, 204, 22, 0.25), 18, 0, 0, 5);
+}
+.theme-light .dashboard-kpi-title {
+    -fx-text-fill: #64748b;
+}
+.theme-light .dashboard-kpi-icon-wrap {
+    -fx-background-color: #f1f5f9;
+}
+.theme-light .dashboard-kpi-value {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .dashboard-kpi-subtext {
+    -fx-text-fill: #94a3b8;
+}
+.theme-light .dashboard-card-section {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.04), 14, 0, 0, 3);
+}
+.theme-light .dashboard-section-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .dashboard-section-subtitle {
+    -fx-text-fill: #64748b;
+}
+.theme-light .dashboard-line-chart {
+    -fx-background-color: transparent;
+}
+.theme-light .dashboard-line-chart .chart-plot-background {
+    -fx-background-color: #fafbfc;
+}
+.theme-light .dashboard-line-chart .chart-vertical-grid-lines,
+.theme-light .dashboard-line-chart .chart-horizontal-grid-lines {
+    -fx-stroke: #f1f5f9;
+}
+.theme-light .dashboard-line-chart .axis {
+    -fx-tick-label-fill: #64748b;
+}
+.theme-light .dashboard-line-chart .axis:bottom {
+    -fx-border-color: #e2e8f0;
+}
+.theme-light .dashboard-line-chart .axis:left {
+    -fx-border-color: #e2e8f0;
+}
+.theme-light .telemetry-stat-box {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+.theme-light .telemetry-stat-label {
+    -fx-text-fill: #64748b;
+}
+.theme-light .telemetry-stat-value {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .equipment-duty-row {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.theme-light .equipment-duty-row:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .equipment-name-label {
+    -fx-text-fill: #1e293b;
+}
+.theme-light .equipment-duty-hours {
+    -fx-text-fill: #64748b;
+}
+.theme-light .equipment-progress-bar > .track {
+    -fx-background-color: #e2e8f0;
+}
+.theme-light .dashboard-table {
+    -fx-background-color: transparent;
+}
+.theme-light .dashboard-table .column-header-background {
+    -fx-background-color: #f8fafc;
+}
+.theme-light .dashboard-table .column-header {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+}
+.theme-light .dashboard-table .column-header .label {
+    -fx-text-fill: #475569;
+}
+.theme-light .dashboard-table .table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #f1f5f9;
+}
+.theme-light .dashboard-table .table-row-cell:odd {
+    -fx-background-color: #fafbfc;
+}
+.theme-light .dashboard-table .table-row-cell:hover {
+    -fx-background-color: #f0fdf4;
+}
+.theme-light .dashboard-table .table-cell {
+    -fx-text-fill: #1e293b;
+}
+.theme-light .dashboard-search-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .incident-card {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.theme-light .incident-equipment-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .incident-desc-text {
+    -fx-text-fill: #64748b;
+}
+.theme-light .incident-reporter-text {
+    -fx-text-fill: #94a3b8;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: NAVY THEME (Midnight Space Navy & Electric Cyan)
+   ========================================================================== */
+.theme-navy .dashboard-header-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .dashboard-header-subtitle {
+    -fx-text-fill: #93c5fd;
+}
+.theme-navy .dashboard-timestamp {
+    -fx-text-fill: #60a5fa;
+}
+.theme-navy .dashboard-status-pill {
+    -fx-background-color: rgba(56, 189, 248, 0.15);
+    -fx-border-color: rgba(56, 189, 248, 0.4);
+    -fx-text-fill: #38bdf8;
+}
+.theme-navy .timeframe-segment-box {
+    -fx-background-color: #061329;
+    -fx-border-color: rgba(59, 130, 246, 0.25);
+}
+.theme-navy .timeframe-btn {
+    -fx-text-fill: #94a3b8;
+}
+.theme-navy .timeframe-btn:hover {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+}
+.theme-navy .timeframe-btn:selected {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #0284c7);
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.5), 10, 0, 0, 1);
+}
+.theme-navy .dashboard-action-btn {
+    -fx-background-color: #071936;
+    -fx-border-color: rgba(59, 130, 246, 0.25);
+    -fx-text-fill: #cbd5e1;
+}
+.theme-navy .dashboard-action-btn:hover {
+    -fx-background-color: #0d2859;
+    -fx-border-color: #38bdf8;
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .dashboard-kpi-card {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.22);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(2, 6, 23, 0.6), 18, 0, 0, 6);
+}
+.theme-navy .dashboard-kpi-card:hover {
+    -fx-background-color: #0b1e3a;
+    -fx-border-color: #38bdf8;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.35), 20, 0, 0, 8);
+}
+.theme-navy .dashboard-kpi-title {
+    -fx-text-fill: #94a3b8;
+}
+.theme-navy .dashboard-kpi-icon-wrap {
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+}
+.theme-navy .dashboard-kpi-value {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .dashboard-kpi-subtext {
+    -fx-text-fill: #60a5fa;
+}
+.theme-navy .dashboard-card-section {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.22);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(2, 6, 23, 0.5), 16, 0, 0, 6);
+}
+.theme-navy .dashboard-section-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .dashboard-section-subtitle {
+    -fx-text-fill: #93c5fd;
+}
+.theme-navy .dashboard-line-chart .chart-plot-background {
+    -fx-background-color: #040d1a;
+}
+.theme-navy .dashboard-line-chart .chart-vertical-grid-lines,
+.theme-navy .dashboard-line-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(59, 130, 246, 0.1);
+}
+.theme-navy .dashboard-line-chart .axis {
+    -fx-tick-label-fill: #93c5fd;
+}
+.theme-navy .dashboard-line-chart .axis:bottom {
+    -fx-border-color: rgba(59, 130, 246, 0.2);
+}
+.theme-navy .dashboard-line-chart .axis:left {
+    -fx-border-color: rgba(59, 130, 246, 0.2);
+}
+.theme-navy .telemetry-stat-box {
+    -fx-background-color: #061329;
+    -fx-border-color: rgba(59, 130, 246, 0.25);
+}
+.theme-navy .telemetry-stat-label {
+    -fx-text-fill: #93c5fd;
+}
+.theme-navy .telemetry-stat-value {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .equipment-duty-row {
+    -fx-background-color: #061329;
+    -fx-border-color: rgba(59, 130, 246, 0.15);
+}
+.theme-navy .equipment-duty-row:hover {
+    -fx-background-color: #0b1f42;
+    -fx-border-color: #38bdf8;
+}
+.theme-navy .equipment-name-label {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .equipment-duty-hours {
+    -fx-text-fill: #94a3b8;
+}
+.theme-navy .equipment-progress-bar > .track {
+    -fx-background-color: #0b1a33;
+}
+.theme-navy .dashboard-table .column-header-background {
+    -fx-background-color: #051021;
+}
+.theme-navy .dashboard-table .column-header {
+    -fx-background-color: #051021;
+    -fx-border-color: rgba(59, 130, 246, 0.18);
+}
+.theme-navy .dashboard-table .column-header .label {
+    -fx-text-fill: #93c5fd;
+}
+.theme-navy .dashboard-table .table-row-cell {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.1);
+}
+.theme-navy .dashboard-table .table-row-cell:odd {
+    -fx-background-color: #091a34;
+}
+.theme-navy .dashboard-table .table-row-cell:hover {
+    -fx-background-color: #0e2750;
+}
+.theme-navy .dashboard-table .table-cell {
+    -fx-text-fill: #f8fafc;
+}
+.theme-navy .dashboard-search-field {
+    -fx-background-color: #051021;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(59, 130, 246, 0.3);
+}
+.theme-navy .incident-card {
+    -fx-background-color: #061329;
+    -fx-border-color: rgba(59, 130, 246, 0.2);
+}
+.theme-navy .incident-equipment-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .incident-desc-text {
+    -fx-text-fill: #94a3b8;
+}
+.theme-navy .incident-reporter-text {
+    -fx-text-fill: #60a5fa;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: DARK THEME (Obsidian Cyber Black & Lime Highlights)
+   ========================================================================== */
+.theme-dark .dashboard-header-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-dark .dashboard-kpi-card {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .dashboard-kpi-card:hover {
+    -fx-background-color: #161e1a;
+    -fx-border-color: #ccff00;
+    -fx-effect: dropshadow(gaussian, rgba(204, 255, 0, 0.35), 20, 0, 0, 6);
+}
+.theme-dark .dashboard-card-section {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .dashboard-table .table-row-cell {
+    -fx-background-color: #111614;
+}
+.theme-dark .dashboard-table .table-row-cell:odd {
+    -fx-background-color: #151b18;
+}
+.theme-dark .dashboard-table .table-row-cell:hover {
+    -fx-background-color: #1a231e;
+}
+

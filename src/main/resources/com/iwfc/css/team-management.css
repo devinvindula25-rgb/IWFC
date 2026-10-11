@@ -198,7 +198,6 @@
     -fx-text-fill: #64748b;
     -fx-font-size: 10px;
     -fx-font-weight: 600;
-    -fx-text-transform: uppercase;
 }
 
 /* --- Right Content Area & Cards --- */
@@ -533,3 +532,176 @@
     -fx-padding: 0;
     -fx-pref-height: 0;
 }
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: LIGHT THEME
+   ========================================================================== */
+.theme-light .team-directory-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 14, 0, 0, 3);
+}
+.theme-light .team-directory-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-search-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .team-search-input {
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+}
+.theme-light .team-filter-chip {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #e2e8f0;
+    -fx-text-fill: #64748b;
+}
+.theme-light .team-filter-chip:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-filter-chip-active {
+    -fx-background-color: #2563eb;
+    -fx-border-color: #2563eb;
+    -fx-text-fill: #ffffff;
+}
+.theme-light .team-user-row {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #f1f5f9;
+}
+.theme-light .team-user-row:hover {
+    -fx-background-color: #f8fafc;
+}
+.theme-light .team-user-name {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-user-role {
+    -fx-text-fill: #64748b;
+}
+.theme-light .team-glass-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 14, 0, 0, 3);
+}
+.theme-light .team-card-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-card-subtitle {
+    -fx-text-fill: #64748b;
+}
+.theme-light .team-profile-name {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-telemetry-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+}
+.theme-light .team-gauge-box {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+}
+.theme-light .team-gauge-val {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-gauge-label {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-trainee-name {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-perm-name {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .team-metric-val {
+    -fx-text-fill: #0f172a;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: NAVY THEME
+   ========================================================================== */
+.theme-navy .team-directory-card {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.22);
+}
+.theme-navy .team-directory-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-search-box {
+    -fx-background-color: #051021;
+    -fx-border-color: rgba(59, 130, 246, 0.3);
+}
+.theme-navy .team-search-input {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-filter-chip-active {
+    -fx-background-color: #1d4ed8;
+    -fx-border-color: #38bdf8;
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-user-row {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.1);
+}
+.theme-navy .team-user-row:hover {
+    -fx-background-color: #0e2750;
+}
+.theme-navy .team-user-name {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-glass-card {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.22);
+}
+.theme-navy .team-card-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-profile-name {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-gauge-label {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-trainee-name {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-perm-name {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .team-metric-val {
+    -fx-text-fill: #ffffff;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: DARK THEME
+   ========================================================================== */
+.theme-dark .team-directory-card {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .team-user-row:hover {
+    -fx-background-color: #18221c;
+}
+.theme-dark .team-glass-card {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .team-filter-chip-active {
+    -fx-background-color: #ccff00;
+    -fx-border-color: #ccff00;
+    -fx-text-fill: #000000;
+    -fx-font-weight: 900;
+}
+.theme-dark .team-gauge-label {
+    -fx-text-fill: #ffffff;
+}
+.theme-dark .team-trainee-name {
+    -fx-text-fill: #ffffff;
+}
+.theme-dark .team-perm-name {
+    -fx-text-fill: #ffffff;
+}
+.theme-dark .team-metric-val {
+    -fx-text-fill: #ffffff;
+}
+

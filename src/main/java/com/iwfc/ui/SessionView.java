@@ -465,13 +465,13 @@ public class SessionView extends BorderPane {
         content.setPadding(new Insets(30, 25, 25, 25));
         content.setPrefWidth(620);
         content.setPrefHeight(620);
-        content.setStyle("-fx-background-color: #0f172a; -fx-border-color: #06b6d4; -fx-border-width: 1.5px; -fx-border-radius: 14px; -fx-background-radius: 14px;");
+        content.getStyleClass().add("custom-modal-root");
 
         // Header
         VBox headerBox = new VBox(6);
         headerBox.setAlignment(Pos.CENTER);
         Label title = new Label("Daily Session Schedule");
-        title.setStyle("-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: white;");
+        title.getStyleClass().add("custom-modal-title");
         Label subtitle = new Label(date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")));
         subtitle.setStyle("-fx-font-size: 14px; -fx-text-fill: #94a3b8;");
         headerBox.getChildren().addAll(title, subtitle);
@@ -602,8 +602,7 @@ public class SessionView extends BorderPane {
 
         content.getChildren().addAll(headerBox, mainScroll, bottomRow);
         
-        Scene scene = new Scene(content);
-        modal.setScene(scene);
+        DialogUtils.prepareModalScene(modal, content);
         modal.showAndWait();
     }
 
@@ -615,10 +614,10 @@ public class SessionView extends BorderPane {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(420);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Confirm Session Booking");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         Label sInfo = new Label("Session: " + session.getName() + "\nDate: " + date.format(DateTimeFormatter.ofPattern("EEEE, MMM d")) + "\nTime: " + session.getStartTime());
         sInfo.setStyle("-fx-text-fill: #94a3b8; -fx-line-spacing: 4px;");
@@ -693,10 +692,10 @@ public class SessionView extends BorderPane {
         VBox root = new VBox(15);
         root.setPadding(new Insets(24));
         root.setPrefWidth(440);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Registered Attendees (" + session.getName() + ")");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         List<Booking> bookings = facade.getBookingsForSession(session.getSessionId());
         VBox attendeeList = new VBox(8);
@@ -1082,10 +1081,10 @@ public class SessionView extends BorderPane {
         VBox root = new VBox(18);
         root.setPadding(new Insets(24));
         root.setPrefWidth(500);
-        root.setStyle("-fx-background-color: #0f172a; -fx-border-color: #3b82f6; -fx-border-width: 1.5px; -fx-border-radius: 12px; -fx-background-radius: 12px;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label t = new Label("Facility Zones & Current Schedule");
-        t.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        t.getStyleClass().add("custom-modal-title");
 
         VBox zones = new VBox(10);
         zones.getChildren().addAll(
@@ -1101,8 +1100,7 @@ public class SessionView extends BorderPane {
         close.setOnAction(e -> modal.close());
 
         root.getChildren().addAll(t, zones, close);
-        Scene sc = new Scene(root);
-        modal.setScene(sc);
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1138,10 +1136,10 @@ public class SessionView extends BorderPane {
         VBox root = new VBox(18);
         root.setPadding(new Insets(25));
         root.setPrefWidth(520);
-        root.setStyle("-fx-background-color: #0f172a; -fx-border-color: #06b6d4; -fx-border-width: 1.5px; -fx-border-radius: 12px; -fx-background-radius: 12px;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Create & Schedule Fitness Session");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         // Quick Preset Chips
         Label presetLbl = new Label("Quick Templates:");
@@ -1284,8 +1282,7 @@ public class SessionView extends BorderPane {
         btnRow.getChildren().addAll(cancel, save);
 
         root.getChildren().addAll(title, presetLbl, presets, grid, btnRow);
-        Scene sc = new Scene(root);
-        modal.setScene(sc);
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 

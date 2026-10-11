@@ -12,7 +12,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -58,10 +57,13 @@ public class MemberDashboardView extends StackPane {
     }
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 
     private final IWFCSystemFacade facade;
     private final Consumer<String> navCallback;
+
+    public Consumer<String> getNavCallback() {
+        return navCallback;
+    }
 
     // State
     private JourneyFilter selectedFilter = JourneyFilter.UPCOMING;
@@ -302,6 +304,12 @@ public class MemberDashboardView extends StackPane {
         subLbl.getStyleClass().add("dashboard-kpi-sub");
 
         card.getChildren().addAll(topRow, valLbl, subLbl);
+        if (iconClass != null && !iconClass.isBlank()) {
+            card.getStyleClass().add(iconClass);
+        }
+        if (glowColor != null && !glowColor.isBlank()) {
+            card.setStyle("-fx-border-color: " + glowColor + ";");
+        }
         return card;
     }
 
@@ -372,7 +380,8 @@ public class MemberDashboardView extends StackPane {
 
             String titleStr = plan != null ? plan.getTitle() : "Custom Fitness Plan";
             Label planName = new Label(titleStr);
-            planName.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-font-weight: 800;");
+            planName.setStyle("-fx-font-size: 16px; -fx-font-weight: 800;");
+            planName.getStyleClass().add("dashboard-row-title");
             HBox.setHgrow(planName, Priority.ALWAYS);
 
             Label durationPill = new Label((plan != null ? plan.getDurationWeeks() : 12) + " WEEKS");
@@ -570,7 +579,8 @@ public class MemberDashboardView extends StackPane {
 
         String sessionName = booking.getSession() != null ? booking.getSession().getName() : "Workout Session";
         Label nameLbl = new Label(sessionName);
-        nameLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px; -fx-font-weight: 700;");
+        nameLbl.setStyle("-fx-font-size: 13px; -fx-font-weight: 700;");
+        nameLbl.getStyleClass().add("dashboard-row-title");
 
         String instructorName = (booking.getSession() != null && booking.getSession().getInstructor() != null)
                 ? booking.getSession().getInstructor().getName()
@@ -654,11 +664,12 @@ public class MemberDashboardView extends StackPane {
                 HBox pRow = new HBox(10);
                 pRow.setAlignment(Pos.CENTER_LEFT);
                 pRow.setPadding(new Insets(8, 12, 8, 12));
-                pRow.setStyle("-fx-background-color: rgba(30, 41, 59, 0.4); -fx-background-radius: 8px;");
+                pRow.getStyleClass().add("dashboard-list-row");
 
                 VBox pInfo = new VBox(2);
                 Label desc = new Label(p.getDescription() != null ? p.getDescription() : "Membership Fee");
-                desc.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 12px; -fx-font-weight: 600;");
+                desc.setStyle("-fx-font-size: 12px; -fx-font-weight: 600;");
+                desc.getStyleClass().add("dashboard-row-title");
                 Label pDate = new Label(p.getPaidAt() != null ? p.getPaidAt().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")) : "Settled");
                 pDate.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
                 pInfo.getChildren().addAll(desc, pDate);
@@ -699,7 +710,8 @@ public class MemberDashboardView extends StackPane {
         content.setPadding(new Insets(10));
 
         Label header = new Label("Select Session & Reserve Your Spot");
-        header.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-font-weight: 800;");
+        header.setStyle("-fx-font-size: 16px; -fx-font-weight: 800;");
+        header.getStyleClass().add("dashboard-section-title");
 
         ComboBox<FitnessSession> sessionCombo = new ComboBox<>(FXCollections.observableArrayList(facade.getAllSessions()));
         sessionCombo.setPromptText("Choose Available Fitness Session...");
@@ -810,7 +822,8 @@ public class MemberDashboardView extends StackPane {
         content.setPadding(new Insets(10));
 
         Label header = new Label("Choose Your Desired Fitness Curriculum");
-        header.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-font-weight: 800;");
+        header.setStyle("-fx-font-size: 16px; -fx-font-weight: 800;");
+        header.getStyleClass().add("dashboard-section-title");
 
         ComboBox<FitnessPlan> planCombo = new ComboBox<>(FXCollections.observableArrayList(facade.getPlanCatalogue()));
         planCombo.setPromptText("Select New Fitness Plan...");

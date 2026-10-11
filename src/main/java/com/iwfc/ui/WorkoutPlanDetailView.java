@@ -139,7 +139,8 @@ public class WorkoutPlanDetailView extends VBox {
     private VBox buildDescriptionSection() {
         VBox section = new VBox(15);
         Label header = new Label("Program Overview");
-        header.setStyle("-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #f1f5f9;");
+        header.setStyle("-fx-font-size: 26px; -fx-font-weight: 900;");
+        header.getStyleClass().add("workout-detail-section-title");
         
         String richDescription = generateRichDescription(plan);
         Label text = new Label(richDescription);
@@ -156,7 +157,8 @@ public class WorkoutPlanDetailView extends VBox {
         HBox titleRow = new HBox(12);
         titleRow.setAlignment(Pos.CENTER_LEFT);
         Label header = new Label("Example Routine");
-        header.setStyle("-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #f1f5f9;");
+        header.setStyle("-fx-font-size: 26px; -fx-font-weight: 900;");
+        header.getStyleClass().add("workout-detail-section-title");
         Label hint = new Label("(Click any exercise card to view coaching tips & technique)");
         hint.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13px; -fx-font-style: italic;");
         titleRow.getChildren().addAll(header, hint);
@@ -236,8 +238,8 @@ public class WorkoutPlanDetailView extends VBox {
 
         VBox content = new VBox(20);
         content.setPadding(new Insets(30));
-        content.setStyle("-fx-background-color: #0f172a; -fx-border-color: #3b82f6; -fx-border-width: 1.5px; -fx-border-radius: 14px; -fx-background-radius: 14px;");
         content.setPrefWidth(480);
+        content.getStyleClass().add("custom-modal-root");
 
         HBox top = new HBox(15);
         top.setAlignment(Pos.CENTER_LEFT);
@@ -258,7 +260,7 @@ public class WorkoutPlanDetailView extends VBox {
         Label step = new Label(title);
         step.setStyle("-fx-text-fill: #38bdf8; -fx-font-weight: 800; -fx-font-size: 13px;");
         Label exName = new Label(exerciseName);
-        exName.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: 900;");
+        exName.getStyleClass().add("custom-modal-title");
         Label volLbl = new Label("🎯 Target: " + volume);
         volLbl.setStyle("-fx-text-fill: #34d399; -fx-font-weight: bold; -fx-font-size: 13px;");
         meta.getChildren().addAll(step, exName, volLbl);
@@ -272,7 +274,8 @@ public class WorkoutPlanDetailView extends VBox {
         Label mTitle = new Label("Target Muscles");
         mTitle.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 13px;");
         Label mVal = new Label(muscles);
-        mVal.setStyle("-fx-text-fill: #f1f5f9; -fx-font-size: 14px; -fx-font-weight: 600;");
+        mVal.setStyle("-fx-font-size: 14px; -fx-font-weight: 600;");
+        mVal.getStyleClass().add("workout-card-title");
 
         Label tTitle = new Label("Form & Coaching Tips");
         tTitle.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 13px;");
@@ -288,8 +291,7 @@ public class WorkoutPlanDetailView extends VBox {
         closeBtn.setOnAction(e -> modal.close());
 
         content.getChildren().addAll(top, sep, body, closeBtn);
-        Scene scene = new Scene(content);
-        modal.setScene(scene);
+        DialogUtils.prepareModalScene(modal, content);
         modal.showAndWait();
     }
     
@@ -356,12 +358,12 @@ public class WorkoutPlanDetailView extends VBox {
         VBox root = new VBox(22);
         root.setPadding(new Insets(30));
         root.setPrefWidth(520);
-        root.setStyle("-fx-background-color: #0f172a; -fx-border-color: #3b82f6; -fx-border-width: 1.5px; -fx-border-radius: 14px; -fx-background-radius: 14px;");
+        root.getStyleClass().add("custom-modal-root");
 
         // Header
         VBox dHeader = new VBox(6);
         Label dTitle = new Label("Program Enrollment");
-        dTitle.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: 900;");
+        dTitle.getStyleClass().add("custom-modal-title");
         Label dSub = new Label("Select member, assign certified instructor, and complete setup.");
         dSub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px;");
         dHeader.getChildren().addAll(dTitle, dSub);
@@ -533,8 +535,7 @@ public class WorkoutPlanDetailView extends VBox {
         btnRow.getChildren().addAll(cancelBtn, confirmBtn);
 
         root.getChildren().addAll(dHeader, pCard, memBox, instrBox, payBox, btnRow);
-        Scene s = new Scene(root);
-        dialog.setScene(s);
+        DialogUtils.prepareModalScene(dialog, root);
         dialog.showAndWait();
     }
     
@@ -543,7 +544,8 @@ public class WorkoutPlanDetailView extends VBox {
         card.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 16px; -fx-padding: 30; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 16px;");
         
         Label title = new Label("Progression Path");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #e2e8f0;");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("workout-detail-section-title");
         
         Label text = new Label(plan.getProgressionSummary());
         text.setStyle("-fx-font-size: 14px; -fx-text-fill: #94a3b8; -fx-line-spacing: 8px;");
@@ -561,7 +563,8 @@ public class WorkoutPlanDetailView extends VBox {
     
     private Label createValueLabel(String text) {
         Label l = new Label(text);
-        l.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 15px; -fx-font-weight: 900;");
+        l.setStyle("-fx-font-size: 15px; -fx-font-weight: 900;");
+        l.getStyleClass().add("workout-card-title");
         return l;
     }
     

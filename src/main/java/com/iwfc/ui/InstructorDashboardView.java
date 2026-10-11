@@ -9,10 +9,8 @@ import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -21,10 +19,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
@@ -60,8 +56,6 @@ public class InstructorDashboardView extends StackPane {
     }
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-    private static final DateTimeFormatter SHORT_DATE_FMT = DateTimeFormatter.ofPattern("MMM dd");
 
     private final IWFCSystemFacade facade;
     private final Consumer<String> navCallback;
@@ -301,6 +295,12 @@ public class InstructorDashboardView extends StackPane {
         subLbl.getStyleClass().add("dashboard-kpi-sub");
 
         card.getChildren().addAll(topRow, valLbl, subLbl);
+        if (iconClass != null && !iconClass.isBlank()) {
+            card.getStyleClass().add(iconClass);
+        }
+        if (glowColor != null && !glowColor.isBlank()) {
+            card.setStyle("-fx-border-color: " + glowColor + ";");
+        }
         return card;
     }
 
@@ -400,7 +400,8 @@ public class InstructorDashboardView extends StackPane {
         Label dayLbl = new Label(session.getDayOfWeek().name().substring(0, 3));
         dayLbl.setStyle("-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-weight: 800;");
         Label timeLbl = new Label(session.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")));
-        timeLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px; -fx-font-weight: 700;");
+        timeLbl.setStyle("-fx-font-size: 13px; -fx-font-weight: 700;");
+        timeLbl.getStyleClass().add("dashboard-row-title");
         timeBox.getChildren().addAll(dayLbl, timeLbl);
 
         // Details
@@ -410,7 +411,8 @@ public class InstructorDashboardView extends StackPane {
         HBox titleRow = new HBox(8);
         titleRow.setAlignment(Pos.CENTER_LEFT);
         Label nameLbl = new Label(session.getName());
-        nameLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: 700;");
+        nameLbl.setStyle("-fx-font-size: 14px; -fx-font-weight: 700;");
+        nameLbl.getStyleClass().add("dashboard-row-title");
 
         Label roomPill = new Label("📍 " + (session.getLocation() != null ? session.getLocation().getDisplayName() : "Main Studio"));
         roomPill.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
@@ -509,7 +511,7 @@ public class InstructorDashboardView extends StackPane {
         HBox card = new HBox(12);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(10, 14, 10, 14));
-        card.setStyle("-fx-background-color: rgba(30, 41, 59, 0.5); -fx-background-radius: 12px; -fx-border-color: rgba(255, 255, 255, 0.08); -fx-border-radius: 12px;");
+        card.getStyleClass().add("dashboard-list-row");
 
         // Avatar
         StackPane avatar = new StackPane();
@@ -526,7 +528,8 @@ public class InstructorDashboardView extends StackPane {
         HBox nameRow = new HBox(6);
         nameRow.setAlignment(Pos.CENTER_LEFT);
         Label nameLbl = new Label(member.getName());
-        nameLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px; -fx-font-weight: 700;");
+        nameLbl.setStyle("-fx-font-size: 13px; -fx-font-weight: 700;");
+        nameLbl.getStyleClass().add("dashboard-row-title");
 
         Label tierPill = new Label(member.getMembershipType() != null ? member.getMembershipType() : "Standard");
         tierPill.setStyle("-fx-background-color: rgba(139, 92, 246, 0.2); -fx-text-fill: #c084fc; -fx-font-size: 10px; -fx-padding: 1px 6px; -fx-background-radius: 10px;");
@@ -643,10 +646,11 @@ public class InstructorDashboardView extends StackPane {
             HBox item = new HBox(10);
             item.setAlignment(Pos.CENTER_LEFT);
             item.setPadding(new Insets(8, 12, 8, 12));
-            item.setStyle("-fx-background-color: rgba(30, 41, 59, 0.4); -fx-background-radius: 8px;");
+            item.getStyleClass().add("dashboard-list-row");
 
             Label name = new Label(eq.getName());
-            name.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px; -fx-font-weight: 600;");
+            name.setStyle("-fx-font-size: 13px; -fx-font-weight: 600;");
+            name.getStyleClass().add("dashboard-row-title");
             HBox.setHgrow(name, Priority.ALWAYS);
 
             Label statusPill = new Label(eq.getStatus().name());
@@ -720,7 +724,8 @@ public class InstructorDashboardView extends StackPane {
         content.setPadding(new Insets(10));
 
         Label headerLbl = new Label("Mark Athlete Attendance & Check-Ins");
-        headerLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-font-weight: 800;");
+        headerLbl.setStyle("-fx-font-size: 16px; -fx-font-weight: 800;");
+        headerLbl.getStyleClass().add("dashboard-section-title");
 
         // Session selection combo
         List<FitnessSession> mySessions = getMySessions();
@@ -756,10 +761,11 @@ public class InstructorDashboardView extends StackPane {
                 HBox row = new HBox(12);
                 row.setAlignment(Pos.CENTER_LEFT);
                 row.setPadding(new Insets(8, 12, 8, 12));
-                row.setStyle("-fx-background-color: rgba(30, 41, 59, 0.5); -fx-background-radius: 8px;");
+                row.getStyleClass().add("dashboard-list-row");
 
                 Label memName = new Label(b.getMember() != null ? b.getMember().getName() : "Member");
-                memName.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px; -fx-font-weight: 600;");
+                memName.setStyle("-fx-font-size: 13px; -fx-font-weight: 600;");
+                memName.getStyleClass().add("dashboard-row-title");
                 HBox.setHgrow(memName, Priority.ALWAYS);
 
                 Label status = new Label(b.getStatus().getDisplayName());
@@ -840,7 +846,8 @@ public class InstructorDashboardView extends StackPane {
         content.setPadding(new Insets(10));
 
         Label header = new Label("Assign Fitness Plan Curriculum");
-        header.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-font-weight: 800;");
+        header.setStyle("-fx-font-size: 16px; -fx-font-weight: 800;");
+        header.getStyleClass().add("dashboard-section-title");
 
         // Trainee Selection
         ComboBox<User> memberCombo = new ComboBox<>();

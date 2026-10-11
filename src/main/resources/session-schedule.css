@@ -1,4 +1,4 @@
-﻿/* =========================================================================
+/* =========================================================================
    SESSION SCHEDULE COMPONENT STYLES
    ========================================================================= */
 
@@ -169,3 +169,126 @@
     -fx-background-color: rgba(59, 130, 246, 0.25);
     -fx-border-color: #3b82f6;
 }
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: LIGHT THEME
+   ========================================================================== */
+.theme-light .session-schedule-view {
+    -fx-background-color: transparent;
+}
+.theme-light .calendar-day-header {
+    -fx-text-fill: #475569;
+}
+.theme-light .calendar-day-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.03), 8, 0, 0, 1);
+}
+.theme-light .calendar-day-cell:hover {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #3b82f6;
+}
+.theme-light .calendar-day-selected {
+    -fx-border-color: #0284c7;
+    -fx-background-color: rgba(6, 182, 212, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(6, 182, 212, 0.25), 14, 0, 0, 3);
+}
+.theme-light .calendar-day-today {
+    -fx-border-color: #0284c7;
+    -fx-background-color: #f0fdf4;
+}
+.theme-light .calendar-date-lbl {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .calendar-date-lbl-muted {
+    -fx-text-fill: #94a3b8;
+}
+.theme-light .calendar-date-lbl-today {
+    -fx-text-fill: #0284c7;
+}
+.theme-light .calendar-session-pill {
+    -fx-background-color: #f1f5f9;
+}
+.theme-light .calendar-session-pill:hover {
+    -fx-background-color: #e2e8f0;
+}
+.theme-light .session-glass-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 14, 0, 0, 3);
+}
+.theme-light .session-glass-card:hover {
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .session-search-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .timeline-card {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.03), 8, 0, 0, 1);
+}
+.theme-light .timeline-card:hover {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: NAVY THEME
+   ========================================================================== */
+.theme-navy .calendar-day-header {
+    -fx-text-fill: #93c5fd;
+}
+.theme-navy .calendar-day-cell {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.22);
+}
+.theme-navy .calendar-day-cell:hover {
+    -fx-background-color: #0b1f42;
+    -fx-border-color: #38bdf8;
+}
+.theme-navy .calendar-day-today {
+    -fx-border-color: #38bdf8;
+    -fx-background-color: #0b2247;
+}
+.theme-navy .calendar-date-lbl {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .calendar-date-lbl-muted {
+    -fx-text-fill: #64748b;
+}
+.theme-navy .calendar-date-lbl-today {
+    -fx-text-fill: #38bdf8;
+}
+.theme-navy .session-glass-card {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.22);
+}
+.theme-navy .timeline-card {
+    -fx-background-color: #061329;
+    -fx-border-color: rgba(59, 130, 246, 0.2);
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: DARK THEME
+   ========================================================================== */
+.theme-dark .calendar-day-cell {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .calendar-day-today {
+    -fx-border-color: #ccff00;
+    -fx-background-color: #16201a;
+}
+.theme-dark .session-glass-card {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .timeline-card {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+

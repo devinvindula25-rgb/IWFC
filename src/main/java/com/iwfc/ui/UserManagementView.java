@@ -606,7 +606,8 @@ public class UserManagementView extends HBox {
         fg.setRotate(-90);
 
         Label label = new Label(displayText);
-        label.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 18px; -fx-font-weight: 800;");
+        label.getStyleClass().add("team-gauge-label");
+        label.setStyle("-fx-font-size: 18px; -fx-font-weight: 800;");
 
         stack.getChildren().addAll(bg, fg, label);
         return stack;
@@ -784,7 +785,8 @@ public class UserManagementView extends HBox {
         HBox nameRow = new HBox(6);
         nameRow.setAlignment(Pos.CENTER_LEFT);
         Label name = new Label(member.getName());
-        name.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 13px; -fx-font-weight: 700;");
+        name.getStyleClass().add("team-trainee-name");
+        name.setStyle("-fx-font-size: 13px; -fx-font-weight: 700;");
 
         Label memBadge = new Label(member.getMembershipType() != null ? member.getMembershipType() : "Standard");
         memBadge.setStyle("-fx-background-color: rgba(56, 189, 248, 0.15); -fx-text-fill: #38bdf8; -fx-padding: 2 6; -fx-background-radius: 8; -fx-font-size: 10px; -fx-font-weight: bold;");
@@ -1075,7 +1077,8 @@ public class UserManagementView extends HBox {
             checkIcon.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold; -fx-font-size: 13px;");
             VBox pTexts = new VBox(1);
             Label pName = new Label(perms[i][0]);
-            pName.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 12px; -fx-font-weight: 700;");
+            pName.getStyleClass().add("team-perm-name");
+            pName.setStyle("-fx-font-size: 12px; -fx-font-weight: 700;");
             Label pSub = new Label(perms[i][1]);
             pSub.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
             pTexts.getChildren().addAll(pName, pSub);
@@ -1171,9 +1174,6 @@ public class UserManagementView extends HBox {
                 specF.setText("Strength & Conditioning");
             }
         });
-
-        String inputStyle = "-fx-background-color: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 6; -fx-padding: 8;";
-        nameF.setStyle(inputStyle); emailF.setStyle(inputStyle); phoneF.setStyle(inputStyle); addressF.setStyle(inputStyle); specF.setStyle(inputStyle);
 
         grid.add(new Label("Role:"), 0, 0); grid.add(roleCbx, 1, 0);
         grid.add(new Label("Full Name:"), 0, 1); grid.add(nameF, 1, 1);
@@ -1304,9 +1304,6 @@ public class UserManagementView extends HBox {
         bodyArea.setPromptText("Compose email body...");
         bodyArea.setPrefRowCount(4);
 
-        String inputStyle = "-fx-background-color: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 6; -fx-padding: 8;";
-        toF.setStyle(inputStyle); subjectF.setStyle(inputStyle); bodyArea.setStyle(inputStyle);
-
         grid.add(new Label("To:"), 0, 0); grid.add(toF, 1, 0);
         grid.add(new Label("Priority:"), 0, 1); grid.add(priorityCbx, 1, 1);
         grid.add(new Label("Subject:"), 0, 2); grid.add(subjectF, 1, 2);
@@ -1377,7 +1374,8 @@ public class UserManagementView extends HBox {
         Label k = new Label(key + ":");
         k.setStyle("-fx-text-fill: #94a3b8; -fx-font-weight: 600; -fx-min-width: 140;");
         Label v = new Label(val);
-        v.setStyle("-fx-text-fill: #f1f5f9; -fx-font-weight: bold;");
+        v.setStyle("-fx-font-weight: bold;");
+        v.getStyleClass().add("team-trainee-name");
         row.getChildren().addAll(k, v);
         return row;
     }
@@ -1399,12 +1397,10 @@ public class UserManagementView extends HBox {
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
 
-        String inputStyle = "-fx-background-color: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 6; -fx-padding: 8;";
-
-        TextField nameF = new TextField(selectedUser.getName()); nameF.setStyle(inputStyle);
-        TextField emailF = new TextField(selectedUser.getEmail()); emailF.setStyle(inputStyle);
-        TextField phoneF = new TextField(selectedUser.getPhone() != null ? selectedUser.getPhone() : ""); phoneF.setStyle(inputStyle);
-        TextField addressF = new TextField(selectedUser.getAddress() != null ? selectedUser.getAddress() : ""); addressF.setStyle(inputStyle);
+        TextField nameF = new TextField(selectedUser.getName());
+        TextField emailF = new TextField(selectedUser.getEmail());
+        TextField phoneF = new TextField(selectedUser.getPhone() != null ? selectedUser.getPhone() : "");
+        TextField addressF = new TextField(selectedUser.getAddress() != null ? selectedUser.getAddress() : "");
 
         grid.add(new Label("Full Name:"), 0, 0); grid.add(nameF, 1, 0);
         grid.add(new Label("Email:"), 0, 1); grid.add(emailF, 1, 1);
@@ -1415,10 +1411,8 @@ public class UserManagementView extends HBox {
         TextArea bioArea = null;
         if (selectedUser instanceof Instructor inst) {
             specF = new TextField(inst.getSpecialization() != null ? inst.getSpecialization() : "");
-            specF.setStyle(inputStyle);
             bioArea = new TextArea(inst.getBio() != null ? inst.getBio() : "");
             bioArea.setPrefRowCount(3);
-            bioArea.setStyle(inputStyle);
             grid.add(new Label("Specialization:"), 0, 4); grid.add(specF, 1, 4);
             grid.add(new Label("Bio:"), 0, 5); grid.add(bioArea, 1, 5);
         }
@@ -1470,7 +1464,6 @@ public class UserManagementView extends HBox {
 
         ComboBox<String> memberCbx = new ComboBox<>();
         memberCbx.setPromptText("Select a Registered Member");
-        memberCbx.setStyle("-fx-background-color: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 6;");
 
         try {
             for (User u : facade.getUsersByRole(Role.MEMBER)) {
@@ -1561,7 +1554,9 @@ public class UserManagementView extends HBox {
         box.setPadding(new Insets(8));
         box.setStyle("-fx-background-color: rgba(15,23,42,0.6); -fx-background-radius: 8;");
         Label l = new Label(label); l.setStyle("-fx-text-fill: #64748b; -fx-font-size: 10px; -fx-font-weight: bold;");
-        Label v = new Label(value); v.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: 800;");
+        Label v = new Label(value);
+        v.getStyleClass().add("team-metric-val");
+        v.setStyle("-fx-font-size: 14px; -fx-font-weight: 800;");
         Label c = new Label(change); c.setStyle("-fx-text-fill: #10b981; -fx-font-size: 10px;");
         box.getChildren().addAll(l, v, c);
         return box;
@@ -1664,7 +1659,7 @@ public class UserManagementView extends HBox {
         Dialog<Boolean> dialog = new Dialog<>();
         DialogUtils.stylePremiumDialog(dialog);
         dialog.setTitle("System Broadcast Dispatcher");
-        dialog.setHeaderText("Broadcast critical announcement across all user terminals");
+        dialog.setHeaderText("Broadcast announcement from " + (admin != null ? admin.getName() : "Administrator") + " across all user terminals");
 
         ButtonType sendBtnType = new ButtonType("Broadcast Alert", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(sendBtnType, ButtonType.CANCEL);
@@ -1673,11 +1668,9 @@ public class UserManagementView extends HBox {
         box.setPadding(new Insets(20));
 
         TextField titleF = new TextField("Facility Maintenance / Schedule Update");
-        titleF.setStyle("-fx-background-color: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 6; -fx-padding: 8;");
 
         TextArea msgArea = new TextArea("Please be advised of scheduled maintenance on Sunday from 02:00 to 04:00 AM.");
         msgArea.setPrefRowCount(4);
-        msgArea.setStyle("-fx-control-inner-background: #1e293b; -fx-text-fill: white; -fx-border-color: rgba(248,113,113,0.4); -fx-border-radius: 6;");
 
         box.getChildren().addAll(new Label("Announcement Title:"), titleF, new Label("Message Body:"), msgArea);
         dialog.getDialogPane().setContent(box);

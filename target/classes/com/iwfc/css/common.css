@@ -666,7 +666,6 @@
     -fx-font-size: 11px;
     -fx-font-weight: bold;
     -fx-opacity: 0.6;
-    -fx-text-transform: uppercase;
 }
 
 .calendar-day-cell {
@@ -925,7 +924,6 @@
     -fx-border-radius: 4;
     -fx-padding: 10 15;
     -fx-font-style: italic;
-    font-style: italic;
     -fx-opacity: 0.9;
 }
 
@@ -942,7 +940,6 @@
 
 .premium-bar-chart .axis-tick-mark, .premium-bar-chart .axis-minor-tick-mark {
     -fx-stroke: transparent;
-    stroke: transparent;
 }
 
 .premium-bar-chart .axis {
@@ -951,9 +948,7 @@
 
 .premium-line-chart .chart-series-line {
     -fx-stroke: #8b5cf6;
-    stroke: #8b5cf6;
     -fx-stroke-width: 3px;
-    stroke-width: 3px;
     -fx-effect: dropshadow(gaussian, rgba(139, 92, 246, 0.5), 10, 0, 0, 4);
 }
 
@@ -1039,7 +1034,6 @@
 
 .report-nav-indicator {
     -fx-fill: #6366f1;
-    fill: #6366f1;
 }
 
 /* --- Report Header --- */

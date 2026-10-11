@@ -6,6 +6,7 @@ import javafx.stage.StageStyle;
 import javafx.scene.paint.Color;
 import javafx.application.Platform;
 import javafx.stage.Window;
+import com.iwfc.ui.ThemeManager;
 
 public class DialogUtils {
 
@@ -20,13 +21,23 @@ public class DialogUtils {
         // Add the premium CSS class
         dialog.getDialogPane().getStyleClass().add("premium-dialog");
         
-        // Make sure the dialog pane's scene is transparent so the shadow shows properly
+        // Make sure the dialog pane's scene is transparent and inherits the active theme
         Platform.runLater(() -> {
             if (dialog.getDialogPane().getScene() != null) {
-                dialog.getDialogPane().getScene().setFill(Color.TRANSPARENT);
+                javafx.scene.Scene sc = dialog.getDialogPane().getScene();
+                sc.setFill(Color.TRANSPARENT);
+                ThemeManager tm = ThemeManager.getInstance();
+                tm.applyTheme(sc);
+                String themeClass = switch (tm.getCurrentTheme()) {
+                    case LIGHT -> "theme-light";
+                    case DARK_BLUE -> "theme-navy";
+                    case DARK -> "theme-dark";
+                };
+                dialog.getDialogPane().getStyleClass().removeAll("theme-dark", "theme-light", "theme-navy");
+                dialog.getDialogPane().getStyleClass().add(themeClass);
                 
                 // Center on parent window if possible, or center on screen
-                Window window = dialog.getDialogPane().getScene().getWindow();
+                Window window = sc.getWindow();
                 if (window != null) {
                     if (dialog.getOwner() != null) {
                         Window owner = dialog.getOwner();
@@ -44,7 +55,25 @@ public class DialogUtils {
                 }
             }
         });
-        
-        // Optional: you can add a custom header node if you want to implement window dragging.
+    }
+
+    /**
+     * Prepares and themes a custom modal Stage with transparency and active theme stylesheets.
+     */
+    public static javafx.scene.Scene prepareModalScene(javafx.stage.Stage stage, javafx.scene.Parent root) {
+        javafx.scene.Scene scene = new javafx.scene.Scene(root);
+        scene.setFill(Color.TRANSPARENT);
+        ThemeManager tm = ThemeManager.getInstance();
+        tm.applyTheme(scene);
+        String themeClass = switch (tm.getCurrentTheme()) {
+            case LIGHT -> "theme-light";
+            case DARK_BLUE -> "theme-navy";
+            case DARK -> "theme-dark";
+        };
+        root.getStyleClass().removeAll("theme-dark", "theme-light", "theme-navy");
+        root.getStyleClass().add(themeClass);
+        root.getStyleClass().add("custom-modal-root");
+        stage.setScene(scene);
+        return scene;
     }
 }

@@ -70,7 +70,10 @@ D:\Projects\IWFC\src\main\java\com\iwfc\service\UserService.java
 D:\Projects\IWFC\src\main\java\com\iwfc\TestNotification.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\AdminReportsView.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\AnalysisView.java
+D:\Projects\IWFC\src\main\java\com\iwfc\ui\components\CyberGridCanvas.java
+D:\Projects\IWFC\src\main\java\com\iwfc\ui\components\CyberThemeToggle.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\components\DialogUtils.java
+D:\Projects\IWFC\src\main\java\com\iwfc\ui\components\LiveHeartbeatView.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\components\StatCard.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\components\StatusBadge.java
 D:\Projects\IWFC\src\main\java\com\iwfc\ui\components\ToastNotification.java

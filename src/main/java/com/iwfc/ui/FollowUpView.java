@@ -11,9 +11,7 @@ import javafx.animation.*;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
@@ -70,7 +68,6 @@ public class FollowUpView extends VBox {
     private Button clearFiltersBtn;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
 
     // Dynamic Gradient Palette for Avatars
     private static final String[] AVATAR_GRADIENTS = {
@@ -88,7 +85,6 @@ public class FollowUpView extends VBox {
         getStyleClass().add("followup-view");
         setPadding(new Insets(24));
         setSpacing(18);
-        setStyle("-fx-background-color: radial-gradient(center 50% 50%, radius 120%, #171626, #090812);");
         VBox.setVgrow(this, Priority.ALWAYS);
 
         try {
@@ -758,7 +754,8 @@ public class FollowUpView extends VBox {
         nameBox.setAlignment(Pos.CENTER_LEFT);
 
         Label nameLbl = new Label(f.getName());
-        nameLbl.setStyle("-fx-text-fill: #f8fafc; -fx-font-weight: 800; -fx-font-size: 13.5px;");
+        nameLbl.getStyleClass().add("followup-lead-name");
+        nameLbl.setStyle("-fx-font-weight: 800; -fx-font-size: 13.5px;");
 
         HBox phoneBox = new HBox(4);
         phoneBox.setAlignment(Pos.CENTER_LEFT);
@@ -810,7 +807,8 @@ public class FollowUpView extends VBox {
 
         String dateStr = f.getScheduledDate() != null ? f.getScheduledDate().format(DATE_FMT) : "Not Set";
         Label dateLbl = new Label(dateStr);
-        dateLbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-size: 12px; -fx-font-weight: 700;");
+        dateLbl.getStyleClass().add("followup-lead-date");
+        dateLbl.setStyle("-fx-font-size: 12px; -fx-font-weight: 700;");
 
         // Relative Urgency Badge
         Label urgencyBadge = new Label();
@@ -885,7 +883,8 @@ public class FollowUpView extends VBox {
 
         String noteText = f.getComments() != null && !f.getComments().isEmpty() ? f.getComments() : "No customer notes recorded.";
         Label commentsLbl = new Label(noteText);
-        commentsLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px;");
+        commentsLbl.getStyleClass().add("followup-lead-comments");
+        commentsLbl.setStyle("-fx-font-size: 12px;");
         commentsLbl.setTextOverrun(OverrunStyle.ELLIPSIS);
         commentsLbl.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(commentsLbl, Priority.ALWAYS);
@@ -1125,7 +1124,8 @@ public class FollowUpView extends VBox {
         HBox numBox = new HBox(6);
         numBox.setAlignment(Pos.BASELINE_LEFT);
         Label bNum = new Label(bigNum);
-        bNum.setStyle("-fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: 900;");
+        bNum.getStyleClass().add("followup-stat-num");
+        bNum.setStyle("-fx-font-size: 26px; -fx-font-weight: 900;");
         Label sNum = new Label(subNum);
         sNum.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px; -fx-font-weight: 700;");
         numBox.getChildren().addAll(bNum, sNum);
@@ -1364,9 +1364,7 @@ public class FollowUpView extends VBox {
 
         root.getChildren().addAll(icon, nameLbl, phoneLbl, statusLbl, sep, outcomeTitle, outcomes, cancelBtn);
 
-        Scene sc = new Scene(root);
-        sc.setFill(Color.TRANSPARENT);
-        modal.setScene(sc);
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1378,12 +1376,12 @@ public class FollowUpView extends VBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(490);
-        root.setStyle("-fx-background-color: #0b1120; -fx-border-color: #06b6d4; -fx-border-width: 1.5px; -fx-border-radius: 18px; -fx-background-radius: 18px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 30, 0, 0, 10);");
+        root.getStyleClass().add("custom-modal-root");
 
         HBox top = new HBox(10);
         top.setAlignment(Pos.CENTER_LEFT);
         Label title = new Label("💬 Compose Message — " + f.getName());
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: 800;");
+        title.getStyleClass().add("custom-modal-title");
         Region sp = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
         Button closeX = new Button("✕");
         closeX.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand; -fx-font-size: 14px;");
@@ -1431,9 +1429,7 @@ public class FollowUpView extends VBox {
 
         root.getChildren().addAll(top, templLbl, templates, msgArea, footer);
 
-        Scene sc = new Scene(root);
-        sc.setFill(Color.TRANSPARENT);
-        modal.setScene(sc);
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 

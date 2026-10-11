@@ -1,0 +1,335 @@
+/* ============================================================
+   IWFC — Supreme High-Tech Cyber Login Styling
+   ============================================================ */
+
+.cyber-login-root {
+    -fx-alignment: center;
+}
+
+/* Brand Pane Text */
+.login-hud-tag {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.theme-dark .login-hud-tag,
+.theme-navy .login-hud-tag {
+    -fx-text-fill: #ccff00;
+}
+
+.theme-light .login-hud-tag {
+    -fx-text-fill: #3f6212;
+}
+
+/* Stats Row */
+.stats-number {
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+}
+
+.theme-dark .stats-number,
+.theme-navy .stats-number {
+    -fx-text-fill: #ffffff;
+}
+
+.theme-light .stats-number {
+    -fx-text-fill: #0f172a;
+}
+
+.stats-label {
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.theme-dark .stats-label,
+.theme-navy .stats-label {
+    -fx-text-fill: #64748b;
+}
+
+.theme-light .stats-label {
+    -fx-text-fill: #526649;
+}
+
+/* Slogan */
+.slogan-text {
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+}
+
+.theme-dark .slogan-main,
+.theme-navy .slogan-main {
+    -fx-text-fill: #ffffff;
+}
+
+.theme-light .slogan-main {
+    -fx-text-fill: #0a0d0a;
+}
+
+.theme-dark .slogan-track,
+.theme-navy .slogan-track {
+    -fx-text-fill: #ccff00;
+}
+
+.theme-light .slogan-track-badge {
+    -fx-background-color: #ccff00;
+    -fx-background-radius: 4px;
+    -fx-padding: 0 8px;
+    -fx-text-fill: #000000;
+    -fx-font-weight: 900;
+}
+
+/* Right Form Card Header */
+.form-secure-tag {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.theme-dark .form-secure-tag,
+.theme-navy .form-secure-tag {
+    -fx-text-fill: #ccff00;
+}
+
+.theme-light .form-secure-tag {
+    -fx-text-fill: #3f6212;
+}
+
+.form-sign-in-title {
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: 900;
+}
+
+.theme-dark .form-sign-in-title,
+.theme-navy .form-sign-in-title {
+    -fx-text-fill: #ffffff;
+}
+
+.theme-light .form-sign-in-title {
+    -fx-text-fill: #0a0d0a;
+}
+
+.form-subtitle-desc {
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.theme-dark .form-subtitle-desc,
+.theme-navy .form-subtitle-desc {
+    -fx-text-fill: #94a3b8;
+}
+
+.theme-light .form-subtitle-desc {
+    -fx-text-fill: #64748b;
+}
+
+/* Section label (ROLE, CREDENTIAL ID) */
+.form-field-label {
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.theme-dark .form-field-label,
+.theme-navy .form-field-label {
+    -fx-text-fill: #94a3b8;
+}
+
+.theme-light .form-field-label {
+    -fx-text-fill: #475569;
+}
+
+/* Role Tiles */
+.role-tile-btn {
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+    -fx-padding: 12 8;
+}
+
+.theme-dark .role-tile-inactive {
+    -fx-background-color: #151b18;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+.theme-navy .role-tile-inactive {
+    -fx-background-color: #0b1a33;
+    -fx-border-color: rgba(59, 130, 246, 0.18);
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+.theme-light .role-tile-inactive {
+    -fx-background-color: #f1f3ed;
+    -fx-border-color: #e2e6dc;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+.role-tile-active {
+    -fx-background-color: #ccff00;
+    -fx-border-color: #ccff00;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(204, 255, 0, 0.45), 14, 0.2, 0, 2);
+}
+
+.role-tile-label-active {
+    -fx-text-fill: #000000;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+}
+
+.theme-dark .role-tile-label-inactive,
+.theme-navy .role-tile-label-inactive {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+}
+
+.theme-light .role-tile-label-inactive {
+    -fx-text-fill: #334155;
+    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+}
+
+/* Credential ID Input Field */
+.cyber-input-field {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-border-color: #ccff00;
+    -fx-border-width: 2;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 8 16;
+}
+
+.theme-dark .cyber-input-field {
+    -fx-background-color: #0c100e;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.3);
+}
+
+.theme-navy .cyber-input-field {
+    -fx-background-color: #061124;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.3);
+}
+
+.theme-light .cyber-input-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0a0d0a;
+    -fx-prompt-text-fill: rgba(0, 0, 0, 0.3);
+}
+
+/* Enter Portal Button */
+.cyber-enter-btn {
+    -fx-background-color: #ccff00;
+    -fx-text-fill: #000000;
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(204, 255, 0, 0.4), 16, 0.2, 0, 4);
+}
+
+.cyber-enter-btn:hover {
+    -fx-background-color: #d8ff26;
+    -fx-effect: dropshadow(gaussian, rgba(204, 255, 0, 0.7), 22, 0.3, 0, 6);
+}
+
+/* Demo ID hints */
+.demo-ids-text {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+
+.theme-dark .demo-ids-text,
+.theme-navy .demo-ids-text {
+    -fx-text-fill: #64748b;
+}
+
+.theme-light .demo-ids-text {
+    -fx-text-fill: #475569;
+}
+
+.demo-id-chip {
+    -fx-cursor: hand;
+    -fx-font-weight: 800;
+}
+
+.theme-dark .demo-id-chip:hover,
+.theme-navy .demo-id-chip:hover {
+    -fx-text-fill: #ccff00;
+}
+
+.theme-light .demo-id-chip:hover {
+    -fx-text-fill: #3f6212;
+}
+
+/* System online status footer */
+.online-status-text {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+
+.theme-dark .online-status-text,
+.theme-navy .online-status-text {
+    -fx-text-fill: #94a3b8;
+}
+
+.theme-light .online-status-text {
+    -fx-text-fill: #475569;
+}
+
+.version-text {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+
+.theme-dark .version-text,
+.theme-navy .version-text {
+    -fx-text-fill: #64748b;
+}
+
+.theme-light .version-text {
+    -fx-text-fill: #526649;
+}
+
+/* 3D Theme Switcher Floating HUD */
+.theme-switcher-container {
+    -fx-alignment: center-right;
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+.theme-hud-label {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+
+.theme-dark .theme-hud-label {
+    -fx-text-fill: #64748b;
+}
+
+.theme-navy .theme-hud-label {
+    -fx-text-fill: #93c5fd;
+}
+
+.theme-light .theme-hud-label {
+    -fx-text-fill: #475569;
+}
+

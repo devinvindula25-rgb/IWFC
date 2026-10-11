@@ -18,14 +18,10 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polyline;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
@@ -116,7 +112,8 @@ public class MeasurementAnalyticsView extends VBox {
         nameRow.setAlignment(Pos.CENTER_LEFT);
 
         Label title = new Label(member.getName());
-        title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #f8fafc;");
+        title.setStyle("-fx-font-size: 22px; -fx-font-weight: 800;");
+        title.getStyleClass().add("reports-member-name");
 
         Label idBadge = new Label("ID: " + member.getUserId());
         idBadge.getStyleClass().add("member-badge-id");
@@ -535,7 +532,8 @@ public class MeasurementAnalyticsView extends VBox {
         chartIcon.setStyle("-fx-font-size: 18px;");
 
         Label metricLabel = new Label("Historical Telemetry Chart:");
-        metricLabel.setStyle("-fx-font-weight: 800; -fx-font-size: 15px; -fx-text-fill: #f8fafc;");
+        metricLabel.setStyle("-fx-font-weight: 800; -fx-font-size: 15px;");
+        metricLabel.getStyleClass().add("reports-chart-title");
 
         metricSelector = new ComboBox<>();
         metricSelector.getItems().addAll("Weight", "Chest", "Upper Arms", "Thighs", "Calves");
@@ -573,7 +571,8 @@ public class MeasurementAnalyticsView extends VBox {
         Label aiIcon = new Label("🤖");
         aiIcon.setStyle("-fx-font-size: 18px;");
         Label insightsTitle = new Label("AI Trend & Biometric Diagnostics");
-        insightsTitle.setStyle("-fx-font-weight: 800; -fx-font-size: 16px; -fx-text-fill: #f8fafc;");
+        insightsTitle.setStyle("-fx-font-weight: 800; -fx-font-size: 16px;");
+        insightsTitle.getStyleClass().add("reports-section-title");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -681,7 +680,8 @@ public class MeasurementAnalyticsView extends VBox {
         Label iconLbl = new Label(icon);
         iconLbl.setStyle("-fx-font-weight: 800; -fx-font-size: 15px; -fx-text-fill: " + iconColor + ";");
         Label titleLbl = new Label(insight.metricName());
-        titleLbl.setStyle("-fx-font-weight: 800; -fx-font-size: 14px; -fx-text-fill: #f8fafc;");
+        titleLbl.setStyle("-fx-font-weight: 800; -fx-font-size: 14px;");
+        titleLbl.getStyleClass().add("reports-insight-title");
         topRow.getChildren().addAll(iconLbl, titleLbl);
 
         Label subLbl = new Label(insight.title());

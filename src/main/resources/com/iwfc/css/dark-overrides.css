@@ -807,9 +807,7 @@
 
 .report-avatar-circle {
     -fx-fill: linear-gradient(to bottom right, #6366f1, #8b5cf6);
-    fill: linear-gradient(to bottom right, #6366f1, #8b5cf6);
     -fx-stroke: rgba(255, 255, 255, 0.15);
-    stroke: rgba(255, 255, 255, 0.15);
 }
 
 .report-avatar-text {
@@ -962,3 +960,31 @@
     -fx-background-color: rgba(30, 41, 59, 0.55);
     -fx-border-color: rgba(255, 255, 255, 0.08);
 }
+
+/* --- Custom Modals Dark Overrides --- */
+.custom-modal-root {
+    -fx-background-color: #0f172a;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 35, 0, 0, 12);
+}
+.custom-modal-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+}
+.custom-modal-sub {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+}
+.custom-modal-input {
+    -fx-background-color: rgba(255, 255, 255, 0.07);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+}
+

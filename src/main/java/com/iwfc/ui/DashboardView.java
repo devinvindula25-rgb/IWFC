@@ -855,7 +855,8 @@ public class DashboardView extends StackPane {
 
                     VBox info = new VBox(2);
                     Label nLbl = new Label(name);
-                    nLbl.setStyle("-fx-font-weight: 700; -fx-text-fill: #ffffff; -fx-font-size: 12px;");
+                    nLbl.getStyleClass().add("dashboard-cell-title");
+                    nLbl.setStyle("-fx-font-weight: 700; -fx-font-size: 12px;");
                     Label idLbl = new Label(item.getMember() != null ? item.getMember().getUserId() : "");
                     idLbl.setStyle("-fx-font-size: 10px; -fx-text-fill: #64748b;");
                     info.getChildren().addAll(nLbl, idLbl);
@@ -1127,7 +1128,7 @@ public class DashboardView extends StackPane {
                 HBox iRow = new HBox(12);
                 iRow.setAlignment(Pos.CENTER_LEFT);
                 iRow.setPadding(new Insets(8, 12, 8, 12));
-                iRow.setStyle("-fx-background-color: rgba(30, 41, 59, 0.4); -fx-background-radius: 8px;");
+                iRow.getStyleClass().add("dashboard-list-row");
 
                 StackPane av = new StackPane();
                 av.setPrefSize(32, 32);
@@ -1138,7 +1139,8 @@ public class DashboardView extends StackPane {
 
                 VBox details = new VBox(2);
                 Label nameLbl = new Label(instr.getName());
-                nameLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: 700; -fx-font-size: 12px;");
+                nameLbl.getStyleClass().add("dashboard-row-title");
+                nameLbl.setStyle("-fx-font-weight: 700; -fx-font-size: 12px;");
                 String spec = instr.getSpecialization() != null ? instr.getSpecialization() : "Certified Fitness Coach";
                 Label specLbl = new Label(spec);
                 specLbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
@@ -1189,14 +1191,15 @@ public class DashboardView extends StackPane {
             HBox pRow = new HBox(12);
             pRow.setAlignment(Pos.CENTER_LEFT);
             pRow.setPadding(new Insets(8, 12, 8, 12));
-            pRow.setStyle("-fx-background-color: rgba(30, 41, 59, 0.4); -fx-background-radius: 8px;");
+            pRow.getStyleClass().add("dashboard-list-row");
 
             Label iconLbl = new Label("📋");
             iconLbl.setStyle("-fx-font-size: 16px;");
 
             VBox pInfo = new VBox(2);
             Label name = new Label(plan.getTitle());
-            name.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: 700; -fx-font-size: 12px;");
+            name.getStyleClass().add("dashboard-row-title");
+            name.setStyle("-fx-font-weight: 700; -fx-font-size: 12px;");
             String obj = (!plan.getObjectives().isEmpty()) ? plan.getObjectives().get(0) : "General Fitness";
             Label dur = new Label(plan.getDurationWeeks() + " Weeks • " + obj);
             dur.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
@@ -1280,7 +1283,8 @@ public class DashboardView extends StackPane {
         content.setPadding(new Insets(10));
 
         Label header = new Label("Dispatch Instant Push Notification Across IWFC");
-        header.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-font-weight: 700;");
+        header.setStyle("-fx-font-size: 15px; -fx-font-weight: 700;");
+        header.getStyleClass().add("dashboard-section-title");
 
         TextArea msgArea = new TextArea();
         msgArea.setPromptText("Enter emergency broadcast, schedule update, or facility announcement...");
@@ -1752,7 +1756,7 @@ public class DashboardView extends StackPane {
         dialog.showAndWait();
     }
 
-    private void showDailyLogDialog() {
+    public void showDailyLogDialog() {
         Dialog<Boolean> dialog = new Dialog<>();
         DialogUtils.stylePremiumDialog(dialog);
         dialog.setTitle("Daily Measurement Log");

@@ -3,7 +3,9 @@ package com.iwfc.ui;
 import com.iwfc.facade.IWFCSystemFacade;
 import com.iwfc.model.*;
 import com.iwfc.pattern.DataStore;
+import com.iwfc.ui.components.CyberThemeToggle;
 import com.iwfc.ui.components.DialogUtils;
+import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
@@ -11,14 +13,20 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import java.io.InputStream;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -30,7 +38,8 @@ import java.util.*;
  * - Expandable/Collapsible Sidebar Drawer (Full 280px vs. 76px Compact Icon Rail)
  * - Quick-Action Command Center Button (Instant Member, Booking, Maintenance, POS, Broadcast)
  * - Live User Profile Card with Instant Multi-Role Switcher (Admin, Instructor, Member)
- * - Glassmorphic Theme Toggle with smooth rotation & center status telemetry
+ * - Prominent 3D CyberThemeToggle Segmented Capsule (Matching Physical Hardware Design)
+ * - Real-Time Operational Fleet Telemetry Widget
  */
 public class MainLayout extends BorderPane {
 
@@ -44,8 +53,13 @@ public class MainLayout extends BorderPane {
     private VBox navContentBox;
     private TextField searchField;
     private Button clearSearchBtn;
-    private VBox filterChipsBox;
     private Button collapseToggleBtn;
+    private Button themeBtn;
+    private Button compactThemeBtn;
+    private CyberThemeToggle cyberThemeToggle;
+    private Label themeBadgeLabel;
+    private Label searchFilterBadge;
+    private ImageView eagleLogoView;
     private Button activeNavButton;
     private String activeViewName = "Dashboard";
 
@@ -76,6 +90,12 @@ public class MainLayout extends BorderPane {
 
         // Show dashboard by default
         navigateTo("Dashboard");
+
+        // Real-time Theme Synchronization
+        updateThemeStyles();
+        ThemeManager.getInstance().currentThemeProperty().addListener((obs, oldT, newT) -> {
+            updateThemeStyles();
+        });
     }
 
     // =========================================================================
@@ -92,102 +112,132 @@ public class MainLayout extends BorderPane {
             sidebar.getStyleClass().add("sidebar-compact");
         }
 
-        // 1. Top Brand & Toolbar Header
+        // Clip boundary to ensure children never overflow the sidebar frame
+        Rectangle sidebarClip = new Rectangle();
+        sidebarClip.widthProperty().bind(sidebar.widthProperty());
+        sidebarClip.heightProperty().bind(sidebar.heightProperty());
+        sidebar.setClip(sidebarClip);
+
+        // 1. Top Brand & Window Controls Header (Spacious, uncrowded)
         VBox topHeader = buildTopHeader();
 
-        // 2. Search & Filter Bar (hidden in compact mode)
+        // 2. Dedicated 3D Cyber Theme Switcher Dock (Prominent & Highly Visible)
+        VBox themeControlArea = buildThemeControlArea();
+
+        // 3. Search & Filter Bar (hidden in compact mode)
         VBox searchAndFilterArea = buildSearchAndFilterArea();
 
-        // 3. Quick Action Floating Button
+        // 4. Quick Action Floating Button
         VBox quickActionArea = buildQuickActionButton();
 
-        // 4. Scrollable Navigation Sections
+        // 5. Scrollable Navigation Sections
         navScrollPane = buildNavScrollPane();
         navScrollPane.setMinHeight(120);
         VBox.setVgrow(navScrollPane, Priority.ALWAYS);
 
-        // 5. Bottom User Profile Card & Role Switcher
+        // 6. Live Telemetry & Readiness Status Widget (Utilizes lower empty space)
+        VBox telemetryWidget = buildTelemetryWidget();
+
+        // 7. Bottom User Profile Card & Role Switcher
         VBox userProfileCard = buildUserProfileCard();
         VBox.setMargin(userProfileCard, isCompact ? new Insets(4, 6, 8, 6) : new Insets(4, 12, 10, 12));
 
-        sidebar.getChildren().addAll(topHeader, searchAndFilterArea, quickActionArea, navScrollPane, userProfileCard);
+        if (isCompact) {
+            sidebar.getChildren().addAll(topHeader, quickActionArea, navScrollPane, userProfileCard);
+        } else {
+            sidebar.getChildren().addAll(topHeader, themeControlArea, searchAndFilterArea, quickActionArea, navScrollPane, telemetryWidget, userProfileCard);
+            updateSearchFilterBadge();
+        }
     }
 
     // =========================================================================
-    // 1. Brand & Header Bar
+    // 1. Brand & Header Bar (Spacious, Clean, Uncrowded)
     // =========================================================================
 
     private VBox buildTopHeader() {
         VBox header = new VBox();
         header.getStyleClass().add("sidebar-header");
 
-        HBox brandRow = new HBox(10);
-        brandRow.setAlignment(Pos.CENTER_LEFT);
-
-        // Glowing Brand Badge Icon
-        StackPane brandBadge = new StackPane();
-        brandBadge.getStyleClass().add("sidebar-brand-badge");
-        Label brandIcon = new Label("⚡");
-        brandIcon.getStyleClass().add("sidebar-brand-icon");
-        brandBadge.getChildren().add(brandIcon);
-
-        // Logo Texts with Integrated Live Telemetry Indicator
-        VBox logoTextBox = new VBox(2);
-        logoTextBox.setAlignment(Pos.CENTER_LEFT);
-        Label logoTitle = new Label("IWFC");
-        logoTitle.getStyleClass().add("sidebar-logo-text");
-
-        HBox statusLine = new HBox(5);
-        statusLine.setAlignment(Pos.CENTER_LEFT);
-        statusLine.getStyleClass().add("sidebar-status-line");
-
-        Circle statusDot = new Circle(3);
-        statusDot.getStyleClass().add("sidebar-status-dot");
-
-        Label statusText = new Label("LIVE SYNC • FITNESS OS");
-        statusText.getStyleClass().add("sidebar-status-text");
-
-        statusLine.getChildren().addAll(statusDot, statusText);
-        logoTextBox.getChildren().addAll(logoTitle, statusLine);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        // Theme Toggle Button
-        Button themeBtn = new Button(ThemeManager.getInstance().isDark() ? "🌙" : "☀️");
-        themeBtn.getStyleClass().add("sidebar-header-btn");
-        themeBtn.setTooltip(new Tooltip("Toggle Dark / Light Theme"));
-        themeBtn.setOnAction(e -> {
-            ThemeManager tm = ThemeManager.getInstance();
-            tm.toggle();
-            tm.applyTheme(getScene());
-            themeBtn.setText(tm.isDark() ? "🌙" : "☀️");
-        });
-
-        // Live Refresh Button
-        Button refreshBtn = new Button("↻");
-        refreshBtn.getStyleClass().add("sidebar-header-btn");
-        refreshBtn.setTooltip(new Tooltip("Sync Live Telemetry & Badges"));
-        refreshBtn.setOnAction(e -> refreshAllBadges(true));
-
-        // Collapse / Expand Toggle
-        collapseToggleBtn = new Button(isCompact ? "▶" : "◀");
-        collapseToggleBtn.getStyleClass().add("sidebar-header-btn");
-        collapseToggleBtn.setTooltip(new Tooltip(isCompact ? "Expand Sidebar" : "Collapse Sidebar (Icon Rail)"));
-        collapseToggleBtn.setOnAction(e -> toggleSidebarCompactMode());
-
         if (isCompact) {
-            header.setPadding(new Insets(14, 0, 10, 0));
+            header.setPadding(new Insets(16, 0, 10, 0));
             header.setAlignment(Pos.CENTER);
-            VBox compactBrandBox = new VBox(10);
+
+            eagleLogoView = createEagleLogoView(36);
+
+            compactThemeBtn = new Button();
+            compactThemeBtn.getStyleClass().add("sidebar-header-action-btn");
+            compactThemeBtn.setOnAction(e -> {
+                ThemeManager tm = ThemeManager.getInstance();
+                tm.toggle();
+                tm.applyTheme(getScene());
+                updateThemeStyles();
+                navigateTo(activeViewName);
+            });
+
+            collapseToggleBtn = new Button("▶");
+            collapseToggleBtn.getStyleClass().add("sidebar-header-action-btn");
+            collapseToggleBtn.setTooltip(new Tooltip("Expand Sidebar"));
+            collapseToggleBtn.setOnAction(e -> toggleSidebarCompactMode());
+
+            VBox compactBrandBox = new VBox(12);
             compactBrandBox.setAlignment(Pos.CENTER);
-            compactBrandBox.getChildren().addAll(brandBadge, collapseToggleBtn);
+            compactBrandBox.getChildren().addAll(eagleLogoView, compactThemeBtn, collapseToggleBtn);
             header.getChildren().add(compactBrandBox);
         } else {
-            header.setPadding(new Insets(14, 14, 12, 14));
-            HBox actionControls = new HBox(5, themeBtn, refreshBtn, collapseToggleBtn);
+            header.setPadding(new Insets(18, 14, 10, 14));
+
+            HBox brandRow = new HBox(10);
+            brandRow.setAlignment(Pos.CENTER_LEFT);
+
+            // High-Tech Geometric Eagle Crest Logo (from user upload)
+            eagleLogoView = createEagleLogoView(42);
+
+            // Heavy Athletic Logotype + Micro-Telemetry Status Tag
+            VBox logoTextBox = new VBox(2);
+            logoTextBox.setAlignment(Pos.CENTER_LEFT);
+
+            Label logoTitle = new Label("IWFC");
+            logoTitle.getStyleClass().add("sidebar-logo-text");
+            logoTitle.setFont(resolveHeavyFont(20));
+
+            HBox statusLine = new HBox(5);
+            statusLine.setAlignment(Pos.CENTER_LEFT);
+            statusLine.getStyleClass().add("sidebar-status-line");
+
+            Circle statusDot = new Circle(3.5);
+            statusDot.getStyleClass().add("sidebar-status-dot");
+
+            FadeTransition pulse = new FadeTransition(Duration.millis(900), statusDot);
+            pulse.setFromValue(1.0);
+            pulse.setToValue(0.35);
+            pulse.setAutoReverse(true);
+            pulse.setCycleCount(Animation.INDEFINITE);
+            pulse.play();
+
+            Label statusText = new Label("LIVE SYNC • FITNESS OS");
+            statusText.getStyleClass().add("sidebar-status-text");
+
+            statusLine.getChildren().addAll(statusDot, statusText);
+            logoTextBox.getChildren().addAll(logoTitle, statusLine);
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            // Decluttered Action Controls: Sync Telemetry & Collapse
+            Button refreshBtn = new Button("↻");
+            refreshBtn.getStyleClass().add("sidebar-header-action-btn");
+            refreshBtn.setTooltip(new Tooltip("Sync Live Telemetry & Badges"));
+            refreshBtn.setOnAction(e -> refreshAllBadges(true));
+
+            collapseToggleBtn = new Button("◀");
+            collapseToggleBtn.getStyleClass().add("sidebar-header-action-btn");
+            collapseToggleBtn.setTooltip(new Tooltip("Collapse Sidebar (Icon Rail)"));
+            collapseToggleBtn.setOnAction(e -> toggleSidebarCompactMode());
+
+            HBox actionControls = new HBox(6, refreshBtn, collapseToggleBtn);
             actionControls.setAlignment(Pos.CENTER_RIGHT);
-            brandRow.getChildren().addAll(brandBadge, logoTextBox, spacer, actionControls);
+
+            brandRow.getChildren().addAll(eagleLogoView, logoTextBox, spacer, actionControls);
             header.getChildren().add(brandRow);
         }
 
@@ -195,12 +245,12 @@ public class MainLayout extends BorderPane {
     }
 
     // =========================================================================
-    // 2. Search & Category Filter Area
+    // 2. High-Tech 3D Appearance & Theme Switcher Dock (Prominent & Tactile)
     // =========================================================================
 
-    private VBox buildSearchAndFilterArea() {
-        VBox container = new VBox(8);
-        container.setPadding(new Insets(2, 12, 6, 12));
+    private VBox buildThemeControlArea() {
+        VBox container = new VBox(6);
+        container.setPadding(new Insets(2, 12, 10, 12));
 
         if (isCompact) {
             container.setVisible(false);
@@ -208,17 +258,234 @@ public class MainLayout extends BorderPane {
             return container;
         }
 
-        // Search Input Box
+        VBox card = new VBox(8);
+        card.getStyleClass().add("sidebar-theme-card");
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(10, 12, 12, 12));
+
+        // Header row: Label + Active Theme Pill
+        HBox headerRow = new HBox(8);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label themeIconLbl = new Label("🎨");
+        themeIconLbl.setStyle("-fx-font-size: 11px;");
+
+        Label themeTitle = new Label("APPEARANCE");
+        themeTitle.getStyleClass().add("sidebar-theme-label");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        themeBadgeLabel = new Label();
+        themeBadgeLabel.getStyleClass().add("sidebar-theme-badge");
+        updateThemeBadgeText(ThemeManager.getInstance().getCurrentTheme());
+
+        headerRow.getChildren().addAll(themeIconLbl, themeTitle, spacer, themeBadgeLabel);
+
+        // Centered 3D Segmented Toggle Switch (Matching Image 3)
+        cyberThemeToggle = new CyberThemeToggle(this::onThemeToggleSelected);
+
+        card.getChildren().addAll(headerRow, cyberThemeToggle);
+        container.getChildren().add(card);
+        return container;
+    }
+
+    private void onThemeToggleSelected(ThemeManager.Theme newTheme) {
+        ThemeManager tm = ThemeManager.getInstance();
+        tm.setTheme(newTheme);
+        tm.applyTheme(getScene());
+        updateThemeStyles();
+        navigateTo(activeViewName);
+    }
+
+    private void updateThemeBadgeText(ThemeManager.Theme theme) {
+        if (themeBadgeLabel != null) {
+            String text = switch (theme) {
+                case LIGHT -> "☀ LIGHT";
+                case DARK_BLUE -> "🌌 NAVY";
+                case DARK -> "🌙 DARK";
+            };
+            themeBadgeLabel.setText(text);
+        }
+    }
+
+    // =========================================================================
+    // Live Operational Telemetry & Readiness Status Widget
+    // =========================================================================
+
+    private VBox buildTelemetryWidget() {
+        VBox container = new VBox(6);
+        container.setPadding(new Insets(4, 12, 6, 12));
+
+        if (isCompact) {
+            container.setVisible(false);
+            container.setManaged(false);
+            return container;
+        }
+
+        VBox card = new VBox(8);
+        card.getStyleClass().add("sidebar-telemetry-card");
+        card.setPadding(new Insets(10, 12, 10, 12));
+
+        HBox headerRow = new HBox(6);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+
+        Circle liveDot = new Circle(3.0);
+        liveDot.setStyle("-fx-fill: #10b981; -fx-effect: dropshadow(gaussian, #10b981, 4, 0.5, 0, 0);");
+
+        Label titleLbl = new Label("SYSTEM TELEMETRY");
+        titleLbl.getStyleClass().add("sidebar-telemetry-title");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label syncStatus = new Label("ONLINE");
+        syncStatus.getStyleClass().add("sidebar-telemetry-status");
+
+        headerRow.getChildren().addAll(liveDot, titleLbl, spacer, syncStatus);
+
+        // Telemetry stats row
+        HBox statsRow = new HBox(6);
+        statsRow.setAlignment(Pos.CENTER);
+
+        VBox stat1 = createTelemetryStat("FLEET", "91.7%", "Ready");
+        VBox stat2 = createTelemetryStat("DUTY", "2 TRAINERS", "Active");
+        long memberCount = 0;
+        try {
+            memberCount = DataStore.getInstance().getUsers().findAll().stream().filter(u -> u.getRole() == Role.MEMBER).count();
+        } catch (Exception ignored) {}
+        VBox stat3 = createTelemetryStat("ROSTER", memberCount + " MEMS", "Members");
+
+        HBox.setHgrow(stat1, Priority.ALWAYS);
+        HBox.setHgrow(stat2, Priority.ALWAYS);
+        HBox.setHgrow(stat3, Priority.ALWAYS);
+
+        statsRow.getChildren().addAll(stat1, stat2, stat3);
+        card.getChildren().addAll(headerRow, statsRow);
+        container.getChildren().add(card);
+        return container;
+    }
+
+    private VBox createTelemetryStat(String label, String value, String sub) {
+        VBox box = new VBox(2);
+        box.setAlignment(Pos.CENTER);
+        box.getStyleClass().add("sidebar-telemetry-stat-box");
+
+        Label valLbl = new Label(value);
+        valLbl.getStyleClass().add("sidebar-telemetry-stat-val");
+
+        Label lbl = new Label(label);
+        lbl.getStyleClass().add("sidebar-telemetry-stat-lbl");
+
+        box.getChildren().addAll(valLbl, lbl);
+        if (sub != null && !sub.isBlank()) {
+            Tooltip.install(box, new Tooltip(label + ": " + sub));
+        }
+        return box;
+    }
+
+    private ImageView createEagleLogoView(double height) {
+        ImageView eagleView = new ImageView();
+        try {
+            InputStream is = getClass().getResourceAsStream("/com/iwfc/images/iwfc-logo.png");
+            if (is != null) {
+                eagleView.setImage(new Image(is));
+            }
+        } catch (Exception ignored) {}
+
+        eagleView.setFitHeight(height);
+        eagleView.setPreserveRatio(true);
+        eagleView.setSmooth(true);
+
+        DropShadow aura = new DropShadow(14, Color.rgb(56, 189, 248, 0.45));
+        eagleView.setEffect(aura);
+
+        ScaleTransition breathe = new ScaleTransition(Duration.millis(2400), eagleView);
+        breathe.setFromX(1.0);
+        breathe.setFromY(1.0);
+        breathe.setToX(1.035);
+        breathe.setToY(1.035);
+        breathe.setAutoReverse(true);
+        breathe.setCycleCount(Animation.INDEFINITE);
+        breathe.play();
+
+        return eagleView;
+    }
+
+    private Font resolveHeavyFont(double size) {
+        String[] fontCandidates = {"Impact", "Arial Black", "Segoe UI Black", "Trebuchet MS"};
+        for (String candidate : fontCandidates) {
+            Font font = Font.font(candidate, FontWeight.BLACK, size);
+            if (font != null && font.getFamily().equalsIgnoreCase(candidate)) {
+                return font;
+            }
+        }
+        return Font.font("System", FontWeight.EXTRA_BOLD, size);
+    }
+
+    // =========================================================================
+    // 2. Search & Category Filter Area
+    // =========================================================================
+
+    private VBox buildSearchAndFilterArea() {
+        VBox container = new VBox();
+        container.setPadding(new Insets(2, 12, 6, 12));
+        container.setMaxWidth(280);
+        container.setPrefWidth(280);
+        container.setMinWidth(280);
+
+        if (isCompact) {
+            container.setVisible(false);
+            container.setManaged(false);
+            return container;
+        }
+
+        // Dedicated Frosted Glass Card for Search & Filter Controls (Strictly Contained)
+        VBox card = new VBox(7);
+        card.getStyleClass().add("sidebar-search-card");
+        card.setMaxWidth(256);
+        card.setPrefWidth(256);
+        card.setMinWidth(256);
+        card.setPadding(new Insets(8, 10, 10, 10));
+
+        // Header Row: Micro-Icon + Title + Active Filter State Badge
+        HBox headerRow = new HBox(6);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label searchCardIcon = new Label("🔍");
+        searchCardIcon.setStyle("-fx-font-size: 10px;");
+
+        Label searchCardTitle = new Label("SEARCH & FILTER");
+        searchCardTitle.getStyleClass().add("sidebar-search-card-title");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        searchFilterBadge = new Label("ALL");
+        searchFilterBadge.getStyleClass().add("sidebar-search-card-badge");
+
+        headerRow.getChildren().addAll(searchCardIcon, searchCardTitle, spacer, searchFilterBadge);
+
+        // Search Input Box (High-tech glass pill input - strictly 236px)
         HBox searchBox = new HBox(6);
         searchBox.getStyleClass().add("sidebar-search-box");
+        searchBox.setAlignment(Pos.CENTER_LEFT);
+        searchBox.setMaxWidth(236);
+        searchBox.setPrefWidth(236);
+        searchBox.setMinWidth(236);
 
-        Label searchIcon = new Label("🔍");
+        Label searchIcon = new Label("🔎");
         searchIcon.getStyleClass().add("sidebar-search-icon");
 
         searchField = new TextField();
-        searchField.setPromptText("Filter views... (e.g. sess, pay)");
+        searchField.setPromptText("Search views...");
         searchField.getStyleClass().add("sidebar-search-field");
+        searchField.setMinWidth(0);
+        searchField.setPrefWidth(120);
         HBox.setHgrow(searchField, Priority.ALWAYS);
+
+        Label kbdChip = new Label("Ctrl+K");
+        kbdChip.getStyleClass().add("sidebar-search-kbd");
 
         clearSearchBtn = new Button("✕");
         clearSearchBtn.getStyleClass().add("sidebar-search-clear");
@@ -231,13 +498,15 @@ public class MainLayout extends BorderPane {
 
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             searchQuery = (newVal == null) ? "" : newVal.trim().toLowerCase();
-            clearSearchBtn.setVisible(!searchQuery.isEmpty());
-            clearSearchBtn.setManaged(!searchQuery.isEmpty());
+            boolean hasText = !searchQuery.isEmpty();
+            clearSearchBtn.setVisible(hasText);
+            clearSearchBtn.setManaged(hasText);
+            kbdChip.setVisible(!hasText);
+            kbdChip.setManaged(!hasText);
             applyNavigationFilters();
         });
 
         searchField.setOnAction(e -> {
-            // Jump to first matching view on Enter
             for (Map.Entry<String, Button> entry : navButtons.entrySet()) {
                 if (entry.getValue().isVisible()) {
                     navigateTo(entry.getKey());
@@ -247,52 +516,66 @@ public class MainLayout extends BorderPane {
             }
         });
 
-        searchBox.getChildren().addAll(searchIcon, searchField, clearSearchBtn);
+        searchBox.getChildren().addAll(searchIcon, searchField, kbdChip, clearSearchBtn);
 
-        // Segmented Category Filter Chips (Balanced 2-Row Layout - Always Symmetrical & Never Truncates)
-        filterChipsBox = new VBox(5);
+        // Balanced 2-Row Segmented Category Filter Grid (Always Symmetrical & Never Overflows)
+        VBox filterChipsBox = new VBox(4);
         filterChipsBox.getStyleClass().add("sidebar-filter-chips");
+        filterChipsBox.setMaxWidth(236);
+        filterChipsBox.setPrefWidth(236);
+        filterChipsBox.setMinWidth(236);
 
-        HBox row1 = new HBox(5);
+        HBox row1 = new HBox(4);
         row1.setAlignment(Pos.CENTER);
-        HBox row2 = new HBox(5);
+        row1.setMaxWidth(236);
+        row1.setPrefWidth(236);
+        row1.setMinWidth(236);
+
+        HBox row2 = new HBox(4);
         row2.setAlignment(Pos.CENTER);
+        row2.setMaxWidth(236);
+        row2.setPrefWidth(236);
+        row2.setMinWidth(236);
 
         String[][] row1Defs = {
-            {"ALL", "All"},
-            {"OVERVIEW", "Overview"},
-            {"MANAGE", "Manage"}
+            {"ALL", "ALL", "Show all system views"},
+            {"OVERVIEW", "OVERVIEW", "Executive KPIs, Plans & Timetables"},
+            {"MANAGE", "MANAGE", "Members & Equipment Fleet Management"}
         };
         String[][] row2Defs = {
-            {"OPS", "Operations"},
-            {"SETTINGS", "Settings"}
+            {"OPS", "OPERATIONS", "Retention Pipelines & Alert Center"},
+            {"SETTINGS", "SETTINGS", "Staff Team & Payment Processing"}
         };
 
         List<Button> allChips = new ArrayList<>();
-
         for (String[] def : row1Defs) {
-            Button chip = createFilterChip(def[0], def[1], allChips);
+            Button chip = createFilterChip(def[0], def[1], def[2], allChips);
             HBox.setHgrow(chip, Priority.ALWAYS);
             chip.setMaxWidth(Double.MAX_VALUE);
             row1.getChildren().add(chip);
         }
 
         for (String[] def : row2Defs) {
-            Button chip = createFilterChip(def[0], def[1], allChips);
+            Button chip = createFilterChip(def[0], def[1], def[2], allChips);
             HBox.setHgrow(chip, Priority.ALWAYS);
             chip.setMaxWidth(Double.MAX_VALUE);
             row2.getChildren().add(chip);
         }
 
         filterChipsBox.getChildren().addAll(row1, row2);
-        container.getChildren().addAll(searchBox, filterChipsBox);
+        card.getChildren().addAll(headerRow, searchBox, filterChipsBox);
+        container.getChildren().add(card);
+
+        updateSearchFilterBadge();
         return container;
     }
 
-    private Button createFilterChip(String code, String label, List<Button> allChips) {
+    private Button createFilterChip(String code, String label, String tooltipText, List<Button> allChips) {
         Button chip = new Button(label);
         chip.getStyleClass().add("sidebar-chip");
-        chip.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        chip.setMinWidth(0);
+        chip.setMaxWidth(Double.MAX_VALUE);
+        chip.setTooltip(new Tooltip(tooltipText));
         chip.setTextOverrun(OverrunStyle.CLIP);
         chip.setEllipsisString("");
         chip.setAlignment(Pos.CENTER);
@@ -575,10 +858,15 @@ public class MainLayout extends BorderPane {
             btn.setGraphic(graphic);
         }
 
-        // Tooltip with description
-        Tooltip tip = new Tooltip(data.label + "\n" + data.description + (data.count > 0 ? " (" + data.count + " active)" : ""));
-        tip.setShowDelay(Duration.millis(200));
-        btn.setTooltip(tip);
+        // Tooltip (only enabled in compact icon rail mode where text labels are hidden)
+        if (isCompact) {
+            Tooltip tip = new Tooltip(data.label + (data.count > 0 ? " (" + data.count + ")" : ""));
+            tip.setShowDelay(Duration.millis(250));
+            tip.getStyleClass().add("sidebar-rail-tooltip");
+            btn.setTooltip(tip);
+        } else {
+            btn.setTooltip(null);
+        }
 
         // Click Handler
         btn.setOnAction(e -> {
@@ -921,6 +1209,21 @@ public class MainLayout extends BorderPane {
                 secBox.setManaged(anyChildVisible);
             }
         }
+        updateSearchFilterBadge();
+    }
+
+    private void updateSearchFilterBadge() {
+        if (searchFilterBadge != null) {
+            if (!searchQuery.isEmpty()) {
+                long matches = navButtons.values().stream().filter(Node::isVisible).count();
+                searchFilterBadge.setText(matches + (matches == 1 ? " MATCH" : " MATCHES"));
+            } else {
+                long totalInCat = navItemDataMap.values().stream()
+                        .filter(d -> "ALL".equalsIgnoreCase(activeCategoryFilter) || d.category.equalsIgnoreCase(activeCategoryFilter))
+                        .count();
+                searchFilterBadge.setText(activeCategoryFilter + " (" + totalInCat + ")");
+            }
+        }
     }
 
     // =========================================================================
@@ -932,6 +1235,74 @@ public class MainLayout extends BorderPane {
         getChildren().remove(sidebar);
         buildSidebar();
         setLeft(sidebar);
+        updateThemeStyles();
+    }
+
+    /**
+     * Re-syncs sidebar colors, theme classes, button icons, and logo aura.
+     */
+    private void updateThemeStyles() {
+        ThemeManager.Theme theme = ThemeManager.getInstance().getCurrentTheme();
+        getStyleClass().removeAll("theme-dark", "theme-light", "theme-navy");
+        if (sidebar != null) {
+            sidebar.getStyleClass().removeAll("theme-dark", "theme-light", "theme-navy");
+        }
+
+        String themeClass = switch (theme) {
+            case LIGHT -> "theme-light";
+            case DARK_BLUE -> "theme-navy";
+            case DARK -> "theme-dark";
+        };
+        getStyleClass().add(themeClass);
+        if (sidebar != null) {
+            sidebar.getStyleClass().add(themeClass);
+        }
+        if (contentArea != null) {
+            contentArea.getStyleClass().removeAll("theme-dark", "theme-light", "theme-navy");
+            contentArea.getStyleClass().add(themeClass);
+            for (Node child : contentArea.getChildren()) {
+                if (!child.getStyleClass().contains("toast-notification")) {
+                    child.getStyleClass().removeAll("theme-dark", "theme-light", "theme-navy");
+                    child.getStyleClass().add(themeClass);
+                }
+            }
+        }
+
+        updateThemeBadgeText(theme);
+
+        if (cyberThemeToggle != null) {
+            cyberThemeToggle.syncWithCurrentTheme(true);
+        }
+
+        if (compactThemeBtn != null) {
+            String icon = switch (theme) {
+                case LIGHT -> "☀";
+                case DARK_BLUE -> "🌌";
+                case DARK -> "🌙";
+            };
+            compactThemeBtn.setText(icon);
+            compactThemeBtn.setTooltip(new Tooltip("Theme: " + (theme == ThemeManager.Theme.LIGHT ? "Light" : theme == ThemeManager.Theme.DARK_BLUE ? "Navy" : "Dark") + " (Click to cycle)"));
+        }
+
+        if (themeBtn != null) {
+            String icon = switch (theme) {
+                case LIGHT -> "☀";
+                case DARK_BLUE -> "🌌";
+                case DARK -> "🌙";
+            };
+            themeBtn.setText(icon);
+            themeBtn.setTooltip(new Tooltip("Theme: " + (theme == ThemeManager.Theme.LIGHT ? "Light" : theme == ThemeManager.Theme.DARK_BLUE ? "Navy" : "Dark")));
+        }
+
+        if (eagleLogoView != null) {
+            if (theme == ThemeManager.Theme.DARK_BLUE) {
+                eagleLogoView.setEffect(new DropShadow(18, Color.rgb(56, 189, 248, 0.65)));
+            } else if (theme == ThemeManager.Theme.LIGHT) {
+                eagleLogoView.setEffect(new DropShadow(12, Color.rgb(0, 0, 0, 0.14)));
+            } else {
+                eagleLogoView.setEffect(new DropShadow(16, Color.rgb(204, 255, 0, 0.45)));
+            }
+        }
     }
 
     // =========================================================================
@@ -1025,6 +1396,16 @@ public class MainLayout extends BorderPane {
             case "Workout Plans" -> new WorkoutPlansView(facade);
             default -> new DashboardView(facade, this::navigateToWithHighlight);
         };
+
+        // Apply current active theme class to newly created view
+        ThemeManager.Theme currentTheme = ThemeManager.getInstance().getCurrentTheme();
+        String themeClass = switch (currentTheme) {
+            case LIGHT -> "theme-light";
+            case DARK_BLUE -> "theme-navy";
+            case DARK -> "theme-dark";
+        };
+        content.getStyleClass().removeAll("theme-dark", "theme-light", "theme-navy");
+        content.getStyleClass().add(themeClass);
 
         // Insert content behind any existing toasts
         StackPane.setAlignment(content, Pos.TOP_LEFT);

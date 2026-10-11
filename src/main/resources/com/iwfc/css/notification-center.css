@@ -43,7 +43,6 @@
     -fx-text-fill: #64748b;
     -fx-font-size: 11px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1.2px;
 }
 
 /* -------------------------------------------------------------------------
@@ -302,4 +301,185 @@
 .notification-view .scroll-bar:vertical .decrement-button {
     -fx-pref-height: 0px;
     -fx-padding: 0px;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: LIGHT THEME
+   ========================================================================== */
+.theme-light .notification-view {
+    -fx-background-color: transparent;
+}
+.theme-light .notification-title-main {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .notification-unread-badge {
+    -fx-text-fill: #2563eb;
+    -fx-background-color: rgba(37, 99, 235, 0.1);
+    -fx-border-color: rgba(37, 99, 235, 0.3);
+}
+.theme-light .notification-total-badge {
+    -fx-text-fill: #475569;
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #e2e8f0;
+}
+.theme-light .notification-search-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .notification-search-field:focused {
+    -fx-border-color: #2563eb;
+    -fx-background-color: #ffffff;
+}
+.theme-light .notification-header-btn {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0284c7;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .notification-chip {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #475569;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .notification-chip:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #0f172a;
+}
+.theme-light .notification-chip-active {
+    -fx-background-color: #2563eb;
+    -fx-border-color: #2563eb;
+    -fx-text-fill: #ffffff;
+}
+.theme-light .notification-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 14, 0, 0, 3);
+}
+.theme-light .notification-card:hover {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.18), 16, 0, 0, 5);
+}
+.theme-light .notification-card-unread {
+    -fx-background-color: linear-gradient(to right, rgba(59, 130, 246, 0.08), #ffffff);
+    -fx-border-color: #e2e8f0 #e2e8f0 #e2e8f0 #2563eb;
+    -fx-border-width: 1px 1px 1px 3.5px;
+}
+.theme-light .notification-telemetry-capsule {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+}
+.theme-light .notification-item-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .notification-item-msg {
+    -fx-text-fill: #334155;
+}
+.theme-light .notification-day-lbl {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .notification-empty-title {
+    -fx-text-fill: #0f172a;
+}
+.theme-light .notification-cta-btn {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #334155;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .notification-cta-btn:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #0f172a;
+}
+.theme-light .notification-page-btn {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #475569;
+    -fx-border-color: #cbd5e1;
+}
+.theme-light .notification-page-btn-active {
+    -fx-background-color: #2563eb;
+    -fx-border-color: #2563eb;
+    -fx-text-fill: #ffffff;
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: NAVY THEME
+   ========================================================================== */
+.theme-navy .notification-view {
+    -fx-background-color: transparent;
+}
+.theme-navy .notification-title-main {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .notification-search-field {
+    -fx-background-color: #07162c;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #64748b;
+    -fx-border-color: rgba(59, 130, 246, 0.25);
+}
+.theme-navy .notification-card {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(59, 130, 246, 0.2);
+    -fx-effect: dropshadow(gaussian, rgba(2, 6, 23, 0.5), 16, 0, 0, 4);
+}
+.theme-navy .notification-card:hover {
+    -fx-background-color: #0b1e3a;
+    -fx-border-color: #38bdf8;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.3), 18, 0, 0, 6);
+}
+.theme-navy .notification-card-unread {
+    -fx-background-color: linear-gradient(to right, rgba(56, 189, 248, 0.12), #07162c);
+    -fx-border-color: rgba(59, 130, 246, 0.25) rgba(59, 130, 246, 0.25) rgba(59, 130, 246, 0.25) #38bdf8;
+    -fx-border-width: 1px 1px 1px 3.5px;
+}
+.theme-navy .notification-telemetry-capsule {
+    -fx-background-color: #040c18;
+    -fx-border-color: rgba(59, 130, 246, 0.2);
+}
+.theme-navy .notification-item-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .notification-item-msg {
+    -fx-text-fill: #cbd5e1;
+}
+.theme-navy .notification-day-lbl {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .notification-empty-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-navy .notification-cta-btn {
+    -fx-background-color: rgba(59, 130, 246, 0.15);
+    -fx-text-fill: #e2e8f0;
+    -fx-border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* ==========================================================================
+   THEME SYNCHRONIZATION: DARK THEME
+   ========================================================================== */
+.theme-dark .notification-view {
+    -fx-background-color: transparent;
+}
+.theme-dark .notification-title-main {
+    -fx-text-fill: #ffffff;
+}
+.theme-dark .notification-card {
+    -fx-background-color: #111614;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+}
+.theme-dark .notification-card:hover {
+    -fx-border-color: #ccff00;
+    -fx-effect: dropshadow(gaussian, rgba(204, 255, 0, 0.35), 18, 0, 0, 6);
+}
+.theme-dark .notification-item-title {
+    -fx-text-fill: #ffffff;
+}
+.theme-dark .notification-item-msg {
+    -fx-text-fill: #cbd5e1;
+}
+.theme-dark .notification-day-lbl {
+    -fx-text-fill: #ffffff;
+}
+.theme-dark .notification-empty-title {
+    -fx-text-fill: #ffffff;
 }

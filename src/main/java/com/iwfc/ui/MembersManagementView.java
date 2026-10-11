@@ -9,7 +9,6 @@ import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -139,7 +138,8 @@ public class MembersManagementView extends HBox {
         header.setAlignment(Pos.CENTER_LEFT);
 
         Label title = new Label("Members");
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+        title.setStyle("-fx-font-size: 20px; -fx-font-weight: 900;");
+        title.getStyleClass().add("member-section-title");
 
         countBadge = new Label(String.valueOf(allMembers.size()));
         countBadge.setStyle("-fx-background-color: rgba(6, 182, 212, 0.18); -fx-text-fill: #22d3ee; -fx-font-weight: 800; -fx-padding: 2 8; -fx-background-radius: 12; -fx-font-size: 11px;");
@@ -380,7 +380,8 @@ public class MembersManagementView extends HBox {
         identityBox.setAlignment(Pos.CENTER_LEFT);
 
         Label nameLbl = new Label(selectedMember.getName());
-        nameLbl.setStyle("-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: #ffffff;");
+        nameLbl.getStyleClass().add("member-hero-name");
+        nameLbl.setStyle("-fx-font-size: 26px; -fx-font-weight: 900;");
 
         HBox badgeRow = new HBox(8);
         badgeRow.setAlignment(Pos.CENTER_LEFT);
@@ -436,7 +437,8 @@ public class MembersManagementView extends HBox {
         Label lbl = new Label(label);
         lbl.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
         Label val = new Label(value);
-        val.setStyle("-fx-text-fill: #f8fafc; -fx-font-size: 13px; -fx-font-weight: bold;");
+        val.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+        val.getStyleClass().add("member-row-primary");
         box.getChildren().addAll(lbl, val);
         grid.add(box, col, row);
     }
@@ -509,7 +511,8 @@ public class MembersManagementView extends HBox {
         HBox statsHeader = new HBox(12);
         statsHeader.setAlignment(Pos.CENTER_LEFT);
         Label statsTitle = new Label("Workout Statistics");
-        statsTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+        statsTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900;");
+        statsTitle.getStyleClass().add("member-section-title");
         Region sSp = new Region();
         HBox.setHgrow(sSp, Priority.ALWAYS);
 
@@ -537,7 +540,8 @@ public class MembersManagementView extends HBox {
         HBox bookHeader = new HBox(12);
         bookHeader.setAlignment(Pos.CENTER_LEFT);
         Label bTitle = new Label("Recent Bookings & Attendance");
-        bTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+        bTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900;");
+        bTitle.getStyleClass().add("member-section-title");
 
         Region bSp = new Region();
         HBox.setHgrow(bSp, Priority.ALWAYS);
@@ -570,7 +574,8 @@ public class MembersManagementView extends HBox {
                 row.getStyleClass().add("member-data-row");
 
                 Label sName = new Label("Session: " + b.getSession().getName());
-                sName.setStyle("-fx-font-weight: 800; -fx-text-fill: #ffffff; -fx-pref-width: 220px;");
+                sName.getStyleClass().add("member-row-primary");
+                sName.setStyle("-fx-font-weight: 800; -fx-pref-width: 220px;");
 
                 Label sDate = new Label(b.getSessionDate().toString());
                 sDate.setStyle("-fx-text-fill: #94a3b8; -fx-pref-width: 110px;");
@@ -631,7 +636,8 @@ public class MembersManagementView extends HBox {
         HBox sumHeader = new HBox(12);
         sumHeader.setAlignment(Pos.CENTER_LEFT);
         Label sTitle = new Label("Membership & Payments");
-        sTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+        sTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900;");
+        sTitle.getStyleClass().add("member-section-title");
 
         Region smSp = new Region();
         HBox.setHgrow(smSp, Priority.ALWAYS);
@@ -665,7 +671,8 @@ public class MembersManagementView extends HBox {
         HBox histHeader = new HBox(12);
         histHeader.setAlignment(Pos.CENTER_LEFT);
         Label hTitle = new Label("Payment History");
-        hTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+        hTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900;");
+        hTitle.getStyleClass().add("member-section-title");
 
         Region hSp = new Region();
         HBox.setHgrow(hSp, Priority.ALWAYS);
@@ -702,7 +709,8 @@ public class MembersManagementView extends HBox {
                 dLbl.setStyle("-fx-text-fill: #94a3b8; -fx-pref-width: 100px;");
 
                 Label purpLbl = new Label(p.getPurpose().getDisplayName());
-                purpLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: 800; -fx-pref-width: 180px;");
+                purpLbl.getStyleClass().add("member-row-primary");
+                purpLbl.setStyle("-fx-font-weight: 800; -fx-pref-width: 180px;");
 
                 Label methLbl = new Label(p.getMethod().getDisplayName());
                 methLbl.setStyle("-fx-text-fill: #60a5fa; -fx-font-size: 11px; -fx-background-color: rgba(59, 130, 246, 0.15); -fx-padding: 3 8; -fx-background-radius: 6;");
@@ -748,7 +756,8 @@ public class MembersManagementView extends HBox {
         HBox mHeader = new HBox(12);
         mHeader.setAlignment(Pos.CENTER_LEFT);
         Label mTitle = new Label("Body Measurement Logs");
-        mTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+        mTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 900;");
+        mTitle.getStyleClass().add("member-section-title");
 
         Region mSp = new Region();
         HBox.setHgrow(mSp, Priority.ALWAYS);
@@ -799,7 +808,8 @@ public class MembersManagementView extends HBox {
                     }
                 }
                 Label wLbl = new Label("Weight: " + current.getWeight() + "kg" + weightDelta);
-                wLbl.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: 800; -fx-pref-width: 170px;");
+                wLbl.getStyleClass().add("member-row-primary");
+                wLbl.setStyle("-fx-font-weight: 800; -fx-pref-width: 170px;");
 
                 // Chest measurement
                 Label cLbl = new Label("Chest: " + current.getChest() + "cm");
@@ -839,7 +849,8 @@ public class MembersManagementView extends HBox {
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
         Label mainTitle = new Label("Active Workout Plans");
-        mainTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+        mainTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: 900;");
+        mainTitle.getStyleClass().add("member-section-title");
 
         Region hSp = new Region();
         HBox.setHgrow(hSp, Priority.ALWAYS);
@@ -881,7 +892,8 @@ public class MembersManagementView extends HBox {
                     pHeader.setAlignment(Pos.CENTER_LEFT);
                     VBox titleBox = new VBox(4);
                     Label title = new Label(plan.getTitle());
-                    title.setStyle("-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+                    title.setStyle("-fx-font-size: 18px; -fx-font-weight: 900;");
+                    title.getStyleClass().add("member-section-title");
                     Label type = new Label(plan.getPlanType() + " | " + plan.getDurationWeeks() + " Weeks");
                     type.setStyle("-fx-text-fill: #10b981; -fx-font-weight: 800; -fx-font-size: 13px;");
                     titleBox.getChildren().addAll(title, type);
@@ -901,7 +913,8 @@ public class MembersManagementView extends HBox {
                     // Objectives
                     VBox objBox = new VBox(5);
                     Label objTitle = new Label("Objectives:");
-                    objTitle.setStyle("-fx-text-fill: #f8fafc; -fx-font-weight: bold; -fx-font-size: 13px;");
+                    objTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+                    objTitle.getStyleClass().add("member-row-primary");
                     objBox.getChildren().add(objTitle);
                     for (String obj : plan.getObjectives()) {
                         Label oLbl = new Label("• " + obj);
@@ -912,7 +925,8 @@ public class MembersManagementView extends HBox {
                     // Progression
                     VBox progBox = new VBox(5);
                     Label progTitle = new Label("Progression Plan:");
-                    progTitle.setStyle("-fx-text-fill: #f8fafc; -fx-font-weight: bold; -fx-font-size: 13px;");
+                    progTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+                    progTitle.getStyleClass().add("member-row-primary");
                     Label progDesc = new Label(plan.getProgressionSummary());
                     progDesc.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px;");
                     progDesc.setWrapText(true);
@@ -969,7 +983,8 @@ public class MembersManagementView extends HBox {
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
         Label titleLbl = new Label(title);
-        titleLbl.setStyle("-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #f8fafc;");
+        titleLbl.setStyle("-fx-font-size: 16px; -fx-font-weight: 900;");
+        titleLbl.getStyleClass().add("member-section-title");
         Region sp = new Region();
         HBox.setHgrow(sp, Priority.ALWAYS);
 
@@ -990,7 +1005,8 @@ public class MembersManagementView extends HBox {
                 Label lLabel = new Label(fields[i][j]);
                 lLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 12px;");
                 Label vLabel = new Label(fields[i][j + 1]);
-                vLabel.setStyle("-fx-text-fill: #f1f5f9; -fx-font-size: 14px; -fx-font-weight: bold;");
+                vLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+                vLabel.getStyleClass().add("member-row-primary");
                 vLabel.setWrapText(true);
                 fieldBox.getChildren().addAll(lLabel, vLabel);
                 grid.add(fieldBox, j / 2, i);
@@ -1069,25 +1085,25 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(18);
         root.setPadding(new Insets(24));
         root.setPrefWidth(460);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Register New Member");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         TextField nameFld = new TextField();
         nameFld.setPromptText("Full Name");
-        nameFld.setStyle("-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-padding: 10; -fx-background-radius: 8;");
+        nameFld.getStyleClass().add("custom-modal-input");
 
         TextField emailFld = new TextField();
         emailFld.setPromptText("Email Address");
-        emailFld.setStyle("-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-padding: 10; -fx-background-radius: 8;");
+        emailFld.getStyleClass().add("custom-modal-input");
 
         TextField phoneFld = new TextField("+1 (555) ");
-        phoneFld.setStyle("-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-padding: 10; -fx-background-radius: 8;");
+        phoneFld.getStyleClass().add("custom-modal-input");
 
         TextField addressFld = new TextField();
         addressFld.setPromptText("Physical Address");
-        addressFld.setStyle("-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-padding: 10; -fx-background-radius: 8;");
+        addressFld.getStyleClass().add("custom-modal-input");
 
         ComboBox<String> tierCbo = new ComboBox<>();
         tierCbo.getItems().addAll("Standard", "Premium", "VIP");
@@ -1140,7 +1156,7 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, save);
         root.getChildren().addAll(title, nameFld, emailFld, phoneFld, addressFld, tierCbo, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1155,10 +1171,10 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(420);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Edit Personal Information");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         TextField nameF = createStyledField("Name", m.getName());
         TextField phoneF = createStyledField("Phone", m.getPhone());
@@ -1190,7 +1206,7 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, save);
         root.getChildren().addAll(title, nameF, phoneF, emailF, addrF, genderF, dobF, natF, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1205,10 +1221,10 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(400);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Edit Gym Preferences");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         ComboBox<String> tier = new ComboBox<>();
         tier.getItems().addAll("Standard", "Premium", "VIP");
@@ -1238,7 +1254,7 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, save);
         root.getChildren().addAll(title, new Label("Membership Plan:"), tier, hours, diet, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1253,10 +1269,10 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(400);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Choose Favorite Equipment");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         ComboBox<String> prim = new ComboBox<>();
         prim.getItems().addAll("Treadmill Pro X2", "Yoga Mat", "Elliptical E-500", "Olympic Barbell", "Rowing Machine RX", "Cable Crossover");
@@ -1287,7 +1303,7 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, save);
         root.getChildren().addAll(title, new Label("Primary Equipment:"), prim, new Label("Secondary Equipment:"), sec, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1320,10 +1336,10 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(420);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Book Session for " + m.getName());
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         List<FitnessSession> sessions = facade.getAllSessions();
         ComboBox<FitnessSession> sessionCbo = new ComboBox<>();
@@ -1367,7 +1383,7 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, book);
         root.getChildren().addAll(title, new Label("Select Fitness Class:"), sessionCbo, new Label("Select Date:"), datePicker, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1382,10 +1398,10 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(420);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Process Payment for " + m.getName());
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         TextField amtFld = createStyledField("Amount ($)", "94.50");
 
@@ -1428,7 +1444,7 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, pay);
         root.getChildren().addAll(title, amtFld, new Label("Payment Method:"), methodCbo, new Label("Payment Purpose:"), purposeCbo, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1477,10 +1493,10 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(420);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Edit Diet & Lifestyle");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         TextField dietF = createStyledField("Reported Diet", m.getDietHabits());
         TextField waterF = createStyledField("Daily Water Goal (Liters)", String.valueOf(m.getWaterGoal()));
@@ -1508,7 +1524,7 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, save);
         root.getChildren().addAll(title, dietF, waterF, allergyF, supF, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1523,10 +1539,10 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(420);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("New Body Measurement Log");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         DatePicker dp = new DatePicker(LocalDate.now());
         dp.setMaxWidth(Double.MAX_VALUE);
@@ -1565,7 +1581,7 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, save);
         root.getChildren().addAll(title, new Label("Date:"), dp, weightF, chestF, armF, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
@@ -1580,10 +1596,10 @@ public class MembersManagementView extends HBox {
         VBox root = new VBox(16);
         root.setPadding(new Insets(24));
         root.setPrefWidth(460);
-        root.setStyle("-fx-background-color: #0f172a;");
+        root.getStyleClass().add("custom-modal-root");
 
         Label title = new Label("Enroll " + m.getName() + " in Plan");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
+        title.getStyleClass().add("custom-modal-title");
 
         List<FitnessPlan> catalogue = facade.getPlanCatalogue();
         ComboBox<FitnessPlan> planCbo = new ComboBox<>();
@@ -1627,14 +1643,14 @@ public class MembersManagementView extends HBox {
 
         btnRow.getChildren().addAll(cancel, enroll);
         root.getChildren().addAll(title, new Label("Select Fitness Program:"), planCbo, btnRow);
-        modal.setScene(new Scene(root));
+        DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
 
     private TextField createStyledField(String prompt, String initialValue) {
         TextField fld = new TextField(initialValue != null ? initialValue : "");
         fld.setPromptText(prompt);
-        fld.setStyle("-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-padding: 9 12; -fx-background-radius: 8; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 8;");
+        fld.getStyleClass().add("custom-modal-input");
         return fld;
     }
 }

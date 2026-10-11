@@ -84,7 +84,6 @@ public class NotificationView extends BorderPane {
         this.facade = facade;
 
         getStyleClass().add("notification-view");
-        setStyle("-fx-background-color: radial-gradient(center 50% 50%, radius 120%, #0f172a 0%, #020617 70%, #171626 100%);");
 
         try {
             getStylesheets().add(getClass().getResource("/com/iwfc/css/notification-center.css").toExternalForm());
@@ -363,7 +362,8 @@ public class NotificationView extends BorderPane {
             emptyIcon.setStyle("-fx-font-size: 54px;");
 
             Label emptyTitle = new Label("No Notifications Found");
-            emptyTitle.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 800;");
+            emptyTitle.getStyleClass().add("notification-empty-title");
+            emptyTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 800;");
 
             Label emptyDesc = new Label("There are no alerts matching your active category or search query.");
             emptyDesc.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 13px;");
@@ -497,7 +497,8 @@ public class NotificationView extends BorderPane {
         catTag.setStyle("-fx-text-fill: " + n.getCategory().getColor() + "; -fx-font-size: 10px; -fx-font-weight: 900; -fx-background-color: rgba(255,255,255,0.04); -fx-border-color: " + n.getCategory().getColor() + "44; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 2 8;");
 
         Label titleLbl = new Label(n.getTitle());
-        titleLbl.setStyle("-fx-text-fill: white; -fx-font-size: 14.5px; -fx-font-weight: 800;");
+        titleLbl.getStyleClass().add("notification-item-title");
+        titleLbl.setStyle("-fx-font-size: 14.5px; -fx-font-weight: 800;");
 
         headerRow.getChildren().addAll(catTag, titleLbl);
 
@@ -522,7 +523,8 @@ public class NotificationView extends BorderPane {
         // Row 2: Message Text
         Label msgLbl = new Label(n.getMessage());
         msgLbl.setWrapText(true);
-        msgLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 13px; -fx-line-spacing: 2px;");
+        msgLbl.getStyleClass().add("notification-item-msg");
+        msgLbl.setStyle("-fx-font-size: 13px; -fx-line-spacing: 2px;");
 
         // Row 3: Operational Action Hub (Buttons that work 100%)
         HBox actionsRow = buildCardActionHub(n, unreadDot);
@@ -567,7 +569,8 @@ public class NotificationView extends BorderPane {
             monthLbl.setStyle("-fx-text-fill: #818cf8; -fx-font-size: 10px; -fx-font-weight: 900; -fx-letter-spacing: 0.8px;");
 
             Label dayLbl = new Label(n.getTimestamp().format(DateTimeFormatter.ofPattern("dd")));
-            dayLbl.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: 900;");
+            dayLbl.getStyleClass().add("notification-day-lbl");
+            dayLbl.setStyle("-fx-font-size: 20px; -fx-font-weight: 900;");
 
             Label timeSub = new Label(n.getTimestamp().format(TIME_FMT));
             timeSub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 9.5px; -fx-font-weight: 700;");
