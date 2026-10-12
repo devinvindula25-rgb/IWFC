@@ -336,7 +336,7 @@ public class MemberDashboardView extends StackPane {
 
     private VBox buildActiveWorkoutPlanSection() {
         VBox container = new VBox(14);
-        container.getStyleClass().add("dashboard-glass-panel");
+        container.getStyleClass().addAll("dashboard-card-section", "dashboard-glass-panel");
         container.setPadding(new Insets(20, 22, 22, 22));
 
         HBox header = new HBox(12);
@@ -423,7 +423,7 @@ public class MemberDashboardView extends StackPane {
 
     private VBox buildTransformationChartSection() {
         VBox container = new VBox(12);
-        container.getStyleClass().add("dashboard-glass-panel");
+        container.getStyleClass().addAll("dashboard-card-section", "dashboard-glass-panel");
         container.setPadding(new Insets(20, 22, 22, 22));
 
         HBox header = new HBox(12);
@@ -510,7 +510,7 @@ public class MemberDashboardView extends StackPane {
 
     private VBox buildMyBookingsSection() {
         VBox container = new VBox(14);
-        container.getStyleClass().add("dashboard-glass-panel");
+        container.getStyleClass().addAll("dashboard-card-section", "dashboard-glass-panel");
         container.setPadding(new Insets(20, 22, 22, 22));
 
         HBox header = new HBox(12);
@@ -563,7 +563,7 @@ public class MemberDashboardView extends StackPane {
         HBox row = new HBox(14);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(10, 14, 10, 14));
-        row.setStyle("-fx-background-color: rgba(30, 41, 59, 0.4); -fx-background-radius: 10px; -fx-border-color: rgba(255, 255, 255, 0.05); -fx-border-radius: 10px;");
+        row.getStyleClass().add("dashboard-list-row");
 
         VBox dateBox = new VBox(2);
         dateBox.setAlignment(Pos.CENTER);
@@ -625,7 +625,7 @@ public class MemberDashboardView extends StackPane {
 
     private VBox buildPersonalBillingSection() {
         VBox container = new VBox(14);
-        container.getStyleClass().add("dashboard-glass-panel");
+        container.getStyleClass().addAll("dashboard-card-section", "dashboard-glass-panel");
         container.setPadding(new Insets(20, 22, 22, 22));
 
         HBox header = new HBox(12);

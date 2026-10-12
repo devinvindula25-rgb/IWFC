@@ -832,19 +832,35 @@ public class PaymentView extends VBox {
     private void showPaymentTerminalDialog() {
         Dialog<Boolean> dialog = new Dialog<>();
         DialogUtils.stylePremiumDialog(dialog);
+        try {
+            if (getScene() != null && getScene().getWindow() != null) {
+                dialog.initOwner(getScene().getWindow());
+            }
+        } catch (Exception ignored) {}
         dialog.setTitle(isAdmin ? "POS Payment Terminal" : "Make Payment");
         dialog.setHeaderText("Process & record transaction through IWFC payment gateway");
 
         ButtonType payBtnType = new ButtonType("Authorize & Pay", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(payBtnType, ButtonType.CANCEL);
+        dialog.getDialogPane().setPrefWidth(540);
 
         GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(20));
+        grid.setHgap(16);
+        grid.setVgap(14);
+        grid.setPadding(new Insets(20, 24, 20, 24));
+
+        ColumnConstraints col0 = new ColumnConstraints();
+        col0.setMinWidth(160);
+        col0.setPrefWidth(160);
+
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setHgrow(Priority.ALWAYS);
+
+        grid.getColumnConstraints().addAll(col0, col1);
 
         ComboBox<String> memberCbx = new ComboBox<>();
         memberCbx.setPromptText("Select Member");
+        memberCbx.setMaxWidth(Double.MAX_VALUE);
         memberCbx.getStyleClass().add("payments-input-field");
 
         try {
@@ -862,22 +878,36 @@ public class PaymentView extends VBox {
         ComboBox<PaymentPurpose> purposeCbx = new ComboBox<>();
         purposeCbx.getItems().addAll(PaymentPurpose.values());
         purposeCbx.setValue(PaymentPurpose.MEMBERSHIP_FEE);
+        purposeCbx.setMaxWidth(Double.MAX_VALUE);
+        purposeCbx.getStyleClass().add("payments-input-field");
 
         TextField amountF = new TextField("2500.00");
+        amountF.setMaxWidth(Double.MAX_VALUE);
+        amountF.getStyleClass().add("payments-input-field");
+
         ComboBox<PaymentMethod> methodCbx = new ComboBox<>();
         methodCbx.getItems().addAll(PaymentMethod.CARD, PaymentMethod.CASH, PaymentMethod.DIGITAL_WALLET, PaymentMethod.BANK_TRANSFER);
         methodCbx.setValue(PaymentMethod.CARD);
+        methodCbx.setMaxWidth(Double.MAX_VALUE);
+        methodCbx.getStyleClass().add("payments-input-field");
 
         TextField extraF = new TextField("4242424242424242");
         extraF.setPromptText("Card Number (16 digits)");
+        extraF.setMaxWidth(Double.MAX_VALUE);
+        extraF.getStyleClass().add("payments-input-field");
 
         Label feePreviewLbl = new Label("Processing Fee: LKR 62.50 (2.5%) • Total: LKR 2,562.50");
-        feePreviewLbl.setStyle("-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-weight: bold;");
+        feePreviewLbl.setStyle("-fx-text-fill: #38bdf8; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        HBox feeBox = new HBox(feePreviewLbl);
+        feeBox.setAlignment(Pos.CENTER_LEFT);
+        feeBox.setStyle("-fx-background-color: rgba(56, 189, 248, 0.08); -fx-border-color: rgba(56, 189, 248, 0.25); -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-padding: 10px 14px;");
+        feeBox.setMaxWidth(Double.MAX_VALUE);
 
         // Live Fee Calculator
         Runnable recalc = () -> {
             try {
-                double amt = Double.parseDouble(amountF.getText());
+                double amt = Double.parseDouble(amountF.getText().trim());
                 double fee = switch (methodCbx.getValue()) {
                     case CARD -> amt * 0.025;
                     case DIGITAL_WALLET -> amt * 0.015;
@@ -903,15 +933,27 @@ public class PaymentView extends VBox {
             recalc.run();
         });
 
-        amountF.getStyleClass().add("payments-input-field");
-        extraF.getStyleClass().add("payments-input-field");
+        Label memberLbl = new Label("Member:");
+        memberLbl.setMinWidth(Region.USE_PREF_SIZE);
 
-        grid.add(new Label("Member:"), 0, 0); grid.add(memberCbx, 1, 0);
-        grid.add(new Label("Purpose:"), 0, 1); grid.add(purposeCbx, 1, 1);
-        grid.add(new Label("Base Amount (LKR):"), 0, 2); grid.add(amountF, 1, 2);
-        grid.add(new Label("Payment Method:"), 0, 3); grid.add(methodCbx, 1, 3);
-        grid.add(new Label("Details / Credentials:"), 0, 4); grid.add(extraF, 1, 4);
-        grid.add(feePreviewLbl, 1, 5);
+        Label purposeLbl = new Label("Purpose:");
+        purposeLbl.setMinWidth(Region.USE_PREF_SIZE);
+
+        Label amountLbl = new Label("Base Amount (LKR):");
+        amountLbl.setMinWidth(Region.USE_PREF_SIZE);
+
+        Label methodLbl = new Label("Payment Method:");
+        methodLbl.setMinWidth(Region.USE_PREF_SIZE);
+
+        Label detailsLbl = new Label("Details / Credentials:");
+        detailsLbl.setMinWidth(Region.USE_PREF_SIZE);
+
+        grid.add(memberLbl, 0, 0); grid.add(memberCbx, 1, 0);
+        grid.add(purposeLbl, 0, 1); grid.add(purposeCbx, 1, 1);
+        grid.add(amountLbl, 0, 2); grid.add(amountF, 1, 2);
+        grid.add(methodLbl, 0, 3); grid.add(methodCbx, 1, 3);
+        grid.add(detailsLbl, 0, 4); grid.add(extraF, 1, 4);
+        grid.add(feeBox, 0, 5, 2, 1);
 
         dialog.getDialogPane().setContent(grid);
 

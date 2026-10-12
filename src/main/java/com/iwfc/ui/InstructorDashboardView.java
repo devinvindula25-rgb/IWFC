@@ -175,18 +175,22 @@ public class InstructorDashboardView extends StackPane {
 
         Button checkInBtn = new Button("✓ Take Attendance");
         checkInBtn.getStyleClass().add("dashboard-emerald-btn");
+        checkInBtn.setMinWidth(Region.USE_PREF_SIZE);
         checkInBtn.setOnAction(e -> showQuickAttendanceModal(null));
 
         Button assignPlanBtn = new Button("+ Assign Workout Plan");
         assignPlanBtn.getStyleClass().add("dashboard-primary-btn");
+        assignPlanBtn.setMinWidth(Region.USE_PREF_SIZE);
         assignPlanBtn.setOnAction(e -> showAssignPlanModal());
 
         Button reportIssueBtn = new Button("+ Report Equipment Issue");
         reportIssueBtn.getStyleClass().add("dashboard-amber-btn");
+        reportIssueBtn.setMinWidth(Region.USE_PREF_SIZE);
         reportIssueBtn.setOnAction(e -> showReportEquipmentModal());
 
         Button liveSyncBtn = new Button("🔄 Sync");
         liveSyncBtn.getStyleClass().add("dashboard-action-btn");
+        liveSyncBtn.setMinWidth(Region.USE_PREF_SIZE);
         liveSyncBtn.setOnAction(e -> refreshData(true));
 
         actionHub.getChildren().addAll(checkInBtn, assignPlanBtn, reportIssueBtn, liveSyncBtn);
@@ -286,6 +290,7 @@ public class InstructorDashboardView extends StackPane {
 
         Label pill = new Label(pillText);
         pill.getStyleClass().add("dashboard-kpi-trend");
+        pill.setMinWidth(Region.USE_PREF_SIZE);
         topRow.getChildren().addAll(titleLbl, pill);
 
         Label valLbl = new Label(mainValue);
@@ -318,8 +323,8 @@ public class InstructorDashboardView extends StackPane {
 
         // Right: Trainee Athlete Matrix
         traineeMatrixContainer = buildTraineeMatrixSection();
-        traineeMatrixContainer.setMinWidth(420);
-        traineeMatrixContainer.setPrefWidth(460);
+        traineeMatrixContainer.setMinWidth(440);
+        traineeMatrixContainer.setPrefWidth(480);
 
         row.getChildren().addAll(classScheduleContainer, traineeMatrixContainer);
         return row;
@@ -327,7 +332,7 @@ public class InstructorDashboardView extends StackPane {
 
     private VBox buildClassScheduleSection() {
         VBox container = new VBox(14);
-        container.getStyleClass().add("dashboard-glass-panel");
+        container.getStyleClass().addAll("dashboard-card-section", "dashboard-glass-panel");
         container.setPadding(new Insets(20, 22, 22, 22));
 
         // Header
@@ -345,6 +350,7 @@ public class InstructorDashboardView extends StackPane {
 
         Button scheduleClassBtn = new Button("+ Schedule Class");
         scheduleClassBtn.getStyleClass().add("dashboard-action-btn");
+        scheduleClassBtn.setMinWidth(Region.USE_PREF_SIZE);
         scheduleClassBtn.setOnAction(e -> {
             if (navCallback != null) navCallback.accept("Sessions");
         });
@@ -388,7 +394,7 @@ public class InstructorDashboardView extends StackPane {
         HBox card = new HBox(16);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(12, 16, 12, 16));
-        card.setStyle("-fx-background-color: rgba(30, 41, 59, 0.5); -fx-background-radius: 12px; -fx-border-color: rgba(255, 255, 255, 0.08); -fx-border-radius: 12px;");
+        card.getStyleClass().add("dashboard-list-row");
 
         // Time Chip
         VBox timeBox = new VBox(2);
@@ -405,7 +411,7 @@ public class InstructorDashboardView extends StackPane {
         timeBox.getChildren().addAll(dayLbl, timeLbl);
 
         // Details
-        VBox info = new VBox(3);
+        VBox info = new VBox(4);
         HBox.setHgrow(info, Priority.ALWAYS);
 
         HBox titleRow = new HBox(8);
@@ -431,6 +437,7 @@ public class InstructorDashboardView extends StackPane {
         pb.setPrefWidth(220);
         pb.setPrefHeight(6);
         pb.setStyle("-fx-accent: #38bdf8;");
+        VBox.setMargin(pb, new Insets(3, 0, 0, 0));
 
         info.getChildren().addAll(titleRow, capacityLbl, pb);
 
@@ -440,6 +447,7 @@ public class InstructorDashboardView extends StackPane {
 
         Button checkInRosterBtn = new Button("✓ Roster Check-In");
         checkInRosterBtn.getStyleClass().add("dashboard-emerald-btn");
+        checkInRosterBtn.setMinWidth(Region.USE_PREF_SIZE);
         checkInRosterBtn.setOnAction(e -> showQuickAttendanceModal(session));
 
         actionBox.getChildren().add(checkInRosterBtn);
@@ -450,7 +458,7 @@ public class InstructorDashboardView extends StackPane {
 
     private VBox buildTraineeMatrixSection() {
         VBox container = new VBox(14);
-        container.getStyleClass().add("dashboard-glass-panel");
+        container.getStyleClass().addAll("dashboard-card-section", "dashboard-glass-panel");
         container.setPadding(new Insets(20, 22, 22, 22));
 
         HBox header = new HBox(12);
@@ -472,6 +480,7 @@ public class InstructorDashboardView extends StackPane {
 
         Button addTraineeBtn = new Button("+ Assign Plan");
         addTraineeBtn.getStyleClass().add("dashboard-action-btn");
+        addTraineeBtn.setMinWidth(Region.USE_PREF_SIZE);
         addTraineeBtn.setOnAction(e -> showAssignPlanModal());
 
         header.getChildren().addAll(titleBox, addTraineeBtn);
@@ -532,6 +541,7 @@ public class InstructorDashboardView extends StackPane {
         nameLbl.getStyleClass().add("dashboard-row-title");
 
         Label tierPill = new Label(member.getMembershipType() != null ? member.getMembershipType() : "Standard");
+        tierPill.setMinWidth(Region.USE_PREF_SIZE);
         tierPill.setStyle("-fx-background-color: rgba(139, 92, 246, 0.2); -fx-text-fill: #c084fc; -fx-font-size: 10px; -fx-padding: 1px 6px; -fx-background-radius: 10px;");
         nameRow.getChildren().addAll(nameLbl, tierPill);
 
@@ -550,6 +560,7 @@ public class InstructorDashboardView extends StackPane {
         // Quick action: log measurements
         Button logMeasureBtn = new Button("📏 Stats");
         logMeasureBtn.getStyleClass().add("dashboard-action-btn");
+        logMeasureBtn.setMinWidth(Region.USE_PREF_SIZE);
         logMeasureBtn.setStyle("-fx-padding: 4px 10px; -fx-font-size: 11px;");
         logMeasureBtn.setTooltip(new Tooltip("Log Body Measurement for " + member.getName()));
         logMeasureBtn.setOnAction(e -> showLogMeasurementModal(member));
@@ -572,8 +583,8 @@ public class InstructorDashboardView extends StackPane {
 
         // Zone Hardware Readiness
         VBox hardwareBox = buildZoneHardwareSection();
-        hardwareBox.setMinWidth(420);
-        hardwareBox.setPrefWidth(460);
+        hardwareBox.setMinWidth(440);
+        hardwareBox.setPrefWidth(480);
 
         row.getChildren().addAll(chartBox, hardwareBox);
         return row;
@@ -581,7 +592,7 @@ public class InstructorDashboardView extends StackPane {
 
     private VBox buildAttendanceVelocityChart() {
         VBox container = new VBox(12);
-        container.getStyleClass().add("dashboard-glass-panel");
+        container.getStyleClass().addAll("dashboard-card-section", "dashboard-glass-panel");
         container.setPadding(new Insets(20, 22, 22, 22));
 
         Label title = new Label("Student Attendance & Check-In Velocity");
@@ -619,22 +630,23 @@ public class InstructorDashboardView extends StackPane {
 
     private VBox buildZoneHardwareSection() {
         VBox container = new VBox(12);
-        container.getStyleClass().add("dashboard-glass-panel");
+        container.getStyleClass().addAll("dashboard-card-section", "dashboard-glass-panel");
         container.setPadding(new Insets(20, 22, 22, 22));
 
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
 
         VBox titleBox = new VBox(2);
-        Label title = new Label("Studio & Training Zone Equipment Health");
+        Label title = new Label("Zone Equipment Health");
         title.getStyleClass().add("dashboard-panel-title");
-        Label sub = new Label("Readiness of machines and stations in coaching areas");
+        Label sub = new Label("Machine readiness across coaching stations");
         sub.getStyleClass().add("dashboard-panel-sub");
         titleBox.getChildren().addAll(title, sub);
         HBox.setHgrow(titleBox, Priority.ALWAYS);
 
         Button reportBtn = new Button("+ Report Issue");
         reportBtn.getStyleClass().add("dashboard-amber-btn");
+        reportBtn.setMinWidth(Region.USE_PREF_SIZE);
         reportBtn.setOnAction(e -> showReportEquipmentModal());
         header.getChildren().addAll(titleBox, reportBtn);
 
@@ -654,6 +666,7 @@ public class InstructorDashboardView extends StackPane {
             HBox.setHgrow(name, Priority.ALWAYS);
 
             Label statusPill = new Label(eq.getStatus().name());
+            statusPill.setMinWidth(Region.USE_PREF_SIZE);
             if (eq.getStatus() == EquipmentStatus.OPERATIONAL) {
                 statusPill.setStyle("-fx-background-color: rgba(16, 185, 129, 0.2); -fx-text-fill: #34d399; -fx-font-size: 10px; -fx-padding: 2px 8px; -fx-background-radius: 10px;");
             } else {

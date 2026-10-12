@@ -16,13 +16,19 @@ public class DialogUtils {
      */
     public static void stylePremiumDialog(Dialog<?> dialog) {
         // Remove OS window borders
-        dialog.initStyle(StageStyle.TRANSPARENT);
+        try {
+            dialog.initStyle(StageStyle.TRANSPARENT);
+        } catch (IllegalStateException ignored) {
+            // Already initialized style
+        }
         
         // Add the premium CSS class
-        dialog.getDialogPane().getStyleClass().add("premium-dialog");
+        if (!dialog.getDialogPane().getStyleClass().contains("premium-dialog")) {
+            dialog.getDialogPane().getStyleClass().add("premium-dialog");
+        }
         
-        // Make sure the dialog pane's scene is transparent and inherits the active theme
-        Platform.runLater(() -> {
+        // Make sure the dialog pane's scene is transparent, inherits active theme, and sizes properly
+        Runnable applyStylesAndSize = () -> {
             if (dialog.getDialogPane().getScene() != null) {
                 javafx.scene.Scene sc = dialog.getDialogPane().getScene();
                 sc.setFill(Color.TRANSPARENT);
@@ -35,9 +41,15 @@ public class DialogUtils {
                 };
                 dialog.getDialogPane().getStyleClass().removeAll("theme-dark", "theme-light", "theme-navy");
                 dialog.getDialogPane().getStyleClass().add(themeClass);
-                
-                // Center on parent window if possible, or center on screen
+
+                dialog.getDialogPane().applyCss();
+                dialog.getDialogPane().layout();
+
                 Window window = sc.getWindow();
+                if (window instanceof javafx.stage.Stage stage) {
+                    stage.sizeToScene();
+                }
+
                 if (window != null) {
                     if (dialog.getOwner() != null) {
                         Window owner = dialog.getOwner();
@@ -54,7 +66,24 @@ public class DialogUtils {
                     }
                 }
             }
+        };
+
+        // Attach scene change listener to capture when dialog scene is created
+        dialog.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                Platform.runLater(applyStylesAndSize);
+            }
         });
+
+        // Attach showing listener to ensure proper sizing after window is displayed
+        dialog.showingProperty().addListener((obs, oldV, isShowing) -> {
+            if (isShowing) {
+                Platform.runLater(applyStylesAndSize);
+            }
+        });
+
+        // Also schedule via runLater in case scene is already attached
+        Platform.runLater(applyStylesAndSize);
     }
 
     /**

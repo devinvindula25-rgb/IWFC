@@ -59,7 +59,7 @@
    Header Action Buttons
    ------------------------------------------------------------------------- */
 .followup-add-btn {
-    -fx-background-color: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
     -fx-text-fill: #ffffff;
     -fx-font-weight: 900;
     -fx-font-size: 12px;
@@ -72,7 +72,7 @@
 }
 
 .followup-add-btn:hover {
-    -fx-background-color: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%);
+    -fx-background-color: linear-gradient(to bottom right, #2563eb 0%, #4f46e5 50%, #7c3aed 100%);
     -fx-scale-x: 1.025;
     -fx-scale-y: 1.025;
     -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.7), 18, 0, 0, 4);
@@ -146,7 +146,7 @@
 }
 
 .followup-chip-active {
-    -fx-background-color: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(99, 102, 241, 0.22));
+    -fx-background-color: linear-gradient(to bottom right, rgba(59, 130, 246, 0.22), rgba(99, 102, 241, 0.22));
     -fx-text-fill: #ffffff;
     -fx-border-color: #3b82f6;
     -fx-border-radius: 16px;
@@ -277,7 +277,7 @@
 }
 
 .followup-page-btn-active {
-    -fx-background-color: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.25));
+    -fx-background-color: linear-gradient(to bottom right, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.25));
     -fx-text-fill: #ef4444;
     -fx-border-color: rgba(239, 68, 68, 0.6);
     -fx-border-radius: 6px;

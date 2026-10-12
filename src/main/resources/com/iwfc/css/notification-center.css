@@ -131,7 +131,7 @@
 }
 
 .notification-chip-active {
-    -fx-background-color: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(99, 102, 241, 0.22));
+    -fx-background-color: linear-gradient(to bottom right, rgba(59, 130, 246, 0.22), rgba(99, 102, 241, 0.22));
     -fx-text-fill: #ffffff;
     -fx-border-color: #3b82f6;
     -fx-border-radius: 16px;
@@ -254,7 +254,7 @@
 }
 
 .notification-page-btn-active {
-    -fx-background-color: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(99, 102, 241, 0.3));
+    -fx-background-color: linear-gradient(to bottom right, rgba(59, 130, 246, 0.3), rgba(99, 102, 241, 0.3));
     -fx-text-fill: #60a5fa;
     -fx-border-color: rgba(59, 130, 246, 0.7);
     -fx-border-radius: 6px;

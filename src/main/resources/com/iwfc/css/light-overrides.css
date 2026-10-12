@@ -129,17 +129,44 @@
     -fx-text-fill: #6b7280;
 }
 
-/* --- Dashboard Sections --- */
-.dashboard-section {
+/* --- Dashboard Sections & Glass Panels --- */
+.dashboard-section,
+.dashboard-card-section,
+.dashboard-glass-panel {
     -fx-background-color: #ffffff;
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: #cbd5e1;
     -fx-border-width: 1;
-    -fx-border-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 14, 0, 0, 3);
 }
 
-.section-title {
+.dashboard-card-section:hover,
+.dashboard-glass-panel:hover {
+    -fx-border-color: #94a3b8;
+}
+
+.dashboard-list-row {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.dashboard-list-row:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #cbd5e1;
+}
+
+.section-title,
+.dashboard-section-title,
+.dashboard-panel-title {
     -fx-text-fill: #1f2937;
+}
+
+.dashboard-section-subtitle,
+.dashboard-panel-sub {
+    -fx-text-fill: #64748b;
 }
 
 /* --- Tables --- */

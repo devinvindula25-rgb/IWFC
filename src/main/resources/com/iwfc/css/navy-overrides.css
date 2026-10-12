@@ -75,16 +75,44 @@
     -fx-text-fill: #a0a0c0;
 }
 
-/* --- Dashboard Sections --- */
-.dashboard-section {
-    -fx-background-color: rgba(255,255,255,0.04);
-    -fx-border-color: rgba(255,255,255,0.06);
-    -fx-border-width: 1;
-    -fx-border-radius: 12;
+/* --- Dashboard Sections & Glass Panels --- */
+.dashboard-section,
+.dashboard-card-section,
+.dashboard-glass-panel {
+    -fx-background-color: #07162c;
+    -fx-border-color: rgba(56, 189, 248, 0.32);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-border-width: 1.2px;
+    -fx-effect: dropshadow(gaussian, rgba(2, 6, 23, 0.65), 18, 0, 0, 6);
 }
 
-.section-title {
+.dashboard-card-section:hover,
+.dashboard-glass-panel:hover {
+    -fx-border-color: rgba(56, 189, 248, 0.55);
+}
+
+.dashboard-list-row {
+    -fx-background-color: #061329;
+    -fx-border-color: rgba(59, 130, 246, 0.25);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.dashboard-list-row:hover {
+    -fx-background-color: #0b1f42;
+    -fx-border-color: #38bdf8;
+}
+
+.section-title,
+.dashboard-section-title,
+.dashboard-panel-title {
     -fx-text-fill: #e0e0ff;
+}
+
+.dashboard-section-subtitle,
+.dashboard-panel-sub {
+    -fx-text-fill: #93c5fd;
 }
 
 /* --- Tables --- */
