@@ -15,11 +15,19 @@ public abstract class User implements Identifiable {
     private String address;
     private String profileImageUrl;
     private Role role;
+    private String password = "0000";
 
     /**
      * Protected constructor — only subclasses can instantiate.
      */
     protected User(String userId, String name, String email, String phone, String address, String profileImageUrl, Role role) {
+        this(userId, name, email, phone, address, profileImageUrl, role, "0000");
+    }
+
+    /**
+     * Protected constructor with custom password.
+     */
+    protected User(String userId, String name, String email, String phone, String address, String profileImageUrl, Role role, String password) {
         this.userId = userId;
         this.name = name;
         this.email = email;
@@ -27,6 +35,7 @@ public abstract class User implements Identifiable {
         this.address = address;
         this.profileImageUrl = profileImageUrl;
         this.role = role;
+        this.password = (password != null && !password.trim().isEmpty()) ? password.trim() : "0000";
     }
 
     /**
@@ -102,6 +111,14 @@ public abstract class User implements Identifiable {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getPassword() {
+        return password != null ? password : "0000";
+    }
+
+    public void setPassword(String password) {
+        this.password = (password != null && !password.trim().isEmpty()) ? password.trim() : "0000";
     }
 
     @Override

@@ -1,12 +1,12 @@
 package com.iwfc.ui;
 
 import com.iwfc.facade.IWFCSystemFacade;
+import com.iwfc.service.SchedulingValidator;
 import com.iwfc.model.*;
 import com.iwfc.pattern.DataStore;
 import com.iwfc.ui.components.DialogUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -174,10 +174,17 @@ public class SessionView extends BorderPane {
         searchField = new TextField();
         searchField.setPromptText("🔍 Search by session, type, room...");
         searchField.getStyleClass().add("session-search-field");
-        searchField.setPrefWidth(240);
+        searchField.setPrefWidth(220);
         searchField.textProperty().addListener((obs, oldVal, newVal) -> populateCalendar());
         
         header.getChildren().addAll(title, toggles, nav, spacer, searchField);
+
+        if (facade.getCurrentUser() instanceof Member) {
+            Button topBookBtn = new Button("⚡ + Book a Session");
+            topBookBtn.setStyle("-fx-background-color: linear-gradient(to right, #06b6d4, #3b82f6); -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 12px; -fx-padding: 7 18; -fx-background-radius: 18px; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(6, 182, 212, 0.4), 8, 0, 0, 2);");
+            topBookBtn.setOnAction(e -> showBookSessionModal(null, selectedDate, null));
+            header.getChildren().add(topBookBtn);
+        }
         return header;
     }
 
@@ -256,7 +263,7 @@ public class SessionView extends BorderPane {
             for (int col = 0; col < 7; col++) {
                 boolean inMonth = (drawDate.getMonth() == currentMonth.getMonth());
                 List<FitnessSession> daySessions = facade.getSessionsForDate(drawDate);
-                List<FitnessSession> filtered = filterSessions(daySessions);
+                List<FitnessSession> filtered = filterSessions(daySessions, drawDate);
                 
                 VBox dayCell = createDayCell(drawDate, inMonth, filtered);
                 calendarGrid.add(dayCell, col, row);
@@ -289,7 +296,7 @@ public class SessionView extends BorderPane {
         LocalDate drawDate = currentWeekStart;
         for (int col = 0; col < 7; col++) {
             List<FitnessSession> daySessions = facade.getSessionsForDate(drawDate);
-            List<FitnessSession> filtered = filterSessions(daySessions);
+            List<FitnessSession> filtered = filterSessions(daySessions, drawDate);
 
             VBox dayColumn = new VBox(8);
             dayColumn.setPadding(new Insets(10));
@@ -319,10 +326,11 @@ public class SessionView extends BorderPane {
             dayColumn.getChildren().add(sessionsBox);
 
             final LocalDate clickedDate = drawDate;
+            final List<FitnessSession> cellFiltered = filtered;
             dayColumn.setOnMouseClicked(e -> {
                 selectedDate = clickedDate;
                 updatePersonalGoalsCard();
-                showDailyDetailedView(clickedDate, daySessions);
+                showDailyDetailedView(clickedDate, cellFiltered);
             });
 
             weekGrid.add(dayColumn, col, 0);
@@ -338,14 +346,78 @@ public class SessionView extends BorderPane {
     // 3. 100% OPERATIONAL FILTER ENGINE
     // =========================================================================
 
-    private List<FitnessSession> filterSessions(List<FitnessSession> sessions) {
+    private boolean isPrivateSessionOfAnotherMember(FitnessSession fs, User currentUser) {
+        if (fs == null) return false;
+        String nameLower = fs.getName().toLowerCase();
+        boolean isPtSession = nameLower.contains("1-on-1 pt") || "personal training".equalsIgnoreCase(fs.getSessionType());
+        if (!isPtSession) return false;
+
+        // Staff / Admin / Instructor can view PT sessions
+        if (currentUser != null && (currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.INSTRUCTOR)) {
+            return false;
+        }
+
+        // For a member: if it's their own PT session, they can view it; otherwise it's private to another member
+        if (currentUser instanceof Member mem) {
+            return !fs.getName().toLowerCase().contains(mem.getName().toLowerCase());
+        }
+
+        return true;
+    }
+
+    private boolean isMemberBookedForSessionOnDate(Member member, FitnessSession fs, LocalDate date) {
+        if (member == null || fs == null || date == null) return false;
+        return facade.getAllBookings().stream().anyMatch(b -> 
+            b.getSession() != null && b.getSession().getSessionId().equals(fs.getSessionId()) &&
+            b.getSessionDate().equals(date) &&
+            b.getMember() != null && b.getMember().getUserId().equals(member.getUserId()) &&
+            b.getStatus() != BookingStatus.CANCELLED
+        );
+    }
+
+    private List<FitnessSession> filterSessions(List<FitnessSession> sessions, LocalDate date) {
         String query = (searchField != null && searchField.getText() != null) ? searchField.getText().trim().toLowerCase() : "";
         String sType = typeFilter != null ? typeFilter.getValue() : "All Types";
         String sInst = instFilter != null ? instFilter.getValue() : "All Instructors";
-        String sMember = memberFilter != null ? memberFilter.getValue() : "All Members";
+        String sMember = memberFilter != null ? memberFilter.getValue() : null;
+        User currentUser = facade.getCurrentUser();
 
         List<FitnessSession> filtered = new ArrayList<>();
         for (FitnessSession fs : sessions) {
+            // Privacy Rule: Private 1-on-1 PT sessions of other members are strictly invisible
+            if (isPrivateSessionOfAnotherMember(fs, currentUser)) {
+                continue;
+            }
+
+            // Role-Based Member Visibility
+            if (currentUser instanceof Member mem) {
+                boolean isMySessionsMode = sMember == null || "My Sessions".equals(sMember);
+                if (isMySessionsMode) {
+                    // In "My Sessions" mode, ONLY show sessions where this member is actively booked on this date,
+                    // or dedicated personal training sessions assigned to this member
+                    boolean isBookedByMe = isMemberBookedForSessionOnDate(mem, fs, date);
+                    boolean isMyPtSession = fs.getName().toLowerCase().contains("1-on-1 pt") && 
+                                           fs.getName().toLowerCase().contains(mem.getName().toLowerCase());
+                    if (!isBookedByMe && !isMyPtSession) {
+                        continue;
+                    }
+                }
+                // When in "Browse Available Classes" mode, continue to regular filters below
+            } else {
+                // Admin / Instructor / Staff Attendance Filter
+                if (sMember != null && !"All Members".equals(sMember) && !"Member".equals(sMember)) {
+                    boolean memberBooked = facade.getAllBookings().stream().anyMatch(b -> 
+                        b.getSession() != null && b.getSession().getSessionId().equals(fs.getSessionId()) &&
+                        b.getSessionDate().equals(date) &&
+                        b.getMember() != null && b.getMember().getName().equalsIgnoreCase(sMember) &&
+                        b.getStatus() != BookingStatus.CANCELLED
+                    );
+                    boolean isPtForMember = fs.getName().toLowerCase().contains("1-on-1 pt") && 
+                                           fs.getName().toLowerCase().contains(sMember.toLowerCase());
+                    if (!memberBooked && !isPtForMember) continue;
+                }
+            }
+
             // Text Search Filter
             if (!query.isEmpty()) {
                 boolean inName = fs.getName().toLowerCase().contains(query);
@@ -373,28 +445,23 @@ public class SessionView extends BorderPane {
                 }
             }
 
-            // Real Capacity Calculation
-            int booked = facade.getBookingsForSession(fs.getSessionId()).size();
+            // Real Capacity Calculation for the specific date
+            long bookedCount = facade.getBookingsForDate(fs.getSessionId(), date).stream()
+                    .filter(b -> b.getStatus() != BookingStatus.CANCELLED)
+                    .count();
             int maxCap = fs.getMaxCapacity();
             switch (capacityFilter) {
                 case "Available":
-                    if (booked >= maxCap) continue;
+                    if (bookedCount >= maxCap) continue;
                     break;
                 case "Full":
-                    if (booked < maxCap) continue;
+                    if (bookedCount < maxCap) continue;
                     break;
                 case "Waitlist":
-                    if (booked < (maxCap * 0.8)) continue;
+                    if (bookedCount < (maxCap * 0.8)) continue;
                     break;
                 default:
                     break;
-            }
-
-            // Member Attendance Filter
-            if (sMember != null && !"All Members".equals(sMember)) {
-                List<Booking> sessionBookings = facade.getBookingsForSession(fs.getSessionId());
-                boolean memberBooked = sessionBookings.stream().anyMatch(b -> b.getMember().getName().equalsIgnoreCase(sMember));
-                if (!memberBooked) continue;
             }
 
             filtered.add(fs);
@@ -441,11 +508,12 @@ public class SessionView extends BorderPane {
         cell.getChildren().add(scrollPane);
 
         if (isCurrentMonth) {
+            final List<FitnessSession> cellSessions = sessions;
             cell.setOnMouseClicked(e -> {
                 selectedDate = date;
                 updatePersonalGoalsCard();
                 populateCalendar();
-                showDailyDetailedView(date, sessions);
+                showDailyDetailedView(date, cellSessions);
             });
         }
 
@@ -475,6 +543,43 @@ public class SessionView extends BorderPane {
         Label subtitle = new Label(date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")));
         subtitle.setStyle("-fx-font-size: 14px; -fx-text-fill: #94a3b8;");
         headerBox.getChildren().addAll(title, subtitle);
+
+        User currentUser = facade.getCurrentUser();
+        if (currentUser instanceof Member) {
+            HBox toggleRow = new HBox(10);
+            toggleRow.setAlignment(Pos.CENTER);
+            toggleRow.setPadding(new Insets(6, 0, 0, 0));
+
+            Button showMyBtn = new Button("My Booked Sessions");
+            Button showAllBtn = new Button("Browse Available Classes");
+
+            boolean isShowingAll = (memberFilter != null && "Browse Available Classes".equals(memberFilter.getValue()));
+
+            showMyBtn.setStyle(isShowingAll ? 
+                "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand; -fx-padding: 5 12;" : 
+                "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 14px; -fx-padding: 5 12; -fx-cursor: hand;");
+
+            showAllBtn.setStyle(isShowingAll ? 
+                "-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 14px; -fx-padding: 5 12; -fx-cursor: hand;" : 
+                "-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-cursor: hand; -fx-padding: 5 12;");
+
+            showMyBtn.setOnAction(e -> {
+                if (memberFilter != null) memberFilter.setValue("My Sessions");
+                modal.close();
+                populateCalendar();
+                showDailyDetailedView(date, filterSessions(facade.getSessionsForDate(date), date));
+            });
+
+            showAllBtn.setOnAction(e -> {
+                if (memberFilter != null) memberFilter.setValue("Browse Available Classes");
+                modal.close();
+                populateCalendar();
+                showDailyDetailedView(date, filterSessions(facade.getSessionsForDate(date), date));
+            });
+
+            toggleRow.getChildren().addAll(showMyBtn, showAllBtn);
+            headerBox.getChildren().add(toggleRow);
+        }
         
         // Timeline Container
         VBox timeline = new VBox(22);
@@ -554,8 +659,10 @@ public class SessionView extends BorderPane {
                 
                 infoRow.getChildren().addAll(instBox, locBox);
                 
-                // Booked Progress Bar
-                int booked = facade.getBookingsForSession(fs.getSessionId()).size();
+                // Booked Progress Bar for specific date
+                long booked = facade.getBookingsForDate(fs.getSessionId(), date).stream()
+                        .filter(b -> b.getStatus() != BookingStatus.CANCELLED)
+                        .count();
                 ProgressBar pBar = new ProgressBar(Math.min(1.0, (double) booked / fs.getMaxCapacity()));
                 pBar.setMaxWidth(Double.MAX_VALUE);
                 pBar.setStyle("-fx-accent: " + fs.getColor() + "; -fx-control-inner-background: rgba(255,255,255,0.06);");
@@ -569,17 +676,63 @@ public class SessionView extends BorderPane {
 
                 // Interactive Booking Buttons
                 HBox cardBtns = new HBox(8);
-                Button bookBtn = new Button("Book Spot");
-                bookBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 6px; -fx-padding: 4 12; -fx-cursor: hand;");
-                bookBtn.setOnAction(e -> {
-                    showBookingDialog(fs, date, modal);
-                });
+                boolean isMemberBooked = (currentUser instanceof Member mem) && isMemberBookedForSessionOnDate(mem, fs, date);
+
+                if (isMemberBooked) {
+                    Label bookedBadge = new Label("✓ Booked");
+                    bookedBadge.setStyle("-fx-background-color: rgba(16, 185, 129, 0.2); -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 6px; -fx-padding: 4 10; -fx-border-color: #10b981; -fx-border-radius: 6px;");
+
+                    Button cancelBtn = new Button("Cancel Booking");
+                    cancelBtn.setStyle("-fx-background-color: rgba(239, 68, 68, 0.15); -fx-text-fill: #f87171; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 6px; -fx-padding: 4 10; -fx-cursor: hand; -fx-border-color: rgba(239, 68, 68, 0.4); -fx-border-radius: 6px;");
+                    cancelBtn.setOnAction(e -> {
+                        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Cancel your booking for " + fs.getName() + " on " + date.format(DateTimeFormatter.ofPattern("MMM d")) + "?", ButtonType.YES, ButtonType.NO);
+                        DialogUtils.stylePremiumDialog(confirm);
+                        confirm.showAndWait().ifPresent(res -> {
+                            if (res == ButtonType.YES) {
+                                try {
+                                    Booking myBooking = facade.getAllBookings().stream()
+                                        .filter(b -> b.getSession() != null && b.getSession().getSessionId().equals(fs.getSessionId())
+                                            && b.getSessionDate().equals(date)
+                                            && b.getMember() != null && b.getMember().getUserId().equals(currentUser.getUserId())
+                                            && b.getStatus() != BookingStatus.CANCELLED)
+                                        .findFirst().orElse(null);
+                                    if (myBooking != null) {
+                                        facade.cancelBooking(myBooking.getBookingId());
+                                        modal.close();
+                                        populateCalendar();
+                                        updatePersonalGoalsCard();
+                                        updateCommunityActivity();
+                                        Alert sc = new Alert(Alert.AlertType.INFORMATION, "Booking cancelled successfully.");
+                                        DialogUtils.stylePremiumDialog(sc);
+                                        sc.show();
+                                    }
+                                } catch (Exception ex) {
+                                    Alert err = new Alert(Alert.AlertType.ERROR, "Cancellation failed: " + ex.getMessage());
+                                    DialogUtils.stylePremiumDialog(err);
+                                    err.show();
+                                }
+                            }
+                        });
+                    });
+                    cardBtns.getChildren().addAll(bookedBadge, cancelBtn);
+                } else {
+                    Button bookBtn = new Button("Book Spot");
+                    if (booked >= fs.getMaxCapacity()) {
+                        bookBtn.setText("Full");
+                        bookBtn.setDisable(true);
+                        bookBtn.setStyle("-fx-background-color: rgba(255,255,255,0.08); -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 6px; -fx-padding: 4 12;");
+                    } else {
+                        bookBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 6px; -fx-padding: 4 12; -fx-cursor: hand;");
+                        bookBtn.setOnAction(e -> showBookSessionModal(fs, date, modal));
+                    }
+                    cardBtns.getChildren().add(bookBtn);
+                }
 
                 Button attendeesBtn = new Button("Attendees (" + booked + ")");
                 attendeesBtn.setStyle("-fx-background-color: rgba(255,255,255,0.08); -fx-text-fill: #cbd5e1; -fx-font-size: 11px; -fx-background-radius: 6px; -fx-padding: 4 10; -fx-cursor: hand;");
                 attendeesBtn.setOnAction(e -> showAttendeesDialog(fs));
+                cardBtns.getChildren().add(0, attendeesBtn);
 
-                cardBtns.getChildren().addAll(attendeesBtn, bookBtn);
                 capRow.getChildren().addAll(capacityLbl, capSp, cardBtns);
                 
                 cardCol.getChildren().addAll(nameLbl, infoRow, pBar, capRow);
@@ -593,8 +746,20 @@ public class SessionView extends BorderPane {
         mainScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;");
         VBox.setVgrow(mainScroll, Priority.ALWAYS);
         
-        HBox bottomRow = new HBox();
+        HBox bottomRow = new HBox(12);
         bottomRow.setAlignment(Pos.CENTER_RIGHT);
+
+        if (currentUser instanceof Member) {
+            Button addMoreBtn = new Button("⚡ + Book a Session for This Day");
+            addMoreBtn.setStyle("-fx-background-color: linear-gradient(to right, #06b6d4, #3b82f6); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px; -fx-background-radius: 6px; -fx-padding: 6 16; -fx-cursor: hand;");
+            addMoreBtn.setOnAction(e -> showBookSessionModal(null, date, modal));
+            bottomRow.getChildren().add(addMoreBtn);
+        }
+
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
+        bottomRow.getChildren().add(sp);
+
         Button closeBtn = new Button("Close");
         closeBtn.setStyle("-fx-background-color: rgba(255,255,255,0.12); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8px; -fx-padding: 8 22; -fx-cursor: hand;");
         closeBtn.setOnAction(e -> modal.close());
@@ -606,82 +771,570 @@ public class SessionView extends BorderPane {
         modal.showAndWait();
     }
 
-    private void showBookingDialog(FitnessSession session, LocalDate date, Stage parentModal) {
-        Dialog<Void> dlg = new Dialog<>();
-        DialogUtils.stylePremiumDialog(dlg);
-        dlg.setTitle("Book Session: " + session.getName());
+    private void showBookSessionModal(FitnessSession initialSession, LocalDate initialDate, Stage parentModal) {
+        Stage modal = new Stage(StageStyle.UTILITY);
+        modal.initModality(Modality.APPLICATION_MODAL);
+        modal.setTitle("Book Fitness Session — IWFC Collision-Free Scheduling");
 
-        VBox root = new VBox(16);
-        root.setPadding(new Insets(24));
-        root.setPrefWidth(420);
-        root.getStyleClass().add("custom-modal-root");
+        VBox content = new VBox(18);
+        content.setPadding(new Insets(26, 28, 26, 28));
+        content.setPrefWidth(580);
+        content.getStyleClass().add("custom-modal-root");
 
-        Label title = new Label("Confirm Session Booking");
-        title.getStyleClass().add("custom-modal-title");
+        // 1. Header with glowing icon capsule
+        HBox header = new HBox(14);
+        header.setAlignment(Pos.CENTER_LEFT);
+        
+        StackPane iconPane = new StackPane();
+        Circle iconBg = new Circle(22, Color.web("#06b6d4", 0.15));
+        iconBg.setStroke(Color.web("#06b6d4"));
+        iconBg.setStrokeWidth(1.5);
+        Label iconLbl = new Label("📅");
+        iconLbl.setStyle("-fx-font-size: 20px;");
+        iconPane.getChildren().addAll(iconBg, iconLbl);
 
-        Label sInfo = new Label("Session: " + session.getName() + "\nDate: " + date.format(DateTimeFormatter.ofPattern("EEEE, MMM d")) + "\nTime: " + session.getStartTime());
-        sInfo.setStyle("-fx-text-fill: #94a3b8; -fx-line-spacing: 4px;");
+        VBox titleBox = new VBox(2);
+        Label title = new Label("Book Fitness Session");
+        title.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: 900;");
+        Label sub = new Label("Collision-Free Scheduling Engine • Double-Bookings Physically Impossible");
+        sub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        titleBox.getChildren().addAll(title, sub);
 
-        Label memLbl = new Label("Select Member:");
-        memLbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-weight: bold;");
+        header.getChildren().addAll(iconPane, titleBox);
 
-        ComboBox<User> memberCbo = new ComboBox<>();
-        memberCbo.setMaxWidth(Double.MAX_VALUE);
-        memberCbo.setStyle("-fx-background-color: #1e293b; -fx-text-fill: white;");
-        List<User> members = DataStore.getInstance().getUsers().findAll().stream()
-            .filter(u -> u.getRole() == Role.MEMBER)
-            .collect(Collectors.toList());
-        memberCbo.getItems().addAll(members);
-        memberCbo.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(User u, boolean empty) {
-                super.updateItem(u, empty);
-                setText(empty || u == null ? null : u.getName() + " (" + u.getUserId() + ")");
+        // 2. Member Info Banner
+        User currentUser = facade.getCurrentUser();
+        Member currentMember = (currentUser instanceof Member mem) ? mem :
+            (Member) com.iwfc.pattern.DataStore.getInstance().getUsers().findById("MEM001").orElse(null);
+        User displayUser = (currentUser instanceof Member) ? currentUser : currentMember;
+
+        HBox memberCard = new HBox(12);
+        memberCard.setAlignment(Pos.CENTER_LEFT);
+        memberCard.setStyle("-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 10px; -fx-padding: 10 14; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 10px;");
+
+        Circle memAvatar = new Circle(16, Color.web("#3b82f6"));
+        String initStr = "ME";
+        if (displayUser != null && displayUser.getName().contains(" ")) {
+            String[] parts = displayUser.getName().split(" ");
+            if (parts.length > 1 && !parts[1].isEmpty()) {
+                initStr = (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
             }
-        });
-        memberCbo.setButtonCell(new ListCell<>() {
+        } else if (displayUser != null && displayUser.getName().length() >= 2) {
+            initStr = displayUser.getName().substring(0, 2).toUpperCase();
+        }
+        Label memInit = new Label(initStr);
+        memInit.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;");
+        StackPane memAvatarPane = new StackPane(memAvatar, memInit);
+
+        VBox memDetails = new VBox(2);
+        Label memName = new Label(displayUser != null ? displayUser.getName() : "Guest");
+        memName.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;");
+        Label memSub = new Label((displayUser != null ? displayUser.getUserId() : "") + " • Registered Gym Member");
+        memSub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        memDetails.getChildren().addAll(memName, memSub);
+
+        Region memSp = new Region();
+        HBox.setHgrow(memSp, Priority.ALWAYS);
+
+        String planText = "Active Member";
+        if (displayUser instanceof Member m && m.getMembershipType() != null) {
+            planText = m.getMembershipType() + " Plan";
+        }
+        Label planBadge = new Label("🌟 " + planText);
+        planBadge.setStyle("-fx-background-color: rgba(16, 185, 129, 0.18); -fx-text-fill: #34d399; -fx-font-weight: 800; -fx-font-size: 11px; -fx-padding: 4 10; -fx-background-radius: 12px; -fx-border-color: #10b981; -fx-border-radius: 12px;");
+
+        memberCard.getChildren().addAll(memAvatarPane, memDetails, memSp, planBadge);
+
+        // 3. Date Selection Row
+        VBox dateSection = new VBox(6);
+        Label dateLbl = new Label("Target Booking Date:");
+        dateLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        HBox datePickerRow = new HBox(10);
+        datePickerRow.setAlignment(Pos.CENTER_LEFT);
+
+        DatePicker datePicker = new DatePicker(initialDate != null ? initialDate : selectedDate);
+        datePicker.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(datePicker, Priority.ALWAYS);
+        datePicker.setStyle("-fx-background-color: #1e293b; -fx-text-fill: white;");
+        // Disable past dates in picker
+        datePicker.setDayCellFactory(picker -> new DateCell() {
             @Override
-            protected void updateItem(User u, boolean empty) {
-                super.updateItem(u, empty);
-                setText(empty || u == null ? null : u.getName() + " (" + u.getUserId() + ")");
-            }
-        });
-        if (!members.isEmpty()) memberCbo.getSelectionModel().selectFirst();
-
-        HBox btns = new HBox(10);
-        btns.setAlignment(Pos.CENTER_RIGHT);
-        Button cancel = new Button("Cancel");
-        cancel.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: #94a3b8;");
-        cancel.setOnAction(e -> dlg.close());
-
-        Button confirm = new Button("Confirm Booking");
-        confirm.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold;");
-        confirm.setOnAction(e -> {
-            User m = memberCbo.getValue();
-            if (m instanceof Member mem) {
-                try {
-                    facade.bookSession(session.getSessionId());
-                } catch (Exception ex) {
-                    try {
-                        Booking newB = new Booking("BKG-" + System.currentTimeMillis(), mem, session, date, java.time.LocalDateTime.now());
-                        DataStore.getInstance().getBookings().save(newB);
-                    } catch (com.iwfc.exception.DuplicateDataException ignored) {}
+            public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item.isBefore(LocalDate.now())) {
+                    setDisable(true);
+                    setStyle("-fx-background-color: rgba(255,255,255,0.02); -fx-text-fill: #475569;");
                 }
-                dlg.close();
-                parentModal.close();
+            }
+        });
+
+        Label weekdayPill = new Label(datePicker.getValue().getDayOfWeek().toString());
+        weekdayPill.setStyle("-fx-background-color: rgba(59, 130, 246, 0.15); -fx-text-fill: #60a5fa; -fx-font-weight: 800; -fx-font-size: 11px; -fx-padding: 6 12; -fx-background-radius: 8px; -fx-border-color: rgba(59, 130, 246, 0.3); -fx-border-radius: 8px;");
+
+        datePickerRow.getChildren().addAll(datePicker, weekdayPill);
+        dateSection.getChildren().addAll(dateLbl, datePickerRow);
+
+        // 4. Session Selection Row
+        VBox sessionSection = new VBox(6);
+        Label sessLbl = new Label("Fitness Session / Class:");
+        sessLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        ComboBox<FitnessSession> sessionCombo = new ComboBox<>();
+        sessionCombo.setMaxWidth(Double.MAX_VALUE);
+        sessionCombo.setStyle("-fx-background-color: #1e293b; -fx-text-fill: white;");
+
+        sessionCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(FitnessSession s, boolean empty) {
+                super.updateItem(s, empty);
+                if (empty || s == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    HBox box = new HBox(8);
+                    box.setAlignment(Pos.CENTER_LEFT);
+                    Circle dot = new Circle(4, Color.web(s.getColor()));
+                    Label n = new Label(s.getName());
+                    n.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    Label t = new Label(s.getStartTime() + " (" + s.getSessionType() + ")");
+                    t.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+                    Region sp = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
+                    Label d = new Label(s.getDayOfWeek().toString().substring(0,3));
+                    d.setStyle("-fx-text-fill: #64748b; -fx-font-size: 10px;");
+                    box.getChildren().addAll(dot, n, t, sp, d);
+                    setGraphic(box);
+                }
+            }
+        });
+        sessionCombo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(FitnessSession s, boolean empty) {
+                super.updateItem(s, empty);
+                if (empty || s == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    HBox box = new HBox(8);
+                    box.setAlignment(Pos.CENTER_LEFT);
+                    Circle dot = new Circle(4, Color.web(s.getColor()));
+                    Label n = new Label(s.getName() + " • " + s.getStartTime() + " (" + s.getSessionType() + ")");
+                    n.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    box.getChildren().addAll(dot, n);
+                    setGraphic(box);
+                }
+            }
+        });
+
+        CheckBox dayOnlyFilter = new CheckBox("Only show classes on selected day");
+        dayOnlyFilter.setSelected(true);
+        dayOnlyFilter.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-cursor: hand;");
+
+        sessionSection.getChildren().addAll(sessLbl, sessionCombo, dayOnlyFilter);
+
+        // 5. Live Interactive Details Card & Conflict Box
+        VBox liveDetailsCard = new VBox(12);
+        liveDetailsCard.setStyle("-fx-background-color: rgba(30, 41, 59, 0.5); -fx-background-radius: 12px; -fx-padding: 16; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 12px;");
+
+        VBox conflictAlertBox = new VBox(6);
+        conflictAlertBox.setStyle("-fx-background-radius: 8px; -fx-padding: 10 14;");
+
+        Runnable updateLiveState = () -> {
+            LocalDate selDate = datePicker.getValue();
+            if (selDate != null) {
+                weekdayPill.setText(selDate.getDayOfWeek().toString());
+            }
+
+            FitnessSession currentSess = sessionCombo.getValue();
+            liveDetailsCard.getChildren().clear();
+
+            if (currentSess == null || selDate == null) {
+                Label placeholder = new Label("Select a session and date above to preview schedule details.");
+                placeholder.setStyle("-fx-text-fill: #64748b; -fx-font-style: italic;");
+                liveDetailsCard.getChildren().add(placeholder);
+                conflictAlertBox.setVisible(false);
+                conflictAlertBox.setManaged(false);
+                return;
+            }
+
+            // Top Row: Title + Type
+            HBox topRow = new HBox(10);
+            topRow.setAlignment(Pos.CENTER_LEFT);
+            Label sessTitle = new Label(currentSess.getName());
+            sessTitle.setStyle("-fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: 900;");
+            Label typePill = new Label(currentSess.getSessionType());
+            typePill.setStyle("-fx-background-color: " + currentSess.getColor() + "33; -fx-text-fill: " + currentSess.getColor() + "; -fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 6px;");
+            topRow.getChildren().addAll(sessTitle, typePill);
+
+            // Middle Grid: Time, Instructor, Location
+            GridPane infoGrid = new GridPane();
+            infoGrid.setHgap(16);
+            infoGrid.setVgap(6);
+
+            Label timeVal = new Label("⏰ " + currentSess.getStartTime().format(DateTimeFormatter.ofPattern("hh:mm a")) + " - " + currentSess.getEndTime().format(DateTimeFormatter.ofPattern("hh:mm a")));
+            timeVal.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+            String instStr = currentSess.getInstructor() != null ? currentSess.getInstructor().getName() : "TBD";
+            Label instVal = new Label("👤 Instructor: " + instStr);
+            instVal.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px;");
+
+            String locStr = currentSess.getLocation() != null ? currentSess.getLocation().getDisplayName() : "Studio Floor";
+            Label locVal = new Label("📍 Location: " + locStr);
+            locVal.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px;");
+
+            infoGrid.add(timeVal, 0, 0);
+            infoGrid.add(instVal, 1, 0);
+            infoGrid.add(locVal, 0, 1);
+
+            // Capacity Progress Bar
+            long bookedCount = facade.getBookingsForDate(currentSess.getSessionId(), selDate).stream()
+                    .filter(b -> b.getStatus() != BookingStatus.CANCELLED)
+                    .count();
+            int maxCap = currentSess.getMaxCapacity();
+            ProgressBar pBar = new ProgressBar(Math.min(1.0, (double) bookedCount / maxCap));
+            pBar.setMaxWidth(Double.MAX_VALUE);
+            pBar.setPrefHeight(7);
+            pBar.setStyle("-fx-accent: " + currentSess.getColor() + ";");
+
+            HBox capTxtRow = new HBox();
+            Label capTxt = new Label(bookedCount + " of " + maxCap + " spots booked (" + Math.max(0, maxCap - bookedCount) + " remaining)");
+            capTxt.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;");
+            capTxtRow.getChildren().add(capTxt);
+
+            liveDetailsCard.getChildren().addAll(topRow, infoGrid, pBar, capTxtRow);
+
+            // Conflict Checker Preview
+            conflictAlertBox.setVisible(true);
+            conflictAlertBox.setManaged(true);
+            conflictAlertBox.getChildren().clear();
+
+            if (currentMember != null) {
+                String conflict = checkPreBookingConflict(currentMember, currentSess, selDate);
+                if (conflict != null) {
+                    conflictAlertBox.setStyle("-fx-background-color: rgba(239, 68, 68, 0.15); -fx-border-color: #ef4444; -fx-border-width: 1.5px; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-padding: 10 14;");
+                    HBox cHead = new HBox(8);
+                    cHead.setAlignment(Pos.CENTER_LEFT);
+                    Label cIcon = new Label("🛡️ ⚠️");
+                    cIcon.setStyle("-fx-font-size: 14px;");
+                    Label cTitle = new Label("Double-Booking Physically Impossible");
+                    cTitle.setStyle("-fx-text-fill: #f87171; -fx-font-weight: 900; -fx-font-size: 12px;");
+                    cHead.getChildren().addAll(cIcon, cTitle);
+
+                    Label cMsg = new Label(conflict);
+                    cMsg.setStyle("-fx-text-fill: #fca5a5; -fx-font-size: 11.5px;");
+                    cMsg.setWrapText(true);
+
+                    conflictAlertBox.getChildren().addAll(cHead, cMsg);
+                } else {
+                    conflictAlertBox.setStyle("-fx-background-color: rgba(16, 185, 129, 0.12); -fx-border-color: #10b981; -fx-border-width: 1px; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-padding: 8 14;");
+                    HBox clHead = new HBox(8);
+                    clHead.setAlignment(Pos.CENTER_LEFT);
+                    Label clIcon = new Label("✓");
+                    clIcon.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold; -fx-font-size: 13px;");
+                    Label clMsg = new Label("Time slot clear • No scheduling conflicts found for this date.");
+                    clMsg.setStyle("-fx-text-fill: #34d399; -fx-font-weight: bold; -fx-font-size: 11.5px;");
+                    clHead.getChildren().addAll(clIcon, clMsg);
+                    conflictAlertBox.getChildren().add(clHead);
+                }
+            }
+        };
+
+        // Populate sessionCombo dynamically based on selected date
+        Runnable populateSessions = () -> {
+            LocalDate selDate = datePicker.getValue();
+            if (selDate != null) {
+                String dayName = selDate.getDayOfWeek().toString().substring(0, 1) + 
+                                 selDate.getDayOfWeek().toString().substring(1).toLowerCase();
+                dayOnlyFilter.setText("Only show classes scheduled on " + dayName + "s");
+            }
+            boolean onlyDay = dayOnlyFilter.isSelected();
+            List<FitnessSession> filtered = facade.getAllSessions().stream()
+                .filter(s -> !isPrivateSessionOfAnotherMember(s, currentUser))
+                .filter(s -> !onlyDay || (selDate != null && s.getDayOfWeek() == selDate.getDayOfWeek()))
+                .sorted((a, b) -> {
+                    boolean aDay = (selDate != null && a.getDayOfWeek() == selDate.getDayOfWeek());
+                    boolean bDay = (selDate != null && b.getDayOfWeek() == selDate.getDayOfWeek());
+                    if (aDay != bDay) return aDay ? -1 : 1;
+                    return a.getStartTime().compareTo(b.getStartTime());
+                })
+                .collect(Collectors.toList());
+
+            FitnessSession currentSel = sessionCombo.getValue();
+            sessionCombo.getItems().setAll(filtered);
+
+            if (initialSession != null && filtered.contains(initialSession)) {
+                sessionCombo.setValue(initialSession);
+            } else if (currentSel != null && filtered.contains(currentSel)) {
+                sessionCombo.setValue(currentSel);
+            } else if (!filtered.isEmpty()) {
+                sessionCombo.getSelectionModel().selectFirst();
+            }
+            updateLiveState.run();
+        };
+
+        dayOnlyFilter.selectedProperty().addListener((obs, oldVal, newVal) -> populateSessions.run());
+        datePicker.valueProperty().addListener((obs, oldVal, newVal) -> populateSessions.run());
+        sessionCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateLiveState.run());
+
+        populateSessions.run();
+
+        // 6. Action Buttons
+        HBox btns = new HBox(12);
+        btns.setAlignment(Pos.CENTER_RIGHT);
+
+        Button cancel = new Button("Cancel");
+        cancel.setStyle("-fx-background-color: rgba(255,255,255,0.08); -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-padding: 9 20; -fx-background-radius: 8px; -fx-cursor: hand;");
+        cancel.setOnAction(e -> modal.close());
+
+        Button confirm = new Button("⚡ Confirm & Reserve Spot");
+        confirm.setStyle("-fx-background-color: linear-gradient(to right, #06b6d4, #3b82f6); -fx-text-fill: white; -fx-font-weight: 900; -fx-padding: 9 24; -fx-background-radius: 8px; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(6, 182, 212, 0.4), 10, 0, 0, 2);");
+        confirm.setOnAction(e -> {
+            FitnessSession chosenSession = sessionCombo.getValue();
+            LocalDate chosenDate = datePicker.getValue();
+
+            if (chosenSession == null || chosenDate == null) {
+                Alert err = new Alert(Alert.AlertType.WARNING, "Please select both a fitness session and date.");
+                DialogUtils.stylePremiumDialog(err);
+                err.showAndWait();
+                return;
+            }
+
+            try {
+                if (currentUser instanceof Member mem) {
+                    facade.bookSessionForDate(chosenSession.getSessionId(), chosenDate);
+                } else if (currentMember != null) {
+                    facade.bookSessionForMember(currentMember.getUserId(), chosenSession.getSessionId(), chosenDate);
+                }
+                modal.close();
+                if (parentModal != null) parentModal.close();
                 populateCalendar();
+                updatePersonalGoalsCard();
                 updateCommunityActivity();
-                
-                Alert success = new Alert(Alert.AlertType.INFORMATION, "Successfully booked " + m.getName() + " for " + session.getName() + "!");
-                DialogUtils.stylePremiumDialog(success);
-                success.show();
+
+                showBookingSuccessModal(chosenSession, chosenDate);
+            } catch (com.iwfc.exception.InvalidBookingException ex) {
+                showConflictErrorModal(ex.getMessage());
+                updateLiveState.run();
+            } catch (Exception ex) {
+                Alert err = new Alert(Alert.AlertType.ERROR, "Booking failed: " + ex.getMessage());
+                DialogUtils.stylePremiumDialog(err);
+                err.showAndWait();
             }
         });
 
         btns.getChildren().addAll(cancel, confirm);
-        root.getChildren().addAll(title, sInfo, memLbl, memberCbo, btns);
-        dlg.getDialogPane().setContent(root);
-        dlg.showAndWait();
+
+        content.getChildren().addAll(header, memberCard, dateSection, sessionSection, liveDetailsCard, conflictAlertBox, btns);
+
+        DialogUtils.prepareModalScene(modal, content);
+        modal.showAndWait();
+    }
+
+    private String checkPreBookingConflict(Member member, FitnessSession session, LocalDate date) {
+        if (member == null || session == null || date == null) return null;
+
+        if (date.isBefore(LocalDate.now())) {
+            return "Cannot book sessions in the past (" + date + ").";
+        }
+
+        if (!session.isActiveOn(date)) {
+            return "Session '" + session.getName() + "' is scheduled for " + session.getDayOfWeek() + 
+                   "s, but the selected date (" + date + ") is a " + date.getDayOfWeek() + ".";
+        }
+
+        long bookedCount = facade.getBookingsForDate(session.getSessionId(), date).stream()
+                .filter(b -> b.getStatus() != BookingStatus.CANCELLED)
+                .count();
+        if (bookedCount >= session.getMaxCapacity()) {
+            return "Session '" + session.getName() + "' is FULL (" + bookedCount + "/" + session.getMaxCapacity() + " spots booked).";
+        }
+
+        List<Booking> allBookings = facade.getAllBookings();
+        TimeSlot newSlot = new TimeSlot(
+            date.atTime(session.getStartTime()),
+            date.atTime(session.getEndTime())
+        );
+
+        for (Booking b : allBookings) {
+            if (b.getMember() == null || !b.getMember().getUserId().equals(member.getUserId())) continue;
+            if (b.getStatus() == BookingStatus.CANCELLED) continue;
+            if (!b.getSessionDate().equals(date)) continue;
+
+            FitnessSession existingSession = b.getSession();
+            if (existingSession == null) continue;
+
+            if (existingSession.getSessionId().equals(session.getSessionId())) {
+                return "Double-booking prevented: You are already booked for session '" + session.getName() + "' on " + date + ".";
+            }
+
+            TimeSlot existingSlot = new TimeSlot(
+                date.atTime(existingSession.getStartTime()),
+                date.atTime(existingSession.getEndTime())
+            );
+
+            SchedulingValidator validator = new SchedulingValidator();
+            if (validator.overlaps(newSlot, existingSlot)) {
+                return "Schedule conflict: You are already booked for overlapping session '" + 
+                       existingSession.getName() + "' (" + existingSession.getStartTime() + " - " + 
+                       existingSession.getEndTime() + ") on " + date + ". Double-bookings are physically impossible.";
+            }
+        }
+
+        return null;
+    }
+
+    private void showConflictErrorModal(String message) {
+        Stage modal = new Stage(StageStyle.UTILITY);
+        modal.initModality(Modality.APPLICATION_MODAL);
+        modal.setTitle("Double-Booking Physically Impossible — IWFC Rule Engine");
+
+        VBox content = new VBox(18);
+        content.setPadding(new Insets(24, 26, 24, 26));
+        content.setPrefWidth(540);
+        content.getStyleClass().add("custom-modal-root");
+
+        // Header with pulsing red shield icon
+        HBox header = new HBox(14);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        StackPane iconPane = new StackPane();
+        Circle iconBg = new Circle(24, Color.web("#ef4444", 0.18));
+        iconBg.setStroke(Color.web("#ef4444"));
+        iconBg.setStrokeWidth(1.8);
+        Label iconLbl = new Label("🛡️");
+        iconLbl.setStyle("-fx-font-size: 22px;");
+        iconPane.getChildren().addAll(iconBg, iconLbl);
+
+        VBox titleBox = new VBox(2);
+        Label title = new Label("Double-Booking Physically Impossible");
+        title.setStyle("-fx-text-fill: #f87171; -fx-font-size: 18px; -fx-font-weight: 900;");
+        Label sub = new Label("IWFC Scheduling Safety Rule Engine Violation");
+        sub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        titleBox.getChildren().addAll(title, sub);
+        header.getChildren().addAll(iconPane, titleBox);
+
+        // Conflict Card
+        VBox conflictCard = new VBox(10);
+        conflictCard.setStyle("-fx-background-color: rgba(239, 68, 68, 0.12); -fx-border-color: rgba(239, 68, 68, 0.4); -fx-border-width: 1px; -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-padding: 14 16;");
+
+        Label badge = new Label("⚠️ SCHEDULING CONFLICT DETECTED");
+        badge.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: 900; -fx-padding: 3 8; -fx-background-radius: 4px;");
+
+        Label conflictMsg = new Label(message);
+        conflictMsg.setStyle("-fx-text-fill: #fca5a5; -fx-font-size: 13px; -fx-font-weight: bold;");
+        conflictMsg.setWrapText(true);
+
+        conflictCard.getChildren().addAll(badge, conflictMsg);
+
+        // Physical Invariant Explanation box
+        VBox ruleBox = new VBox(6);
+        ruleBox.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-padding: 12 14;");
+        
+        Label ruleHeader = new Label("Physical Scheduling Invariant:");
+        ruleHeader.setStyle("-fx-text-fill: #cbd5e1; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        Label ruleText = new Label("Double-bookings and time collisions are strictly prohibited and physically impossible. A member cannot attend overlapping classes simultaneously or duplicate the same session on a single calendar date.");
+        ruleText.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11.5px;");
+        ruleText.setWrapText(true);
+
+        Label tipText = new Label("💡 Recommendation: Choose a non-overlapping time slot or select an alternate calendar date.");
+        tipText.setStyle("-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-weight: bold;");
+        tipText.setWrapText(true);
+
+        ruleBox.getChildren().addAll(ruleHeader, ruleText, tipText);
+
+        // Bottom Dismiss Button
+        HBox btnRow = new HBox();
+        btnRow.setAlignment(Pos.CENTER_RIGHT);
+        Button ackBtn = new Button("Acknowledge & Adjust Selection");
+        ackBtn.setStyle("-fx-background-color: linear-gradient(to right, #ef4444, #dc2626); -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 12px; -fx-padding: 9 22; -fx-background-radius: 8px; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.4), 10, 0, 0, 2);");
+        ackBtn.setOnAction(e -> modal.close());
+        btnRow.getChildren().add(ackBtn);
+
+        content.getChildren().addAll(header, conflictCard, ruleBox, btnRow);
+
+        DialogUtils.prepareModalScene(modal, content);
+        modal.showAndWait();
+    }
+
+    private void showBookingSuccessModal(FitnessSession session, LocalDate date) {
+        Stage modal = new Stage(StageStyle.UTILITY);
+        modal.initModality(Modality.APPLICATION_MODAL);
+        modal.setTitle("Booking Confirmed — IWFC Live Sync");
+
+        VBox content = new VBox(18);
+        content.setPadding(new Insets(24, 26, 24, 26));
+        content.setPrefWidth(520);
+        content.getStyleClass().add("custom-modal-root");
+
+        // Header with green checkmark
+        HBox header = new HBox(14);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        StackPane iconPane = new StackPane();
+        Circle iconBg = new Circle(24, Color.web("#10b981", 0.18));
+        iconBg.setStroke(Color.web("#10b981"));
+        iconBg.setStrokeWidth(1.8);
+        Label iconLbl = new Label("✓");
+        iconLbl.setStyle("-fx-text-fill: #10b981; -fx-font-size: 22px; -fx-font-weight: 900;");
+        iconPane.getChildren().addAll(iconBg, iconLbl);
+
+        VBox titleBox = new VBox(2);
+        Label title = new Label("Session Reserved Successfully!");
+        title.setStyle("-fx-text-fill: #34d399; -fx-font-size: 18px; -fx-font-weight: 900;");
+        Label sub = new Label("IWFC Live Scheduling & Calendar Synchronized");
+        sub.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        titleBox.getChildren().addAll(title, sub);
+        header.getChildren().addAll(iconPane, titleBox);
+
+        // Details card
+        VBox card = new VBox(10);
+        card.setStyle("-fx-background-color: rgba(255,255,255,0.04); -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-padding: 14 16;");
+
+        HBox topRow = new HBox(10);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+        Label sTitle = new Label(session.getName());
+        sTitle.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: 900;");
+        Label typePill = new Label(session.getSessionType());
+        typePill.setStyle("-fx-background-color: " + session.getColor() + "33; -fx-text-fill: " + session.getColor() + "; -fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 3 8; -fx-background-radius: 6px;");
+        topRow.getChildren().addAll(sTitle, typePill);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(16);
+        grid.setVgap(6);
+
+        Label dLbl = new Label("📅 " + date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")));
+        dLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        Label tLbl = new Label("⏰ " + session.getStartTime().format(DateTimeFormatter.ofPattern("hh:mm a")) + " - " + session.getEndTime().format(DateTimeFormatter.ofPattern("hh:mm a")));
+        tLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px;");
+
+        String loc = session.getLocation() != null ? session.getLocation().getDisplayName() : "Studio Floor";
+        Label lLbl = new Label("📍 " + loc);
+        lLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px;");
+
+        String inst = session.getInstructor() != null ? session.getInstructor().getName() : "Assigned Instructor";
+        Label iLbl = new Label("👤 Instructor: " + inst);
+        iLbl.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 12px;");
+
+        grid.add(dLbl, 0, 0);
+        grid.add(tLbl, 1, 0);
+        grid.add(lLbl, 0, 1);
+        grid.add(iLbl, 1, 1);
+
+        card.getChildren().addAll(topRow, grid);
+
+        HBox btnRow = new HBox();
+        btnRow.setAlignment(Pos.CENTER_RIGHT);
+        Button doneBtn = new Button("Done • View in Schedule");
+        doneBtn.setStyle("-fx-background-color: linear-gradient(to right, #06b6d4, #3b82f6); -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 12px; -fx-padding: 9 22; -fx-background-radius: 8px; -fx-cursor: hand;");
+        doneBtn.setOnAction(e -> modal.close());
+        btnRow.getChildren().add(doneBtn);
+
+        content.getChildren().addAll(header, card, btnRow);
+
+        DialogUtils.prepareModalScene(modal, content);
+        modal.showAndWait();
     }
 
     private void showAttendeesDialog(FitnessSession session) {
@@ -787,13 +1440,19 @@ public class SessionView extends BorderPane {
         
         // Member Filter Dropdown
         memberFilter = new ComboBox<>();
-        memberFilter.getItems().add("All Members");
-        Set<String> uniqueMembers = new TreeSet<>();
-        for (Booking b : facade.getAllBookings()) {
-            uniqueMembers.add(b.getMember().getName());
+        User currentUser = facade.getCurrentUser();
+        if (currentUser instanceof Member) {
+            memberFilter.getItems().addAll("My Sessions", "Browse Available Classes");
+            memberFilter.setValue("My Sessions");
+        } else {
+            memberFilter.getItems().add("All Members");
+            Set<String> uniqueMembers = new TreeSet<>();
+            for (Booking b : facade.getAllBookings()) {
+                uniqueMembers.add(b.getMember().getName());
+            }
+            memberFilter.getItems().addAll(uniqueMembers);
+            memberFilter.setValue("All Members");
         }
-        memberFilter.getItems().addAll(uniqueMembers);
-        memberFilter.getSelectionModel().selectFirst();
         memberFilter.setStyle("-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-background-radius: 6px;");
         memberFilter.setOnAction(e -> populateCalendar());
 
@@ -909,11 +1568,38 @@ public class SessionView extends BorderPane {
         Label aTitle = new Label("Action Panel");
         aTitle.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: 900;");
         
-        Button add = new Button("+ Add New Session");
-        add.setMaxWidth(Double.MAX_VALUE);
-        add.getStyleClass().add("session-add-btn");
-        add.setOnAction(e -> showAddSessionDialog());
-        action.getChildren().addAll(aTitle, add);
+        if (facade.getCurrentUser() instanceof Member) {
+            Button bookBtn = new Button("⚡ + Book a Session");
+            bookBtn.setMaxWidth(Double.MAX_VALUE);
+            bookBtn.setStyle("-fx-background-color: linear-gradient(to right, #06b6d4, #3b82f6); -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 13px; -fx-padding: 12 16; -fx-background-radius: 8px; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(6, 182, 212, 0.45), 12, 0, 0, 3);");
+            bookBtn.setOnAction(e -> showBookSessionModal(null, selectedDate, null));
+
+            Button browseBtn = new Button("🔍 Browse Available Classes");
+            browseBtn.setMaxWidth(Double.MAX_VALUE);
+            browseBtn.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-text-fill: #cbd5e1; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 9 16; -fx-background-radius: 8px; -fx-cursor: hand; -fx-border-color: rgba(255, 255, 255, 0.12); -fx-border-radius: 8px;");
+            browseBtn.setOnAction(e -> {
+                if (memberFilter != null) {
+                    memberFilter.setValue("Browse Available Classes");
+                }
+            });
+
+            Button mySessionsBtn = new Button("📅 My Booked Sessions");
+            mySessionsBtn.setMaxWidth(Double.MAX_VALUE);
+            mySessionsBtn.setStyle("-fx-background-color: rgba(255, 255, 255, 0.04); -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 9 16; -fx-background-radius: 8px; -fx-cursor: hand; -fx-border-color: rgba(255, 255, 255, 0.08); -fx-border-radius: 8px;");
+            mySessionsBtn.setOnAction(e -> {
+                if (memberFilter != null) {
+                    memberFilter.setValue("My Sessions");
+                }
+            });
+
+            action.getChildren().addAll(aTitle, bookBtn, browseBtn, mySessionsBtn);
+        } else {
+            Button add = new Button("+ Add New Session");
+            add.setMaxWidth(Double.MAX_VALUE);
+            add.getStyleClass().add("session-add-btn");
+            add.setOnAction(e -> showAddSessionDialog());
+            action.getChildren().addAll(aTitle, add);
+        }
         
         // Personal Goals Card (Synchronized with selected calendar day)
         VBox goals = createGlassCard("Personal Goals", "View Goals", () -> showGoalsModal());
@@ -932,9 +1618,9 @@ public class SessionView extends BorderPane {
         
         VBox txt = new VBox();
         txt.setAlignment(Pos.CENTER);
-        goalsScoreLbl = new Label("5/5");
+        goalsScoreLbl = new Label("1/1");
         goalsScoreLbl.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: 900;");
-        Label v2 = new Label("Classes\nComplete");
+        Label v2 = new Label("Classes\nBooked");
         v2.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 10px;");
         v2.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         txt.getChildren().addAll(goalsScoreLbl, v2);
@@ -973,9 +1659,16 @@ public class SessionView extends BorderPane {
             goalsDateLbl.setText("Selected Day: " + selectedDate.format(DateTimeFormatter.ofPattern("EEEE, MMM d")));
         }
         if (goalsScoreLbl != null) {
-            List<FitnessSession> sessions = facade.getSessionsForDate(selectedDate);
-            int count = sessions.size();
-            goalsScoreLbl.setText(count + "/" + Math.max(count, 5));
+            if (facade.getCurrentUser() instanceof Member) {
+                long bookedCount = facade.getMyBookings().stream()
+                    .filter(b -> b.getSessionDate().equals(selectedDate) && b.getStatus() != BookingStatus.CANCELLED)
+                    .count();
+                goalsScoreLbl.setText(bookedCount + "/" + Math.max(bookedCount, 1));
+            } else {
+                List<FitnessSession> sessions = facade.getSessionsForDate(selectedDate);
+                int count = sessions.size();
+                goalsScoreLbl.setText(count + "/" + Math.max(count, 5));
+            }
         }
     }
 

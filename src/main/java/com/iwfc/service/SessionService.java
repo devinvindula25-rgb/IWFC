@@ -130,33 +130,9 @@ public class SessionService {
     public Booking bookSessionForDate(Member member, String sessionId, LocalDate date) throws InvalidBookingException {
         FitnessSession session = getSessionById(sessionId);
 
-        if (!session.isActiveOn(date)) {
-            throw new InvalidBookingException("Session '" + session.getName() + "' is not active on " + date + ".");
-        }
-
-        if (date.isBefore(LocalDate.now())) {
-            throw new InvalidBookingException("Cannot book a session in the past.");
-        }
-
-        // Check capacity for this specific date
-        List<Booking> existingBookings = sessionBookings.getOrDefault(sessionId, new ArrayList<>());
-        long activeBookings = existingBookings.stream()
-                .filter(b -> b.getStatus() != BookingStatus.CANCELLED && b.getSessionDate().equals(date))
-                .count();
-        
+        // Enforce all scheduling and booking rules via SchedulingValidator engine
         SchedulingValidator validator = new SchedulingValidator();
-        validator.validateCapacity((int) activeBookings, session.getMaxCapacity());
-
-        // Check if member already booked this session on this date
-        boolean alreadyBooked = existingBookings.stream()
-                .anyMatch(b -> b.getMember().getUserId().equals(member.getUserId()) && 
-                               b.getStatus() != BookingStatus.CANCELLED && 
-                               b.getSessionDate().equals(date));
-        if (alreadyBooked) {
-            throw new InvalidBookingException(
-                "Member '" + member.getName() + "' has already booked session '" +
-                session.getName() + "' on " + date + ".");
-        }
+        validator.validateBooking(member, session, date, dataStore.getBookings().findAll());
 
         // Create booking
         String bookingId = "BK" + String.format("%03d", dataStore.getBookings().findAll().size() + 1);

@@ -25,6 +25,7 @@ com\iwfc\model\Urgency.class
 com\iwfc\ui\components\CyberThemeToggle.class
 com\iwfc\util\BillGenerator.class
 com\iwfc\ui\DashboardView$6.class
+com\iwfc\ui\SessionView$11.class
 com\iwfc\model\User.class
 module-info.class
 com\iwfc\pattern\payment\BankTransferPayment.class
@@ -50,6 +51,7 @@ com\iwfc\ui\AdminReportsView$3.class
 com\iwfc\ui\UserManagementView.class
 com\iwfc\model\BookingStatus.class
 com\iwfc\ui\DashboardView$12.class
+com\iwfc\ui\LoginView$1.class
 com\iwfc\ui\MainLayout$5.class
 com\iwfc\ui\SessionView$7.class
 com\iwfc\model\PaymentStatus.class

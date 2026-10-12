@@ -1,9 +1,13 @@
 package com.iwfc.service;
 
 import com.iwfc.exception.InvalidBookingException;
+import com.iwfc.model.Booking;
+import com.iwfc.model.BookingStatus;
 import com.iwfc.model.FitnessSession;
+import com.iwfc.model.Member;
 import com.iwfc.model.TimeSlot;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -107,5 +111,86 @@ public class SchedulingValidator {
         if (activeBookings >= maxCapacity) {
             throw new InvalidBookingException("Session is fully booked (capacity: " + maxCapacity + ").");
         }
+    }
+
+    /**
+     * Validates that a member is not double-booking:
+     * 1. Cannot book the exact same session twice on the same date.
+     * 2. Cannot book another session that overlaps in time on the same date.
+     */
+    public void validateNoMemberDoubleBooking(Member member, FitnessSession sessionToBook, LocalDate date, List<Booking> existingBookings) throws InvalidBookingException {
+        TimeSlot newSlot = new TimeSlot(
+            date.atTime(sessionToBook.getStartTime()),
+            date.atTime(sessionToBook.getEndTime())
+        );
+
+        for (Booking b : existingBookings) {
+            if (b.getMember() == null || !b.getMember().getUserId().equals(member.getUserId())) continue;
+            if (b.getStatus() == BookingStatus.CANCELLED) continue;
+            if (!b.getSessionDate().equals(date)) continue;
+
+            FitnessSession existingSession = b.getSession();
+            if (existingSession == null) continue;
+
+            // 1. Exact same session on same date
+            if (existingSession.getSessionId().equals(sessionToBook.getSessionId())) {
+                throw new InvalidBookingException(
+                    "Double-booking prevented: Member '" + member.getName() + 
+                    "' is already booked for session '" + sessionToBook.getName() + 
+                    "' on " + date + ".");
+            }
+
+            // 2. Overlapping time slot conflict on same date
+            TimeSlot existingSlot = new TimeSlot(
+                date.atTime(existingSession.getStartTime()),
+                date.atTime(existingSession.getEndTime())
+            );
+
+            if (overlaps(newSlot, existingSlot)) {
+                throw new InvalidBookingException(
+                    "Schedule conflict: Member '" + member.getName() + 
+                    "' is already booked for overlapping session '" + existingSession.getName() + 
+                    "' (" + existingSession.getStartTime() + " - " + existingSession.getEndTime() + 
+                    ") on " + date + ". Double-booking is physically impossible.");
+            }
+        }
+    }
+
+    /**
+     * Comprehensive booking validation engine:
+     * - Member and session non-null
+     * - Date non-null and not in the past
+     * - Session active on date
+     * - Session capacity check
+     * - Member double-booking check (same session and time overlap)
+     */
+    public void validateBooking(Member member, FitnessSession session, LocalDate date, List<Booking> existingBookings) throws InvalidBookingException {
+        if (member == null) {
+            throw new InvalidBookingException("A valid gym member must be provided for booking.");
+        }
+        if (session == null) {
+            throw new InvalidBookingException("A valid session must be provided for booking.");
+        }
+        if (date == null) {
+            throw new InvalidBookingException("A booking date must be specified.");
+        }
+        if (date.isBefore(LocalDate.now())) {
+            throw new InvalidBookingException("Cannot book a session in the past (" + date + ").");
+        }
+        if (!session.isActiveOn(date)) {
+            throw new InvalidBookingException("Session '" + session.getName() + "' is not active on " + date + ".");
+        }
+
+        // Capacity check for this specific session on this date
+        long activeCount = existingBookings.stream()
+            .filter(b -> b.getSession() != null
+                      && b.getSession().getSessionId().equals(session.getSessionId())
+                      && b.getSessionDate().equals(date)
+                      && b.getStatus() != BookingStatus.CANCELLED)
+            .count();
+        validateCapacity((int) activeCount, session.getMaxCapacity());
+
+        // Double-booking check across all sessions on this date
+        validateNoMemberDoubleBooking(member, session, date, existingBookings);
     }
 }

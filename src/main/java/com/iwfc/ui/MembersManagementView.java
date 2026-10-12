@@ -1183,6 +1183,7 @@ public class MembersManagementView extends HBox {
         TextField genderF = createStyledField("Gender", m.getGender());
         TextField dobF = createStyledField("Date of Birth", m.getDateOfBirth());
         TextField natF = createStyledField("Nationality", m.getNationality());
+        TextField passF = createStyledField("Security Passcode", m.getPassword());
 
         HBox btnRow = new HBox(12);
         btnRow.setAlignment(Pos.CENTER_RIGHT);
@@ -1200,12 +1201,15 @@ public class MembersManagementView extends HBox {
             m.setGender(genderF.getText().trim());
             m.setDateOfBirth(dobF.getText().trim());
             m.setNationality(natF.getText().trim());
+            if (!passF.getText().trim().isEmpty()) {
+                m.setPassword(passF.getText().trim());
+            }
             modal.close();
             filterMembers();
         });
 
         btnRow.getChildren().addAll(cancel, save);
-        root.getChildren().addAll(title, nameF, phoneF, emailF, addrF, genderF, dobF, natF, btnRow);
+        root.getChildren().addAll(title, nameF, phoneF, emailF, addrF, genderF, dobF, natF, passF, btnRow);
         DialogUtils.prepareModalScene(modal, root);
         modal.showAndWait();
     }
@@ -1369,15 +1373,22 @@ public class MembersManagementView extends HBox {
         book.setOnAction(e -> {
             FitnessSession fs = sessionCbo.getValue();
             if (fs != null) {
-                Booking newB = new Booking("BKG-" + System.currentTimeMillis(), m, fs, datePicker.getValue(), LocalDateTime.now());
                 try {
-                    DataStore.getInstance().getBookings().save(newB);
-                } catch (Exception ignored) {}
-                modal.close();
-                renderProfile();
-                Alert sc = new Alert(Alert.AlertType.INFORMATION, "Booked " + m.getName() + " for " + fs.getName() + " on " + datePicker.getValue() + "!");
-                DialogUtils.stylePremiumDialog(sc);
-                sc.show();
+                    facade.bookSessionForMember(m.getUserId(), fs.getSessionId(), datePicker.getValue());
+                    modal.close();
+                    renderProfile();
+                    Alert sc = new Alert(Alert.AlertType.INFORMATION, "Booked " + m.getName() + " for " + fs.getName() + " on " + datePicker.getValue() + "!");
+                    DialogUtils.stylePremiumDialog(sc);
+                    sc.show();
+                } catch (com.iwfc.exception.InvalidBookingException ex) {
+                    Alert err = new Alert(Alert.AlertType.ERROR, ex.getMessage());
+                    DialogUtils.stylePremiumDialog(err);
+                    err.showAndWait();
+                } catch (Exception ex) {
+                    Alert err = new Alert(Alert.AlertType.ERROR, "Booking failed: " + ex.getMessage());
+                    DialogUtils.stylePremiumDialog(err);
+                    err.showAndWait();
+                }
             }
         });
 

@@ -103,6 +103,18 @@ public class IWFCSystemFacade {
     }
 
     /**
+     * Authenticates and logs in a user by their user ID and security passcode.
+     *
+     * @param userId   the user ID
+     * @param password the security passcode
+     * @return the authenticated User
+     */
+    public User login(String userId, String password) {
+        this.currentUser = userService.login(userId, password);
+        return currentUser;
+    }
+
+    /**
      * Logs out the current user.
      */
     public void logout() {

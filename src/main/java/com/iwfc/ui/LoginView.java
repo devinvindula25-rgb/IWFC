@@ -4,6 +4,7 @@ import com.iwfc.facade.IWFCSystemFacade;
 import com.iwfc.ui.components.CyberGridCanvas;
 import com.iwfc.ui.components.CyberThemeToggle;
 import com.iwfc.ui.components.LiveHeartbeatView;
+import com.iwfc.model.User;
 import javafx.animation.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,6 +16,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
@@ -63,10 +65,22 @@ public class LoginView extends StackPane {
     private TextField userIdField;
     private Button enterPortalBtn;
     private Label demoIdsLabel;
-    private Label onlineStatusLabel;
-    private Label versionLabel;
     private StackPane cardOuterContainer;
     private Canvas cardBorderCanvas;
+    // Step Navigation & State
+    private VBox step1View;
+    private VBox step2View;
+    private Label step1ErrorLabel;
+    private User targetUser;
+    private Circle step2Avatar;
+    private Label step2AvatarInitials;
+    private Label step2NameLabel;
+    private Label step2RolePill;
+    private PasswordField passInputField;
+    private TextField passVisibleField;
+    private boolean isUpdatingPassField = false;
+    private HBox step2ErrorBox;
+    private Label step2ErrorLabel;
 
     // Role Tiles
     private Button adminTile;
@@ -304,19 +318,36 @@ public class LoginView extends StackPane {
         cardBorderCanvas.heightProperty().addListener(e -> redrawCardBorder());
 
         // -------------------------------------------------------------
-        // Form Content Layout
+        // Multi-Step Form Layout
         // -------------------------------------------------------------
-        VBox formContent = new VBox(16);
-        formContent.setAlignment(Pos.CENTER_LEFT);
+        step1View = buildStep1View();
+        step2View = buildStep2View();
+        step2View.setVisible(false);
+        step2View.setManaged(false);
+
+        StackPane stepsContainer = new StackPane(step1View, step2View);
+        stepsContainer.setAlignment(Pos.CENTER);
+
+        cardBody.getChildren().add(stepsContainer);
+        cardOuterContainer.getChildren().addAll(cardBody, cardBorderCanvas);
+
+        VBox rightWrapper = new VBox(cardOuterContainer);
+        rightWrapper.setAlignment(Pos.CENTER);
+        return rightWrapper;
+    }
+
+    private VBox buildStep1View() {
+        VBox content = new VBox(16);
+        content.setAlignment(Pos.CENTER_LEFT);
 
         // Header
-        secureAccessTag = new Label("// SECURE ACCESS");
+        secureAccessTag = new Label("// STEP 01 - IDENTITY VERIFICATION");
         secureAccessTag.getStyleClass().add("form-secure-tag");
 
         signInTitle = new Label("SIGN IN");
         signInTitle.getStyleClass().add("form-sign-in-title");
 
-        signInSubtitle = new Label("Pick your role. Enter your credential ID.");
+        signInSubtitle = new Label("Select your role and enter your Credential ID.");
         signInSubtitle.getStyleClass().add("form-subtitle-desc");
 
         VBox headerBox = new VBox(3, secureAccessTag, signInTitle, signInSubtitle);
@@ -345,8 +376,18 @@ public class LoginView extends StackPane {
         userIdField.getStyleClass().add("cyber-input-field");
         userIdField.setPrefHeight(46);
 
+        step1ErrorLabel = new Label("");
+        step1ErrorLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 11.5px; -fx-font-weight: bold;");
+        step1ErrorLabel.setVisible(false);
+        step1ErrorLabel.setManaged(false);
+
         // Auto-select role tile when user types standard prefixes
         userIdField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (step1ErrorLabel != null) {
+                step1ErrorLabel.setVisible(false);
+                step1ErrorLabel.setManaged(false);
+            }
+            userIdField.setStyle("");
             if (newVal != null) {
                 String val = newVal.trim().toUpperCase();
                 if (val.startsWith("ADM") && !"ADMIN".equals(selectedRole)) {
@@ -359,34 +400,18 @@ public class LoginView extends StackPane {
             }
         });
 
-        VBox credSection = new VBox(6, credSectionLabel, userIdField);
+        VBox credSection = new VBox(6, credSectionLabel, userIdField, step1ErrorLabel);
 
-        // Action Button: "ENTER PORTAL   →"
-        enterPortalBtn = new Button("ENTER PORTAL  →");
+        // Action Button: "CONTINUE TO PASSCODE   →"
+        enterPortalBtn = new Button("CONTINUE TO PASSCODE  →");
         enterPortalBtn.getStyleClass().add("cyber-enter-btn");
         enterPortalBtn.setMaxWidth(Double.MAX_VALUE);
         enterPortalBtn.setPrefHeight(48);
 
-        // Cut corner on bottom-right of button
-        Polygon btnClip = new Polygon();
-        enterPortalBtn.setClip(btnClip);
-        enterPortalBtn.layoutBoundsProperty().addListener((obs, oldB, newB) -> {
-            if (newB != null && newB.getWidth() > 0) {
-                double bw = newB.getWidth();
-                double bh = newB.getHeight();
-                double c = 14.0;
-                btnClip.getPoints().setAll(
-                        0.0, 0.0,
-                        bw, 0.0,
-                        bw, bh - c,
-                        bw - c, bh,
-                        0.0, bh
-                );
-            }
-        });
+        applyCutCornerClip(enterPortalBtn);
 
-        enterPortalBtn.setOnAction(e -> doLogin());
-        userIdField.setOnAction(e -> doLogin());
+        enterPortalBtn.setOnAction(e -> handleStep1Continue());
+        userIdField.setOnAction(e -> handleStep1Continue());
 
         // Demo IDs Line
         HBox demoIdsBox = new HBox(6);
@@ -408,6 +433,221 @@ public class LoginView extends StackPane {
         demoIdsBox.getChildren().addAll(demoIdsLabel, chipAdm, chipDot1, chipIns, chipDot2, chipMem);
 
         // Card Footer
+        HBox footerBox = buildCardFooter();
+
+        content.getChildren().addAll(
+                headerBox,
+                roleSection,
+                credSection,
+                enterPortalBtn,
+                demoIdsBox,
+                footerBox
+        );
+        return content;
+    }
+
+    private VBox buildStep2View() {
+        VBox content = new VBox(14);
+        content.setAlignment(Pos.CENTER_LEFT);
+
+        // Header
+        Label step2Tag = new Label("// STEP 02 - SECURITY AUTHENTICATION");
+        step2Tag.getStyleClass().add("form-secure-tag");
+
+        Label step2Title = new Label("ENTER PASSCODE");
+        step2Title.getStyleClass().add("form-sign-in-title");
+
+        Label step2Subtitle = new Label("Verify your profile credentials to access the portal.");
+        step2Subtitle.getStyleClass().add("form-subtitle-desc");
+
+        VBox headerBox = new VBox(3, step2Tag, step2Title, step2Subtitle);
+
+        // Identified User Profile Card
+        HBox profileCard = new HBox(12);
+        profileCard.setAlignment(Pos.CENTER_LEFT);
+        profileCard.setStyle("-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 8px; -fx-padding: 10 14; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 8px;");
+
+        step2Avatar = new Circle(18, Color.web("#ccff00"));
+        step2AvatarInitials = new Label("AD");
+        step2AvatarInitials.setStyle("-fx-text-fill: #000000; -fx-font-weight: 900; -fx-font-size: 11px;");
+        StackPane avatarPane = new StackPane(step2Avatar, step2AvatarInitials);
+
+        VBox profileInfo = new VBox(2);
+        step2NameLabel = new Label("Sarah Johnson");
+        step2NameLabel.setStyle("-fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 14px;");
+
+        HBox metaRow = new HBox(6);
+        metaRow.setAlignment(Pos.CENTER_LEFT);
+        step2RolePill = new Label("ADM001 • SYSTEM ADMINISTRATOR");
+        step2RolePill.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: 600;");
+        metaRow.getChildren().add(step2RolePill);
+
+        profileInfo.getChildren().addAll(step2NameLabel, metaRow);
+
+        Region pSpacer = new Region();
+        HBox.setHgrow(pSpacer, Priority.ALWAYS);
+
+        Label verifiedBadge = new Label("✓ ID FOUND");
+        verifiedBadge.setStyle("-fx-background-color: rgba(34, 197, 94, 0.15); -fx-text-fill: #22c55e; -fx-font-size: 10px; -fx-font-weight: 900; -fx-padding: 3 8; -fx-background-radius: 10px; -fx-border-color: rgba(34, 197, 94, 0.3); -fx-border-radius: 10px;");
+
+        profileCard.getChildren().addAll(avatarPane, profileInfo, pSpacer, verifiedBadge);
+
+        // Passcode Section
+        Label passSectionLabel = new Label("SECURITY PASSCODE");
+        passSectionLabel.getStyleClass().add("form-field-label");
+
+        // Password input row with show/hide toggle
+        StackPane passInputStack = new StackPane();
+        passInputField = new PasswordField();
+        passInputField.setPromptText("••••");
+        passInputField.getStyleClass().add("cyber-input-field");
+        passInputField.setPrefHeight(46);
+        passInputField.setStyle("-fx-font-size: 18px; -fx-padding: 8 44 8 16;");
+
+        passVisibleField = new TextField();
+        passVisibleField.setPromptText("0000");
+        passVisibleField.getStyleClass().add("cyber-input-field");
+        passVisibleField.setPrefHeight(46);
+        passVisibleField.setStyle("-fx-font-size: 18px; -fx-padding: 8 44 8 16;");
+        passVisibleField.setVisible(false);
+        passVisibleField.setManaged(false);
+
+        // Sync inputs between masked and plain fields
+        passInputField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!isUpdatingPassField && passVisibleField.isVisible()) {
+                isUpdatingPassField = true;
+                passVisibleField.setText(newVal);
+                isUpdatingPassField = false;
+            }
+            hideStep2Error();
+        });
+        passVisibleField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!isUpdatingPassField && !passVisibleField.isVisible()) {
+                isUpdatingPassField = true;
+                passInputField.setText(newVal);
+                isUpdatingPassField = false;
+            }
+            hideStep2Error();
+        });
+
+        Button toggleEyeBtn = new Button("👁");
+        toggleEyeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 4 10;");
+        toggleEyeBtn.setOnAction(e -> {
+            boolean show = !passVisibleField.isVisible();
+            if (show) {
+                isUpdatingPassField = true;
+                passVisibleField.setText(passInputField.getText());
+                isUpdatingPassField = false;
+                passInputField.setVisible(false);
+                passInputField.setManaged(false);
+                passVisibleField.setVisible(true);
+                passVisibleField.setManaged(true);
+                toggleEyeBtn.setText("🙈");
+                toggleEyeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #ccff00; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 4 10;");
+                passVisibleField.requestFocus();
+                passVisibleField.positionCaret(passVisibleField.getText().length());
+            } else {
+                isUpdatingPassField = true;
+                passInputField.setText(passVisibleField.getText());
+                isUpdatingPassField = false;
+                passVisibleField.setVisible(false);
+                passVisibleField.setManaged(false);
+                passInputField.setVisible(true);
+                passInputField.setManaged(true);
+                toggleEyeBtn.setText("👁");
+                toggleEyeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 4 10;");
+                passInputField.requestFocus();
+                passInputField.positionCaret(passInputField.getText().length());
+            }
+        });
+
+        StackPane.setAlignment(toggleEyeBtn, Pos.CENTER_RIGHT);
+        StackPane.setMargin(toggleEyeBtn, new Insets(0, 6, 0, 0));
+        passInputStack.getChildren().addAll(passInputField, passVisibleField, toggleEyeBtn);
+
+        // Clickable Default Passcode Helper Chip
+        HBox helperRow = new HBox(8);
+        helperRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label hintChip = new Label("🔒 Default Passcode: 0000");
+        hintChip.setStyle("-fx-background-color: rgba(204, 255, 0, 0.12); -fx-text-fill: #ccff00; -fx-font-size: 11px; -fx-font-weight: 700; -fx-padding: 4 10; -fx-background-radius: 4px; -fx-cursor: hand; -fx-border-color: rgba(204, 255, 0, 0.25); -fx-border-radius: 4px;");
+        hintChip.setOnMouseClicked(e -> {
+            passInputField.setText("0000");
+            passVisibleField.setText("0000");
+            hideStep2Error();
+        });
+
+        Label clickHint = new Label("(click to fill)");
+        clickHint.setStyle("-fx-text-fill: #64748b; -fx-font-size: 10px;");
+
+        helperRow.getChildren().addAll(hintChip, clickHint);
+
+        // Step 2 Error alert box
+        step2ErrorBox = new HBox(6);
+        step2ErrorBox.setAlignment(Pos.CENTER_LEFT);
+        step2ErrorBox.setStyle("-fx-background-color: rgba(239, 68, 68, 0.15); -fx-border-color: #ef4444; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 8 12;");
+        step2ErrorBox.setVisible(false);
+        step2ErrorBox.setManaged(false);
+
+        Label errIcon = new Label("⚠️");
+        step2ErrorLabel = new Label("ACCESS DENIED: Invalid passcode. Default passcode is 0000.");
+        step2ErrorLabel.setStyle("-fx-text-fill: #fca5a5; -fx-font-size: 11.5px; -fx-font-weight: bold;");
+        step2ErrorLabel.setWrapText(true);
+        step2ErrorBox.getChildren().addAll(errIcon, step2ErrorLabel);
+
+        VBox passSection = new VBox(6, passSectionLabel, passInputStack, helperRow, step2ErrorBox);
+
+        // Action Buttons: UNLOCK PORTAL + BACK
+        Button unlockPortalBtn = new Button("⚡ UNLOCK & ENTER PORTAL  →");
+        unlockPortalBtn.getStyleClass().add("cyber-enter-btn");
+        unlockPortalBtn.setMaxWidth(Double.MAX_VALUE);
+        unlockPortalBtn.setPrefHeight(48);
+        applyCutCornerClip(unlockPortalBtn);
+
+        unlockPortalBtn.setOnAction(e -> doLoginWithPasscode());
+        passInputField.setOnAction(e -> doLoginWithPasscode());
+        passVisibleField.setOnAction(e -> doLoginWithPasscode());
+
+        Button backBtn = new Button("← Back to Change ID");
+        backBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 4 8;");
+        backBtn.setMaxWidth(Double.MAX_VALUE);
+        backBtn.setAlignment(Pos.CENTER);
+        backBtn.setOnAction(e -> transitionToStep1());
+
+        // Card Footer
+        HBox footerBox = buildCardFooter();
+
+        content.getChildren().addAll(
+                headerBox,
+                profileCard,
+                passSection,
+                unlockPortalBtn,
+                backBtn,
+                footerBox
+        );
+        return content;
+    }
+
+    private void applyCutCornerClip(Button btn) {
+        Polygon btnClip = new Polygon();
+        btn.setClip(btnClip);
+        btn.layoutBoundsProperty().addListener((obs, oldB, newB) -> {
+            if (newB != null && newB.getWidth() > 0) {
+                double bw = newB.getWidth();
+                double bh = newB.getHeight();
+                double c = 14.0;
+                btnClip.getPoints().setAll(
+                        0.0, 0.0,
+                        bw, 0.0,
+                        bw, bh - c,
+                        bw - c, bh,
+                        0.0, bh
+                );
+            }
+        });
+    }
+
+    private HBox buildCardFooter() {
         HBox footerBox = new HBox();
         footerBox.setAlignment(Pos.CENTER_LEFT);
         footerBox.setPadding(new Insets(10, 0, 0, 0));
@@ -422,35 +662,20 @@ public class LoginView extends StackPane {
         pulseDot.setCycleCount(Animation.INDEFINITE);
         pulseDot.play();
 
-        onlineStatusLabel = new Label(" SYSTEM ONLINE");
-        onlineStatusLabel.getStyleClass().add("online-status-text");
+        Label statusLbl = new Label(" SYSTEM ONLINE");
+        statusLbl.getStyleClass().add("online-status-text");
 
-        HBox statusLeft = new HBox(4, dot, onlineStatusLabel);
+        HBox statusLeft = new HBox(4, dot, statusLbl);
         statusLeft.setAlignment(Pos.CENTER_LEFT);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        versionLabel = new Label("V2.4 ENT");
-        versionLabel.getStyleClass().add("version-text");
+        Label vLbl = new Label("V2.4 ENT");
+        vLbl.getStyleClass().add("version-text");
 
-        footerBox.getChildren().addAll(statusLeft, spacer, versionLabel);
-
-        formContent.getChildren().addAll(
-                headerBox,
-                roleSection,
-                credSection,
-                enterPortalBtn,
-                demoIdsBox,
-                footerBox
-        );
-
-        cardBody.getChildren().add(formContent);
-        cardOuterContainer.getChildren().addAll(cardBody, cardBorderCanvas);
-
-        VBox rightWrapper = new VBox(cardOuterContainer);
-        rightWrapper.setAlignment(Pos.CENTER);
-        return rightWrapper;
+        footerBox.getChildren().addAll(statusLeft, spacer, vLbl);
+        return footerBox;
     }
 
     private Button createRoleTile(String icon, String roleName, String demoId) {
@@ -486,6 +711,11 @@ public class LoginView extends StackPane {
 
         if (autofillId != null && userIdField != null) {
             userIdField.setText(autofillId);
+            if (step1ErrorLabel != null) {
+                step1ErrorLabel.setVisible(false);
+                step1ErrorLabel.setManaged(false);
+            }
+            userIdField.setStyle("");
         }
     }
 
@@ -513,24 +743,202 @@ public class LoginView extends StackPane {
         chip.setOnMouseClicked(e -> {
             selectRole(role, id);
             userIdField.setText(id);
+            if (step1ErrorLabel != null) {
+                step1ErrorLabel.setVisible(false);
+                step1ErrorLabel.setManaged(false);
+            }
+            userIdField.setStyle("");
         });
         return chip;
     }
 
-    private void doLogin() {
+    private void handleStep1Continue() {
         String userId = userIdField.getText().trim();
         if (userId.isEmpty()) {
+            step1ErrorLabel.setText("⚠️ Please enter a credential ID.");
+            step1ErrorLabel.setVisible(true);
+            step1ErrorLabel.setManaged(true);
+            playShakeAnimation(userIdField);
+            return;
+        }
+
+        User found = com.iwfc.pattern.DataStore.getInstance().getUsers().findById(userId).orElse(null);
+        if (found == null) {
+            found = com.iwfc.pattern.DataStore.getInstance().getUsers().findAll().stream()
+                    .filter(u -> u.getUserId().equalsIgnoreCase(userId))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (found == null) {
+            step1ErrorLabel.setText("⚠️ User ID '" + userId + "' not found. Check ID or pick a role.");
+            step1ErrorLabel.setVisible(true);
+            step1ErrorLabel.setManaged(true);
+            userIdField.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2px;");
+            playShakeAnimation(userIdField);
+            return;
+        }
+
+        step1ErrorLabel.setVisible(false);
+        step1ErrorLabel.setManaged(false);
+        userIdField.setStyle("");
+        transitionToStep2(found);
+    }
+
+    private void transitionToStep2(User user) {
+        this.targetUser = user;
+
+        step2NameLabel.setText(user.getName());
+        step2RolePill.setText(user.getUserId() + " • " + user.getRole().getDisplayName().toUpperCase());
+
+        String initials = getInitials(user.getName());
+        step2AvatarInitials.setText(initials);
+
+        Color roleColor;
+        switch (user.getRole()) {
+            case ADMIN -> roleColor = Color.web("#f59e0b");
+            case INSTRUCTOR -> roleColor = Color.web("#06b6d4");
+            default -> roleColor = Color.web("#10b981");
+        }
+        step2Avatar.setFill(roleColor);
+        if (roleColor == Color.web("#f59e0b")) {
+            step2AvatarInitials.setStyle("-fx-text-fill: black; -fx-font-weight: 900; -fx-font-size: 11px;");
+        } else {
+            step2AvatarInitials.setStyle("-fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 11px;");
+        }
+
+        passInputField.clear();
+        passVisibleField.clear();
+        hideStep2Error();
+
+        step1View.setVisible(false);
+        step1View.setManaged(false);
+
+        step2View.setVisible(true);
+        step2View.setManaged(true);
+        step2View.setOpacity(0.0);
+        step2View.setTranslateX(30.0);
+
+        FadeTransition ft = new FadeTransition(Duration.millis(220), step2View);
+        ft.setToValue(1.0);
+        TranslateTransition tt = new TranslateTransition(Duration.millis(220), step2View);
+        tt.setToX(0.0);
+
+        ParallelTransition pt = new ParallelTransition(ft, tt);
+        pt.setOnFinished(e -> passInputField.requestFocus());
+        pt.play();
+    }
+
+    private void transitionToStep1() {
+        step2View.setVisible(false);
+        step2View.setManaged(false);
+
+        step1View.setVisible(true);
+        step1View.setManaged(true);
+        step1View.setOpacity(0.0);
+        step1View.setTranslateX(-30.0);
+
+        FadeTransition ft = new FadeTransition(Duration.millis(220), step1View);
+        ft.setToValue(1.0);
+        TranslateTransition tt = new TranslateTransition(Duration.millis(220), step1View);
+        tt.setToX(0.0);
+
+        ParallelTransition pt = new ParallelTransition(ft, tt);
+        pt.setOnFinished(e -> userIdField.requestFocus());
+        pt.play();
+    }
+
+    private void doLoginWithPasscode() {
+        if (targetUser == null) {
+            transitionToStep1();
+            return;
+        }
+
+        String enteredPass = passInputField.isVisible() ? passInputField.getText() : passVisibleField.getText();
+        if (enteredPass == null || enteredPass.trim().isEmpty()) {
+            showStep2Error("Please enter your security passcode.");
+            playShakeAnimation(passInputField.isVisible() ? passInputField : passVisibleField);
             return;
         }
 
         try {
-            facade.login(userId);
-            if (onLoginSuccess != null) {
-                onLoginSuccess.run();
-            }
+            facade.login(targetUser.getUserId(), enteredPass.trim());
+
+            step2ErrorBox.setStyle("-fx-background-color: rgba(34, 197, 94, 0.15); -fx-border-color: #22c55e; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 8 12;");
+            step2ErrorBox.getChildren().clear();
+            Label succIcon = new Label("✓");
+            succIcon.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: 900;");
+            Label succMsg = new Label("IDENTITY CONFIRMED — ACCESS GRANTED");
+            succMsg.setStyle("-fx-text-fill: #4ade80; -fx-font-weight: 900; -fx-font-size: 11.5px;");
+            step2ErrorBox.getChildren().addAll(succIcon, succMsg);
+            step2ErrorBox.setVisible(true);
+            step2ErrorBox.setManaged(true);
+
+            PauseTransition pause = new PauseTransition(Duration.millis(350));
+            pause.setOnFinished(e -> {
+                if (onLoginSuccess != null) {
+                    onLoginSuccess.run();
+                }
+            });
+            pause.play();
         } catch (Exception ex) {
-            // Authentication failed
+            showStep2Error(ex.getMessage() != null && ex.getMessage().contains("Invalid password")
+                    ? "ACCESS DENIED: Invalid passcode. Default passcode is 0000."
+                    : ex.getMessage());
+            playShakeAnimation(passInputField.isVisible() ? passInputField : passVisibleField);
+            passInputField.selectAll();
+            passVisibleField.selectAll();
         }
+    }
+
+    private void showStep2Error(String msg) {
+        step2ErrorBox.setStyle("-fx-background-color: rgba(239, 68, 68, 0.15); -fx-border-color: #ef4444; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 8 12;");
+        step2ErrorBox.getChildren().clear();
+        Label errIcon = new Label("⚠️");
+        Label errMsg = new Label(msg);
+        errMsg.setStyle("-fx-text-fill: #fca5a5; -fx-font-size: 11.5px; -fx-font-weight: bold;");
+        errMsg.setWrapText(true);
+        step2ErrorBox.getChildren().addAll(errIcon, errMsg);
+        step2ErrorBox.setVisible(true);
+        step2ErrorBox.setManaged(true);
+
+        if (passInputField.isVisible()) {
+            passInputField.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2px; -fx-font-size: 18px; -fx-padding: 8 44 8 16;");
+        } else {
+            passVisibleField.setStyle("-fx-border-color: #ef4444; -fx-border-width: 2px; -fx-font-size: 18px; -fx-padding: 8 44 8 16;");
+        }
+    }
+
+    private void hideStep2Error() {
+        if (step2ErrorBox != null) {
+            step2ErrorBox.setVisible(false);
+            step2ErrorBox.setManaged(false);
+        }
+        if (passInputField != null) {
+            passInputField.setStyle("-fx-font-size: 18px; -fx-padding: 8 44 8 16;");
+        }
+        if (passVisibleField != null) {
+            passVisibleField.setStyle("-fx-font-size: 18px; -fx-padding: 8 44 8 16;");
+        }
+    }
+
+    private void playShakeAnimation(Node node) {
+        TranslateTransition tt = new TranslateTransition(Duration.millis(60), node);
+        tt.setFromX(0);
+        tt.setByX(8);
+        tt.setCycleCount(6);
+        tt.setAutoReverse(true);
+        tt.setOnFinished(e -> node.setTranslateX(0));
+        tt.play();
+    }
+
+    private String getInitials(String name) {
+        if (name == null || name.trim().isEmpty()) return "US";
+        String[] parts = name.trim().split("\\s+");
+        if (parts.length >= 2 && !parts[0].isEmpty() && !parts[1].isEmpty()) {
+            return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
+        }
+        return name.substring(0, Math.min(2, name.length())).toUpperCase();
     }
 
     // =========================================================================

@@ -4,6 +4,7 @@ import com.iwfc.model.*;
 
 import com.iwfc.repository.Repository;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -290,6 +291,35 @@ public class DataStore {
             FitnessSession fs = new FitnessSession("SES_GEN_" + i, classNames[i % classNames.length] + " " + (i/10 + 1), classTypes[i % classTypes.length], insts[i % insts.length], day, start, start.plusHours(1), locations[i % locations.length], 15 + (i % 10));
             fs.setValidFrom(java.time.LocalDate.now().minusYears(1));
             try { sessions.save(fs); } catch (com.iwfc.exception.DuplicateDataException e) {}
+        }
+
+        // --- Sample Bookings ---
+        try {
+            // James Wilson (MEM001) bookings in September 2026
+            bookings.save(new Booking("BK001", member1, yogaTue, LocalDate.of(2026, 9, 1), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK002", member1, pilatesThu, LocalDate.of(2026, 9, 3), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK003", member1, yogaTue, LocalDate.of(2026, 9, 8), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK004", member1, pilatesThu, LocalDate.of(2026, 9, 10), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK005", member1, yogaTue, LocalDate.of(2026, 9, 15), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK006", member1, pilatesThu, LocalDate.of(2026, 9, 17), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK007", member1, yogaTue, LocalDate.of(2026, 9, 22), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK008", member1, pilatesThu, LocalDate.of(2026, 9, 24), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK009", member1, yogaTue, LocalDate.of(2026, 9, 29), LocalDateTime.of(2026, 8, 28, 10, 0)));
+
+            // Emma Davis (MEM002) bookings in September 2026
+            bookings.save(new Booking("BK010", member2, hiitMon, LocalDate.of(2026, 9, 7), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK011", member2, hiitMon, LocalDate.of(2026, 9, 14), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK012", member2, hiitMon, LocalDate.of(2026, 9, 21), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK013", member2, hiitMon, LocalDate.of(2026, 9, 28), LocalDateTime.of(2026, 8, 28, 10, 0)));
+
+            // 1-on-1 PT dedicated session for Emma Davis
+            FitnessSession ptEmma = new FitnessSession("SES_PT_EMMA", "1-on-1 PT: Emma Davis", "Personal Training",
+                instructor2, DayOfWeek.WEDNESDAY, LocalTime.of(14, 0), LocalTime.of(15, 0), Location.STUDIO_B, 1);
+            sessions.save(ptEmma);
+            bookings.save(new Booking("BK014", member2, ptEmma, LocalDate.of(2026, 9, 23), LocalDateTime.of(2026, 8, 28, 10, 0)));
+            bookings.save(new Booking("BK015", member2, ptEmma, LocalDate.of(2026, 9, 30), LocalDateTime.of(2026, 8, 28, 10, 0)));
+        } catch (com.iwfc.exception.DuplicateDataException e) {
+            System.err.println("Failed to seed bookings: " + e.getMessage());
         }
 
         // --- Sample Maintenance Requests ---

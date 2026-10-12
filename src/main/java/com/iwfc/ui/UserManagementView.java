@@ -1401,11 +1401,13 @@ public class UserManagementView extends HBox {
         TextField emailF = new TextField(selectedUser.getEmail());
         TextField phoneF = new TextField(selectedUser.getPhone() != null ? selectedUser.getPhone() : "");
         TextField addressF = new TextField(selectedUser.getAddress() != null ? selectedUser.getAddress() : "");
+        TextField passF = new TextField(selectedUser.getPassword());
 
         grid.add(new Label("Full Name:"), 0, 0); grid.add(nameF, 1, 0);
         grid.add(new Label("Email:"), 0, 1); grid.add(emailF, 1, 1);
         grid.add(new Label("Phone:"), 0, 2); grid.add(phoneF, 1, 2);
         grid.add(new Label("Office/Address:"), 0, 3); grid.add(addressF, 1, 3);
+        grid.add(new Label("Security Passcode:"), 0, 4); grid.add(passF, 1, 4);
 
         TextField specF = null;
         TextArea bioArea = null;
@@ -1413,8 +1415,8 @@ public class UserManagementView extends HBox {
             specF = new TextField(inst.getSpecialization() != null ? inst.getSpecialization() : "");
             bioArea = new TextArea(inst.getBio() != null ? inst.getBio() : "");
             bioArea.setPrefRowCount(3);
-            grid.add(new Label("Specialization:"), 0, 4); grid.add(specF, 1, 4);
-            grid.add(new Label("Bio:"), 0, 5); grid.add(bioArea, 1, 5);
+            grid.add(new Label("Specialization:"), 0, 5); grid.add(specF, 1, 5);
+            grid.add(new Label("Bio:"), 0, 6); grid.add(bioArea, 1, 6);
         }
 
         final TextField fSpec = specF;
@@ -1427,6 +1429,9 @@ public class UserManagementView extends HBox {
                 selectedUser.setEmail(emailF.getText().trim());
                 selectedUser.setPhone(phoneF.getText().trim());
                 selectedUser.setAddress(addressF.getText().trim());
+                if (!passF.getText().trim().isEmpty()) {
+                    selectedUser.setPassword(passF.getText().trim());
+                }
 
                 if (selectedUser instanceof Instructor inst) {
                     if (fSpec != null) inst.setSpecialization(fSpec.getText().trim());

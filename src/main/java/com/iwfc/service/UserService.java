@@ -27,11 +27,31 @@ public class UserService {
      * @throws IllegalArgumentException if user not found
      */
     public User login(String userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null.");
+        }
+        String cleanId = userId.trim();
         return dataStore.getUsers().findAll().stream()
-                .filter(u -> u.getUserId().equals(userId))
+                .filter(u -> u.getUserId().equalsIgnoreCase(cleanId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                     "User not found with ID: " + userId));
+    }
+
+    /**
+     * Authenticates a user by their user ID and security passcode.
+     *
+     * @param userId   the user ID to look up
+     * @param password the security passcode to verify
+     * @return the authenticated User
+     * @throws IllegalArgumentException if user not found or password incorrect
+     */
+    public User login(String userId, String password) {
+        User user = login(userId);
+        if (password == null || !password.trim().equals(user.getPassword())) {
+            throw new IllegalArgumentException("Invalid password. Please enter the correct security passcode.");
+        }
+        return user;
     }
 
     /**

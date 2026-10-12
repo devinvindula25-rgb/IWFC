@@ -1,4 +1,5 @@
 module com.iwfc {
+    requires javafx.base;
     requires javafx.controls;
     requires transitive javafx.graphics;
     requires javafx.fxml;
